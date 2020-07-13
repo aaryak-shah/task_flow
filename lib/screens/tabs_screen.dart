@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/main_drawer.dart';
 import './projects_screen.dart';
 import './stats_screen.dart';
 import './tasks_screen.dart';
@@ -27,6 +28,7 @@ class _TabsScreenState extends State<TabsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: MainDrawer(),
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         elevation: 0.0,
