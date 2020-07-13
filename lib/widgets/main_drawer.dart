@@ -56,11 +56,17 @@ class MainDrawer extends StatelessWidget {
                 ],
               ),
             ),
+            SizedBox(
+              height: 30,
+            ),
             buildDrawerTile(Icons.perm_contact_calendar, 'Clients'),
             buildDrawerTile(Icons.info, 'About'),
             buildDrawerTile(Icons.feedback, 'Feedback'),
             Spacer(),
             buildDrawerTile(Icons.settings, 'Settings'),
+            SizedBox(
+              height: 30,
+            ),
           ],
         ),
       ),
