@@ -25,7 +25,6 @@ class Tasks with ChangeNotifier {
   ];
 
   List<Task> get tasks {
-    print(_tasks.length);
     return [..._tasks];
   }
 

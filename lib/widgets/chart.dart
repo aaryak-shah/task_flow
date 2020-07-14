@@ -1,8 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
-import '../providers/tasks.dart';
 import '../providers/task.dart';
 
 class Chart extends StatefulWidget {
@@ -24,12 +23,7 @@ class Chart extends StatefulWidget {
       }
 
       return {'day': index, 'time': total};
-    }).toList();
-  }
-
-  Duration get totalTime {
-    return weekTasks.fold(
-        Duration(), (previousSum, day) => previousSum + day['time']);
+    }).reversed.toList();
   }
 
   @override
@@ -39,8 +33,8 @@ class Chart extends StatefulWidget {
 class ChartState extends State<Chart> {
   @override
   Widget build(BuildContext context) {
-    final tasks = Provider.of<Tasks>(context).tasks;
-
+    final Duration totalTime = widget.weekTasks
+        .fold(Duration(), (previousSum, day) => previousSum + day['time']);
     return AspectRatio(
       aspectRatio: 2.5,
       child: Card(
@@ -50,7 +44,7 @@ class ChartState extends State<Chart> {
         child: BarChart(
           BarChartData(
             alignment: BarChartAlignment.spaceAround,
-            maxY: 24,
+            maxY: 1,
             barTouchData: BarTouchData(enabled: false),
             titlesData: FlTitlesData(
               show: true,
@@ -62,25 +56,14 @@ class ChartState extends State<Chart> {
                     fontWeight: FontWeight.bold,
                     fontSize: 14),
                 margin: 20,
-                getTitles: (double value) {
-                  switch (value.toInt()) {
-                    case 0:
-                      return 'M';
-                    case 1:
-                      return 'T';
-                    case 2:
-                      return 'W';
-                    case 3:
-                      return 'T';
-                    case 4:
-                      return 'F';
-                    case 5:
-                      return 'S';
-                    case 6:
-                      return 'S';
-                    default:
-                      return '';
-                  }
+                getTitles: (value) {
+                  return DateFormat.E().format(
+                    DateTime.now().subtract(
+                      Duration(
+                        days: value.toInt(),
+                      ),
+                    ),
+                  )[0];
                 },
               ),
               leftTitles: SideTitles(showTitles: false),
@@ -89,36 +72,19 @@ class ChartState extends State<Chart> {
               show: false,
             ),
             barGroups: [
-              BarChartGroupData(
-                x: 0,
-                barRods: [BarChartRodData(y: 8, color: Colors.white)],
-              ),
-              BarChartGroupData(
-                x: 1,
-                barRods: [BarChartRodData(y: 10, color: Colors.white)],
-              ),
-              BarChartGroupData(
-                x: 2,
-                barRods: [BarChartRodData(y: 14, color: Colors.white)],
-              ),
-              BarChartGroupData(
-                x: 3,
-                barRods: [BarChartRodData(y: 15, color: Colors.white)],
-              ),
-              BarChartGroupData(
-                x: 4,
-                barRods: [BarChartRodData(y: 18, color: Colors.white)],
-              ),
-              BarChartGroupData(
-                x: 5,
-                barRods: [BarChartRodData(y: 10, color: Colors.white)],
-              ),
-              BarChartGroupData(
-                x: 6,
-                barRods: [
-                  BarChartRodData(y: 11, color: Theme.of(context).accentColor)
-                ],
-              ),
+              ...widget.weekTasks.map((t) {
+                return BarChartGroupData(
+                  x: t['day'],
+                  barRods: [
+                    BarChartRodData(
+                      y: (t['time'] as Duration).inHours / totalTime.inHours,
+                      color: t['day'] != 0
+                          ? Colors.white
+                          : Theme.of(context).accentColor,
+                    )
+                  ],
+                );
+              }).toList(),
             ],
           ),
         ),
