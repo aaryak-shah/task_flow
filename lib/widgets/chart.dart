@@ -1,16 +1,22 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
-import '../providers/task.dart';
+import '../providers/tasks.dart';
+
 
 class Chart extends StatefulWidget {
-  final List<Task> recentTasks;
+  @override
+  State<StatefulWidget> createState() => ChartState();
+}
 
-  Chart(this.recentTasks);
+class ChartState extends State<Chart> {
+  @override
+  Widget build(BuildContext context) {
+    final recentTasks = Provider.of<Tasks>(context).recentTasks;
 
-  List<Map<String, Object>> get weekTasks {
-    return List.generate(7, (index) {
+    final weekTasks = List.generate(7, (index) {
       final weekDay = DateTime.now().subtract(Duration(days: index));
       Duration total = Duration();
 
@@ -24,17 +30,10 @@ class Chart extends StatefulWidget {
 
       return {'day': index, 'time': total};
     }).reversed.toList();
-  }
 
-  @override
-  State<StatefulWidget> createState() => ChartState();
-}
-
-class ChartState extends State<Chart> {
-  @override
-  Widget build(BuildContext context) {
-    final Duration totalTime = widget.weekTasks
+    final Duration totalTime = weekTasks
         .fold(Duration(), (previousSum, day) => previousSum + day['time']);
+
     return AspectRatio(
       aspectRatio: 2.5,
       child: Card(
@@ -71,21 +70,22 @@ class ChartState extends State<Chart> {
             borderData: FlBorderData(
               show: false,
             ),
-            barGroups: [
-              ...widget.weekTasks.map((t) {
-                return BarChartGroupData(
-                  x: t['day'],
-                  barRods: [
-                    BarChartRodData(
-                      y: (t['time'] as Duration).inHours / totalTime.inHours,
-                      color: t['day'] != 0
-                          ? Colors.white
-                          : Theme.of(context).accentColor,
-                    )
-                  ],
-                );
-              }).toList(),
-            ],
+            barGroups: weekTasks.map((t) {
+              return BarChartGroupData(
+                x: t['day'],
+                barRods: [
+                  BarChartRodData(
+                    y: totalTime != Duration()
+                        ? (t['time'] as Duration).inSeconds /
+                            totalTime.inSeconds
+                        : 0,
+                    color: t['day'] != 0
+                        ? Colors.white
+                        : Theme.of(context).accentColor,
+                  )
+                ],
+              );
+            }).toList(),
           ),
         ),
       ),
