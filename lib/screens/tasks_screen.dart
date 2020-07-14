@@ -11,7 +11,7 @@ class TasksScreen extends StatefulWidget {
 class _TasksScreenState extends State<TasksScreen> {
   @override
   Widget build(BuildContext context) {
-    final tasks =  Provider.of<Tasks>(context);
+    final tasks = Provider.of<Tasks>(context);
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       body: Column(
@@ -33,6 +33,36 @@ class _TasksScreenState extends State<TasksScreen> {
               ),
             ],
           ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: tasks.visibleTasks.length,
+              itemBuilder: (ctx, index) => ListTile(
+                leading: IconButton(
+                  onPressed: () {
+                    debugPrint(
+                        'presed play on ' + tasks.visibleTasks[index].title);
+                  },
+                  icon: Icon(
+                    Icons.play_arrow,
+                    color: Colors.white,
+                  ),
+                ),
+                title: Text(
+                  tasks.visibleTasks[index].title,
+                  style: Theme.of(context).textTheme.bodyText1,
+                ),
+                subtitle: Text(
+                  tasks.categoriesString(tasks.visibleTasks[index].id),
+                  style: Theme.of(context).textTheme.bodyText2,
+                ),
+                trailing: Text(
+                  (tasks.visibleTasks[index].latestPause.hour.toString() +
+                      ':' +
+                      tasks.visibleTasks[index].latestPause.minute.toString()),
+                ),
+              ),
+            ),
+          )
         ],
       ),
     );
