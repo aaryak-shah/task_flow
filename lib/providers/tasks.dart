@@ -89,13 +89,7 @@ class Tasks with ChangeNotifier {
   }
 
   List<Task> get visibleTasks {
-    List<Task> visTasks = [];
-    _tasks.forEach((tsk) {
-      if (tsk.isPaused) {
-        visTasks.add(tsk);
-      }
-    });
-    return visTasks;
+    return _tasks.where((task) => task.isPaused).toList();
   }
 
   List<Task> get recentTasks {

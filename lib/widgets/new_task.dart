@@ -62,7 +62,7 @@ class _NewTaskState extends State<NewTask> {
 
                 tasks.addTask(DateTime.now().toString(), _titleController.text,
                     DateTime.now(), _selectedCategories, [], null);
-                print(tasks.tasks[0].title);
+                Navigator.of(context).pop();
               },
             )
           ],
