@@ -6,13 +6,13 @@ class Tasks with ChangeNotifier {
     Task(
       id: 't1',
       title: 'Math Homework',
-      start: DateTime(2020, 7, 14, 8, 20, 0),
+      start: DateTime(2020, 7, 13, 8, 20, 0),
       categories: ['College', 'Math'],
       labels: ['BS Grewal'],
       superProjectName: null,
       isRunning: false,
       isPaused: true,
-      latestPause: DateTime(2020, 7, 14, 10, 0, 0),
+      latestPause: DateTime(2020, 7, 13, 10, 0, 0),
       end: DateTime(2020, 7, 14, 10, 0, 0),
     ),
     Task(
