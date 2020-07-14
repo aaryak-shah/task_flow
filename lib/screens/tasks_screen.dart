@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../widgets/chart.dart';
+import '../providers/tasks.dart';
 
 class TasksScreen extends StatefulWidget {
   @override
@@ -8,15 +11,14 @@ class TasksScreen extends StatefulWidget {
 class _TasksScreenState extends State<TasksScreen> {
   @override
   Widget build(BuildContext context) {
+    final tasks =  Provider.of<Tasks>(context);
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       body: Column(
         children: <Widget>[
           Container(
-            child: Text(
-              'data',
-              style: Theme.of(context).textTheme.bodyText1,
-            ), //TODO: Add Chart Widget Here,
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Chart(tasks.recentTasks),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,

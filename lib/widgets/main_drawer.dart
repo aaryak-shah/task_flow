@@ -33,7 +33,7 @@ class MainDrawer extends StatelessWidget {
                   Container(
                     height: 200,
                     child: FittedBox(
-                      fit: BoxFit.fitHeight,
+                      fit: BoxFit.cover,
                       child: Image.asset('assets/images/drawer_bg.png'),
                     ),
                   ),

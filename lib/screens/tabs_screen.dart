@@ -31,13 +31,12 @@ class _TabsScreenState extends State<TabsScreen> {
       drawer: MainDrawer(),
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
+        centerTitle: true,
         elevation: 0.0,
         backgroundColor: Theme.of(context).primaryColor,
-        title: Center(
-          child: Text(
-            'TASKFLOW',
-            style: Theme.of(context).textTheme.headline6,
-          ),
+        title: Text(
+          'TASKFLOW',
+          style: Theme.of(context).appBarTheme.textTheme.headline6,
         ),
       ),
       body: _pages[_selectedIndex],
