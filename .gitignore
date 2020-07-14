@@ -22,10 +22,7 @@
 .vscode/
 ios/
 android/
-.metadata
 .packages
-pubspec.lock
-pubspec.yaml
 taskflow.iml
 test/
 
