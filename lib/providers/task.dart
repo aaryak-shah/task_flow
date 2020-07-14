@@ -38,4 +38,15 @@ class Task with ChangeNotifier {
       return (DateTime.now().difference(start) - pauseTime);
     }
   }
+
+  String getRunningTimeString() {
+    Duration runTime = getRunningTime();
+    String h, m;
+    int time = runTime.inMinutes;
+    int hrs = (time / 60).floor();
+    int mins = time % 60;
+    (hrs / 10).floor() == 0 ? h = '0' + hrs.toString() + ':' : h = hrs.toString() + ':';
+    (mins / 10).floor() == 0 ? m = '0' + mins.toString() : m = mins.toString();
+    return (h + m);
+  }
 }

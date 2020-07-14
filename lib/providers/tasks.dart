@@ -82,10 +82,20 @@ class Tasks with ChangeNotifier {
       isPaused: false,
       latestPause: DateTime(2020, 7, 14, 21, 30, 0),
     ),
-  ]; 
+  ];
 
   List<Task> get tasks {
     return [..._tasks];
+  }
+
+  List<Task> get visibleTasks {
+    List<Task> visTasks = [];
+    _tasks.forEach((tsk) {
+      if (tsk.isPaused) {
+        visTasks.add(tsk);
+      }
+    });
+    return visTasks;
   }
 
   List<Task> get recentTasks {
@@ -93,6 +103,20 @@ class Tasks with ChangeNotifier {
       return t.isPaused &&
           t.latestPause.isAfter(DateTime.now().subtract(Duration(days: 7)));
     }).toList();
+  }
+
+  String categoriesString(String cid) {
+    String catString = '';
+    List<String> cats =
+        _tasks[_tasks.indexWhere((tsk) => cid == tsk.id)].categories;
+    for (int i = 0; i < cats.length; i++) {
+      if (i < cats.length - 1) {
+        catString += cats[i] + ', ';
+      } else {
+        catString += cats[i];
+      }
+    }
+    return catString;
   }
 
   void addTask(
