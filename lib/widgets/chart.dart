@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 
 import '../providers/tasks.dart';
 
-
 class Chart extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => ChartState();
@@ -31,8 +30,8 @@ class ChartState extends State<Chart> {
       return {'day': index, 'time': total};
     }).reversed.toList();
 
-    final Duration totalTime = weekTasks
-        .fold(Duration(), (previousSum, day) => previousSum + day['time']);
+    final Duration totalTime = weekTasks.fold(
+        Duration(), (previousSum, day) => previousSum + day['time']);
 
     return AspectRatio(
       aspectRatio: 2.5,

@@ -13,7 +13,7 @@ class Tasks with ChangeNotifier {
       isRunning: false,
       isPaused: true,
       latestPause: DateTime(2020, 7, 13, 10, 0, 0),
-      end: DateTime(2020, 7, 14, 10, 0, 0),
+      end: DateTime(2020, 7, 13, 10, 0, 0),
     ),
     Task(
       id: 't2',

@@ -17,6 +17,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Task Flow',
         theme: ThemeData(
+          brightness: Brightness.dark,
           primaryColor: Color(0xFF121212),
           accentColor: Colors.lightGreenAccent,
           appBarTheme: AppBarTheme(

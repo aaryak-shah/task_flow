@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../widgets/chart.dart';
+import '../widgets/new_task.dart';
 import '../providers/tasks.dart';
 
 class TasksScreen extends StatefulWidget {
@@ -16,7 +17,7 @@ void showNewTaskForm(BuildContext context) {
       builder: (_) {
         return GestureDetector(
           onTap: () {},
-          child: Container(),
+          child: NewTask(),
           behavior: HitTestBehavior.opaque,
         );
       });
@@ -49,13 +50,14 @@ class _TasksScreenState extends State<TasksScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-          child: Icon(
-            Icons.add,
-            size: 35,
-          ),
-          backgroundColor: Color(0xFF252525),
-          foregroundColor: Theme.of(context).accentColor,
-          onPressed: () => showNewTaskForm(context)),
+        child: Icon(
+          Icons.add,
+          size: 35,
+        ),
+        backgroundColor: Color(0xFF252525),
+        foregroundColor: Theme.of(context).accentColor,
+        onPressed: () => showNewTaskForm(context),
+      ),
     );
   }
 }
