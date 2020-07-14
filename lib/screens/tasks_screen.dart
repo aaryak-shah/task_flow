@@ -70,9 +70,7 @@ class _TasksScreenState extends State<TasksScreen> {
                   style: Theme.of(context).textTheme.bodyText2,
                 ),
                 trailing: Text(
-                  (tasks.visibleTasks[index].latestPause.hour.toString() +
-                      ':' +
-                      tasks.visibleTasks[index].latestPause.minute.toString()),
+                  tasks.visibleTasks[index].getRunningTimeString(),
                 ),
               ),
             ),
