@@ -23,6 +23,23 @@ void showNewTaskForm(BuildContext context) {
 }
 
 class _TasksScreenState extends State<TasksScreen> {
+  int selectedDay = 6;
+  Widget chartBtn(int i) {
+    return Container(
+      height: double.infinity,
+      width: 55,
+      color: Color(0x00000000),
+      child: GestureDetector(
+        onTap: () {
+          debugPrint(i.toString());
+          setState(() {
+            selectedDay = i;
+          });
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final tasks = Provider.of<Tasks>(context);
@@ -35,8 +52,27 @@ class _TasksScreenState extends State<TasksScreen> {
             body: Column(
               children: <Widget>[
                 Container(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Chart(),
+                  height: 200,
+                  child: Stack(
+                    children: <Widget>[
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        child: Chart(),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: <Widget>[
+                          chartBtn(0),
+                          chartBtn(1),
+                          chartBtn(2),
+                          chartBtn(3),
+                          chartBtn(4),
+                          chartBtn(5),
+                          chartBtn(6),
+                        ],
+                      )
+                    ],
+                  ),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -46,7 +82,7 @@ class _TasksScreenState extends State<TasksScreen> {
                       style: Theme.of(context).textTheme.bodyText1,
                     ),
                     Text(
-                      'hh:mm',
+                      '${(tasks.weekTasks[selectedDay]['time'] as Duration).inHours}h ${(tasks.weekTasks[selectedDay]['time'] as Duration).inMinutes.remainder(60)}min',
                       style: Theme.of(context).textTheme.bodyText1,
                     ),
                   ],
@@ -78,7 +114,7 @@ class _TasksScreenState extends State<TasksScreen> {
                       ),
                     ),
                   ),
-                )
+                ),
               ],
             ),
             floatingActionButton: FloatingActionButton(

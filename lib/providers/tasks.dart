@@ -99,7 +99,7 @@ class Tasks with ChangeNotifier {
     List<List<dynamic>> rowsAsListOfValues =
         const CsvToListConverter().convert(csvString).sublist(1);
 
-    DateFormat parser = DateFormat("dd-MM-yyyy hh:mm:ss");
+    DateFormat parser = DateFormat("dd-MM-yyyy HH:mm:ss");
 
     _tasks = rowsAsListOfValues.map((row) {
       return Task(
