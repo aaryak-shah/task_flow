@@ -26,6 +26,8 @@ dependencies:
   provider: ^4.3.1
   fl_chart: ^0.10.1
   intl: ^0.16.1
+  csv: ^4.0.3
+  path_provider: ^1.6.11
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -51,6 +53,7 @@ flutter:
   assets:
     - assets/images/default_pfp.png
     - assets/images/drawer_bg.png
+    - assets/data/tasks.csv
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

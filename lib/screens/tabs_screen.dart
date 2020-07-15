@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:task_flow/providers/tasks.dart';
 import '../widgets/main_drawer.dart';
 import './projects_screen.dart';
 import './stats_screen.dart';
@@ -17,6 +19,12 @@ class _TabsScreenState extends State<TabsScreen> {
   void initState() {
     _pages = [TasksScreen(), ProjectsScreen(), StatsScreen()];
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    Provider.of<Tasks>(context).loadData();
+    super.didChangeDependencies();
   }
 
   void _selectPage(int index) {
