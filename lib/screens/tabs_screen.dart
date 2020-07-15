@@ -49,7 +49,8 @@ class _TabsScreenState extends State<TabsScreen> {
       ),
       body: _pages[_selectedIndex],
       bottomNavigationBar: ClipRRect(
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15)),
+        borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(15), topRight: Radius.circular(15)),
         child: BottomNavigationBar(
           unselectedItemColor: Colors.grey,
           selectedItemColor: Theme.of(context).accentColor,

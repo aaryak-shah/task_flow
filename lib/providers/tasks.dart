@@ -97,9 +97,9 @@ class Tasks with ChangeNotifier {
   }
 
   void loadData() async {
-    String csvString = await rootBundle.loadString('assets/data/tasks.csv');
+    String csvString = await localFile.then((file) => file.readAsString());
     List<List<dynamic>> rowsAsListOfValues =
-        const CsvToListConverter().convert(csvString).sublist(1);
+        const CsvToListConverter().convert(csvString);
 
     DateFormat parser = DateFormat("dd-MM-yyyy HH:mm:ss");
 
@@ -194,26 +194,44 @@ class Tasks with ChangeNotifier {
     );
 
     _tasks.insert(0, task);
-    final res = const ListToCsvConverter().convert(
+    final row = const ListToCsvConverter().convert(
       [
         [
           id,
           title,
           DateFormat("dd-MM-yyyy HH:mm:ss").format(start),
-          null,
-          null,
+          "",
+          "",
           0,
           0,
           1,
           0,
           categories.join(" "),
           labels.join(" "),
-          superProjectName
+          superProjectName == null? "": superProjectName
         ],
       ],
     );
 
-    print(res);
+    localFile.then(
+      (file) => file
+          .writeAsString(
+            row,
+            mode: FileMode.append,
+          )
+          .then(
+            (_) => print('Task added successfully')
+          ),
+    );
     notifyListeners();
+  }
+
+  void readLocalData() async {
+    final directory = await getApplicationDocumentsDirectory();
+    String csvString =
+        await File('${directory.path}/tasks.csv').readAsString();
+    List<List<dynamic>> rowsAsListOfValues =
+        const CsvToListConverter().convert(csvString);
+    print(rowsAsListOfValues);
   }
 }
