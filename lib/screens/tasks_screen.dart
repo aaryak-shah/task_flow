@@ -57,7 +57,7 @@ class _TasksScreenState extends State<TasksScreen> {
                     children: <Widget>[
                       Container(
                         padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: Chart(),
+                        child: Chart(selectedDay),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,

@@ -6,6 +6,9 @@ import 'package:provider/provider.dart';
 import '../providers/tasks.dart';
 
 class Chart extends StatefulWidget {
+  int selectedDay;
+  Chart(this.selectedDay);
+
   @override
   State<StatefulWidget> createState() => ChartState();
 }
@@ -64,7 +67,7 @@ class ChartState extends State<Chart> {
                         ? (t['time'] as Duration).inSeconds /
                             totalTime.inSeconds
                         : 0,
-                    color: t['day'] != 0
+                    color: t['day'] != 6 - widget.selectedDay
                         ? Colors.white
                         : Theme.of(context).accentColor,
                   )
