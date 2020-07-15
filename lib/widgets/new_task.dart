@@ -31,6 +31,19 @@ class _NewTaskState extends State<NewTask> {
   @override
   Widget build(BuildContext context) {
     bool isDisabled = true;
+    Widget returnCatChips() {
+      setState(() {
+        _selectedCategories.isNotEmpty ? isDisabled = false : isDisabled = true;
+      });
+      return CategoryChips(
+        (selectedList) {
+          setState(() {
+            _selectedCategories = selectedList;
+          });
+        },
+      );
+    }
+
     return Container(
       color: Theme.of(context).primaryColor,
       padding: const EdgeInsets.all(10),
@@ -67,14 +80,7 @@ class _NewTaskState extends State<NewTask> {
                 ],
               ),
             ),
-            CategoryChips(
-              (selectedList) {
-                setState(() {
-                  _selectedCategories = selectedList;
-                  isDisabled = _selectedCategories.isNotEmpty;
-                });
-              },
-            ),
+            returnCatChips(),
             RaisedButton(
               child: Text('START'),
               color: Theme.of(context).accentColor,
