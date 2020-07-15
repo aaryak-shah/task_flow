@@ -13,25 +13,11 @@ class Chart extends StatefulWidget {
 class ChartState extends State<Chart> {
   @override
   Widget build(BuildContext context) {
-    final recentTasks = Provider.of<Tasks>(context).recentTasks;
+    final tasks = Provider.of<Tasks>(context);
 
-    final weekTasks = List.generate(7, (index) {
-      final weekDay = DateTime.now().subtract(Duration(days: index));
-      Duration total = Duration();
+    final weekTasks = tasks.weekTasks;
 
-      for (int i = 0; i < recentTasks.length; i++) {
-        if (recentTasks[i].latestPause.day == weekDay.day &&
-            recentTasks[i].latestPause.month == weekDay.month &&
-            recentTasks[i].latestPause.year == weekDay.year) {
-          total += (recentTasks[i].getRunningTime());
-        }
-      }
-
-      return {'day': index, 'time': total};
-    }).reversed.toList();
-
-    final Duration totalTime = weekTasks.fold(
-        Duration(), (previousSum, day) => previousSum + day['time']);
+    final Duration totalTime = tasks.totalTime;
 
     return AspectRatio(
       aspectRatio: 2.5,

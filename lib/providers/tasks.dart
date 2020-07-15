@@ -99,6 +99,27 @@ class Tasks with ChangeNotifier {
     }).toList();
   }
 
+  List<Map<String, Object>> get weekTasks {
+    return List.generate(7, (index) {
+      final weekDay = DateTime.now().subtract(Duration(days: index));
+      Duration total = Duration();
+
+      for (int i = 0; i < recentTasks.length; i++) {
+        if (recentTasks[i].latestPause.day == weekDay.day &&
+            recentTasks[i].latestPause.month == weekDay.month &&
+            recentTasks[i].latestPause.year == weekDay.year) {
+          total += (recentTasks[i].getRunningTime());
+        }
+      }
+
+      return {'day': index, 'time': total};
+    }).reversed.toList();
+  }
+
+  Duration get totalTime {
+    return weekTasks.fold(Duration(), (previousSum, day) => previousSum + day['time']);
+  }
+
   String categoriesString(String cid) {
     String catString = '';
     List<String> cats =
