@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:csv/csv.dart';
 import 'package:flutter/foundation.dart';
@@ -89,9 +91,9 @@ class Tasks with ChangeNotifier {
   //   ),
   // ];
 
-  Future<String> get localPath async {
+  Future<File> get localFile async {
     final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
+    return File('${directory.path}/tasks.csv');
   }
 
   void loadData() async {
@@ -135,7 +137,6 @@ class Tasks with ChangeNotifier {
       return t.isPaused &&
           t.latestPause.isAfter(DateTime.now().subtract(Duration(days: 7)));
     }).toList();
-    // notifyListeners();
     return recent;
   }
 
@@ -193,6 +194,26 @@ class Tasks with ChangeNotifier {
     );
 
     _tasks.insert(0, task);
+    final res = const ListToCsvConverter().convert(
+      [
+        [
+          id,
+          title,
+          DateFormat("dd-MM-yyyy HH:mm:ss").format(start),
+          null,
+          null,
+          0,
+          0,
+          1,
+          0,
+          categories.join(" "),
+          labels.join(" "),
+          superProjectName
+        ],
+      ],
+    );
+
+    print(res);
     notifyListeners();
   }
 }
