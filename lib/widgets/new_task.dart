@@ -13,9 +13,24 @@ class _NewTaskState extends State<NewTask> {
   List<String> _selectedCategories = [];
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
+  final _titleFocusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _titleFocusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    _titleFocusNode.requestFocus();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+    bool isDisabled = true;
     return Container(
       color: Theme.of(context).primaryColor,
       padding: const EdgeInsets.all(10),
@@ -26,7 +41,13 @@ class _NewTaskState extends State<NewTask> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
             TextFormField(
+              focusNode: _titleFocusNode,
               controller: _titleController,
+              validator: (value) {
+                if (value.isEmpty) {
+                  return "Enter a title";
+                }
+              },
               decoration: InputDecoration(
                 labelText: 'Title',
               ),
@@ -50,6 +71,7 @@ class _NewTaskState extends State<NewTask> {
               (selectedList) {
                 setState(() {
                   _selectedCategories = selectedList;
+                  isDisabled = _selectedCategories.isNotEmpty;
                 });
               },
             ),
@@ -57,13 +79,21 @@ class _NewTaskState extends State<NewTask> {
               child: Text('START'),
               color: Theme.of(context).accentColor,
               textColor: Theme.of(context).primaryColor,
-              onPressed: () {
-                final tasks = Provider.of<Tasks>(context, listen: false);
-
-                tasks.addTask(DateTime.now().toString(), _titleController.text,
-                    DateTime.now(), _selectedCategories, [], null);
-                Navigator.of(context).pop();
-              },
+              onPressed: (!isDisabled)
+                  ? () {
+                      final tasks = Provider.of<Tasks>(context, listen: false);
+                      if (_formKey.currentState.validate()) {
+                        tasks.addTask(
+                            DateTime.now().toString(),
+                            _titleController.text,
+                            DateTime.now(),
+                            _selectedCategories,
+                            [],
+                            null);
+                        Navigator.of(context).pop();
+                      }
+                    }
+                  : null,
             )
           ],
         ),
