@@ -225,13 +225,4 @@ class Tasks with ChangeNotifier {
     );
     notifyListeners();
   }
-
-  void readLocalData() async {
-    final directory = await getApplicationDocumentsDirectory();
-    String csvString =
-        await File('${directory.path}/tasks.csv').readAsString();
-    List<List<dynamic>> rowsAsListOfValues =
-        const CsvToListConverter().convert(csvString);
-    print(rowsAsListOfValues);
-  }
 }
