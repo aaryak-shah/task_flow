@@ -90,16 +90,21 @@ class Tasks with ChangeNotifier {
   //     latestPause: DateTime(2020, 7, 14, 21, 30, 0),
   //   ),
   // ];
-
-  Future<File> get localFile async {
+  Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
-    return File('${directory.path}/tasks.csv');
+    return directory.path;
+  }
+
+  Future<File> get _localFile async {
+    final path = await _localPath;
+    return File('$path/tasks.csv').writeAsString('');
   }
 
   void loadData() async {
-    String csvString = await localFile.then((file) => file.readAsString());
+    // String csvString = await _localFile.then((file) => file.readAsString());
+    String csvString = await rootBundle.loadString('assets/data/tasks.csv');
     List<List<dynamic>> rowsAsListOfValues =
-        const CsvToListConverter().convert(csvString);
+        const CsvToListConverter().convert(csvString).sublist(1);
 
     DateFormat parser = DateFormat("dd-MM-yyyy HH:mm:ss");
 
@@ -208,30 +213,27 @@ class Tasks with ChangeNotifier {
           0,
           categories.join(" "),
           labels.join(" "),
-          superProjectName == null? "": superProjectName
+          superProjectName == null ? "" : superProjectName
         ],
       ],
     );
 
-    localFile.then(
+    _localFile.then(
       (file) => file
           .writeAsString(
             row,
             mode: FileMode.append,
           )
-          .then(
-            (_) => print('Task added successfully')
-          ),
+          .then((val) => print(val.readAsStringSync())),
     );
     notifyListeners();
   }
 
-  void readLocalData() async {
-    final directory = await getApplicationDocumentsDirectory();
-    String csvString =
-        await File('${directory.path}/tasks.csv').readAsString();
-    List<List<dynamic>> rowsAsListOfValues =
-        const CsvToListConverter().convert(csvString);
-    print(rowsAsListOfValues);
-  }
+  // void readLocalData() async {
+  //   final directory = await getApplicationDocumentsDirectory();
+  //   String csvString = await File('${directory.path}/tasks.csv').readAsString();
+  //   List<List<dynamic>> rowsAsListOfValues =
+  //       const CsvToListConverter().convert(csvString);
+  //   print(rowsAsListOfValues);
+  // }
 }

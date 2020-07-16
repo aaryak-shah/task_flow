@@ -96,7 +96,6 @@ class _NewTaskState extends State<NewTask> {
                             _selectedCategories,
                             [],
                             null);
-                        tasks.readLocalData();
                         Navigator.of(context).pop();
                       }
                     }
