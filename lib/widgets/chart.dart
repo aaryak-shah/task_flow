@@ -24,56 +24,63 @@ class ChartState extends State<Chart> {
 
     return AspectRatio(
       aspectRatio: 2.5,
-      child: Card(
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-        color: Theme.of(context).primaryColor,
-        child: BarChart(
-          BarChartData(
-            alignment: BarChartAlignment.spaceAround,
-            maxY: 1,
-            barTouchData: BarTouchData(enabled: false),
-            titlesData: FlTitlesData(
-              show: true,
-              bottomTitles: SideTitles(
-                showTitles: true,
-                textStyle: TextStyle(
-                    // color: const Color(0xff7589a2),
-                    color: Colors.grey,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14),
-                margin: 20,
-                getTitles: (value) {
-                  return DateFormat.E().format(
-                    DateTime.now().subtract(
-                      Duration(
-                        days: value.toInt(),
-                      ),
-                    ),
-                  )[0];
-                },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 15),
+        child: Card(
+          elevation: 5,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          color: Color(0xFF252525),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: BarChart(
+              BarChartData(
+                alignment: BarChartAlignment.spaceAround,
+                maxY: 1,
+                barTouchData: BarTouchData(enabled: false),
+                titlesData: FlTitlesData(
+                  show: true,
+                  bottomTitles: SideTitles(
+                    showTitles: true,
+                    textStyle: TextStyle(
+                        // color: const Color(0xff7589a2),
+                        color: Colors.grey,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14),
+                    margin: 20,
+                    getTitles: (value) {
+                      return DateFormat.E().format(
+                        DateTime.now().subtract(
+                          Duration(
+                            days: value.toInt(),
+                          ),
+                        ),
+                      )[0];
+                    },
+                  ),
+                  leftTitles: SideTitles(showTitles: false),
+                ),
+                borderData: FlBorderData(
+                  show: false,
+                ),
+                barGroups: weekTasks.map((t) {
+                  return BarChartGroupData(
+                    x: t['day'],
+                    barRods: [
+                      BarChartRodData(
+                        y: totalTime != Duration()
+                            ? (t['time'] as Duration).inSeconds /
+                                totalTime.inSeconds
+                            : 0,
+                        color: t['day'] != 6 - widget.selectedDay
+                            ? Colors.white
+                            : Theme.of(context).accentColor,
+                      )
+                    ],
+                  );
+                }).toList(),
               ),
-              leftTitles: SideTitles(showTitles: false),
             ),
-            borderData: FlBorderData(
-              show: false,
-            ),
-            barGroups: weekTasks.map((t) {
-              return BarChartGroupData(
-                x: t['day'],
-                barRods: [
-                  BarChartRodData(
-                    y: totalTime != Duration()
-                        ? (t['time'] as Duration).inSeconds /
-                            totalTime.inSeconds
-                        : 0,
-                    color: t['day'] != 6 - widget.selectedDay
-                        ? Colors.white
-                        : Theme.of(context).accentColor,
-                  )
-                ],
-              );
-            }).toList(),
           ),
         ),
       ),
