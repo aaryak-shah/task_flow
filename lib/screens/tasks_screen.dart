@@ -27,7 +27,7 @@ class _TasksScreenState extends State<TasksScreen> {
   Widget chartBtn(int i) {
     return Container(
       height: double.infinity,
-      width: 55,
+      width: 30,
       color: Color(0x00000000),
       child: GestureDetector(
         onTap: () {
@@ -89,12 +89,12 @@ class _TasksScreenState extends State<TasksScreen> {
                 ),
                 Expanded(
                   child: ListView.builder(
-                    itemCount: tasks.visibleTasks.length,
+                    itemCount: tasks.recentTasks.where((tsk) => tsk.latestPause.day == DateTime.now().subtract(Duration(days: 6-selectedDay)).day).length,
                     itemBuilder: (ctx, index) => ListTile(
                       leading: IconButton(
                         onPressed: () {
                           debugPrint('presed play on ' +
-                              tasks.visibleTasks[index].title);
+                              tasks.recentTasks.where((tsk) => tsk.latestPause.day == DateTime.now().subtract(Duration(days: 6-selectedDay)).day).toList()[index].title);
                         },
                         icon: Icon(
                           Icons.play_arrow,
@@ -102,15 +102,15 @@ class _TasksScreenState extends State<TasksScreen> {
                         ),
                       ),
                       title: Text(
-                        tasks.visibleTasks[index].title,
+                        tasks.recentTasks.where((tsk) => tsk.latestPause.day == DateTime.now().subtract(Duration(days: 6-selectedDay)).day).toList()[index].title,
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
                       subtitle: Text(
-                        tasks.categoriesString(tasks.visibleTasks[index].id),
+                        tasks.categoriesString(tasks.recentTasks.where((tsk) => tsk.latestPause.day == DateTime.now().subtract(Duration(days: 6-selectedDay)).day).toList()[index].id),
                         style: Theme.of(context).textTheme.bodyText2,
                       ),
                       trailing: Text(
-                        tasks.visibleTasks[index].getRunningTimeString(),
+                        tasks.recentTasks.where((tsk) => tsk.latestPause.day == DateTime.now().subtract(Duration(days: 6-selectedDay)).day).toList()[index].getRunningTimeString(),
                       ),
                     ),
                   ),
