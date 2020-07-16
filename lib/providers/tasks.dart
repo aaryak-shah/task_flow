@@ -97,9 +97,10 @@ class Tasks with ChangeNotifier {
   }
 
   void loadData() async {
-    String csvString = await localFile.then((file) => file.readAsString());
+    // String csvString = await localFile.then((file) => file.readAsString());
+    String csvString = await rootBundle.loadString('assets/data/tasks.csv');
     List<List<dynamic>> rowsAsListOfValues =
-        const CsvToListConverter().convert(csvString);
+        const CsvToListConverter().convert(csvString).sublist(1);
 
     DateFormat parser = DateFormat("dd-MM-yyyy HH:mm:ss");
 
@@ -208,7 +209,7 @@ class Tasks with ChangeNotifier {
           0,
           categories.join(" "),
           labels.join(" "),
-          superProjectName == null? "": superProjectName
+          superProjectName == null ? "" : superProjectName
         ],
       ],
     );
@@ -219,9 +220,7 @@ class Tasks with ChangeNotifier {
             row,
             mode: FileMode.append,
           )
-          .then(
-            (_) => print('Task added successfully')
-          ),
+          .then((_) => print('Task added successfully')),
     );
     notifyListeners();
   }
