@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import '../providers/tasks.dart';
 
 class Chart extends StatefulWidget {
-  int selectedDay;
+  final int selectedDay;
   Chart(this.selectedDay);
 
   @override

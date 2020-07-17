@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../widgets/chart.dart';
 import '../widgets/new_task.dart';
 import '../providers/tasks.dart';
+import '../screens/current_task.dart';
 
 class TasksScreen extends StatefulWidget {
   @override
@@ -93,6 +94,8 @@ class _TasksScreenState extends State<TasksScreen> {
                     itemBuilder: (ctx, index) => ListTile(
                       leading: IconButton(
                         onPressed: () {
+                          Navigator.of(context)
+                              .pushNamed(CurrentTaskScreen.routeName, arguments: tasks.visibleTasks[index]);
                           debugPrint('presed play on ' +
                               tasks.visibleTasks[index].title);
                         },

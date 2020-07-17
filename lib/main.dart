@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import './screens/tabs_screen.dart';
-import 'providers/tasks.dart';
+import './screens/current_task.dart';
+import './providers/tasks.dart';
+import './providers/task.dart';
 
 void main() {
   runApp(MyApp());
@@ -23,14 +25,11 @@ class MyApp extends StatelessWidget {
           appBarTheme: AppBarTheme(
             textTheme: TextTheme(
               headline6: TextStyle(
-                fontFamily: 'Montserrat',
-                fontWeight: FontWeight.w700,
-                fontSize: 20
-              ),
-              overline: TextStyle(
-                fontFamily: 'Montserrat'
-              )
-            )
+                  fontFamily: 'Montserrat',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 20),
+              overline: TextStyle(fontFamily: 'Montserrat'),
+            ),
           ),
           textTheme: TextTheme(
             bodyText1: TextStyle(
@@ -45,8 +44,13 @@ class MyApp extends StatelessWidget {
           ),
         ),
         home: TabsScreen(),
-        routes: {
-          
+        onGenerateRoute: (settings) {
+          if (settings.name == CurrentTaskScreen.routeName) {
+            final Task task = settings.arguments;
+            return MaterialPageRoute(builder: (context) {
+              return CurrentTaskScreen(task: task);
+            });
+          }
         },
       ),
     );
