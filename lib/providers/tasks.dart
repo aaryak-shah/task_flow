@@ -133,10 +133,6 @@ class Tasks with ChangeNotifier {
     return t;
   }
 
-  List<Task> get visibleTasks {
-    return tasks.where((task) => task.isPaused).toList();
-  }
-
   List<Task> get recentTasks {
     final recent = tasks.where((t) {
       return t.isPaused &&

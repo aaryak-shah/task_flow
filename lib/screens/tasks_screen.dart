@@ -27,8 +27,8 @@ class _TasksScreenState extends State<TasksScreen> {
   int selectedDay = 6;
   Widget chartBtn(int i) {
     return Container(
-      height: double.infinity,
-      width: 55,
+      height: 200,
+      width: 30,
       color: Color(0x00000000),
       child: GestureDetector(
         onTap: () {
@@ -53,51 +53,67 @@ class _TasksScreenState extends State<TasksScreen> {
             body: Column(
               children: <Widget>[
                 Container(
-                  height: 200,
+                  height: 250,
                   child: Stack(
+                    alignment: Alignment.center,
+                    fit: StackFit.expand,
                     children: <Widget>[
                       Container(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         child: Chart(selectedDay),
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: <Widget>[
-                          chartBtn(0),
-                          chartBtn(1),
-                          chartBtn(2),
-                          chartBtn(3),
-                          chartBtn(4),
-                          chartBtn(5),
-                          chartBtn(6),
-                        ],
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 15),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: <Widget>[
+                            chartBtn(0),
+                            chartBtn(1),
+                            chartBtn(2),
+                            chartBtn(3),
+                            chartBtn(4),
+                            chartBtn(5),
+                            chartBtn(6),
+                          ],
+                        ),
                       )
                     ],
                   ),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    Text(
-                      'YOUR TASKS',
-                      style: Theme.of(context).textTheme.bodyText1,
-                    ),
-                    Text(
-                      '${(tasks.weekTasks[selectedDay]['time'] as Duration).inHours}h ${(tasks.weekTasks[selectedDay]['time'] as Duration).inMinutes.remainder(60)}min',
-                      style: Theme.of(context).textTheme.bodyText1,
-                    ),
-                  ],
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        'YOUR TASKS -',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.5
+                        ),
+                      ),
+                      Text(
+                        ' ${(tasks.weekTasks[selectedDay]['time'] as Duration).inHours}h ${(tasks.weekTasks[selectedDay]['time'] as Duration).inMinutes.remainder(60)}min',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.5
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 Expanded(
                   child: ListView.builder(
-                    itemCount: tasks.visibleTasks.length,
+                    itemCount: tasks.recentTasks.where((tsk) => tsk.latestPause.day == DateTime.now().subtract(Duration(days: 6-selectedDay)).day).length,
                     itemBuilder: (ctx, index) => ListTile(
                       leading: IconButton(
                         onPressed: () {
                           Navigator.of(context)
                               .pushNamed(CurrentTaskScreen.routeName, arguments: tasks.visibleTasks[index]);
                           debugPrint('presed play on ' +
-                              tasks.visibleTasks[index].title);
+                              tasks.recentTasks.where((tsk) => tsk.latestPause.day == DateTime.now().subtract(Duration(days: 6-selectedDay)).day).toList()[index].title);
                         },
                         icon: Icon(
                           Icons.play_arrow,
@@ -105,15 +121,15 @@ class _TasksScreenState extends State<TasksScreen> {
                         ),
                       ),
                       title: Text(
-                        tasks.visibleTasks[index].title,
+                        tasks.recentTasks.where((tsk) => tsk.latestPause.day == DateTime.now().subtract(Duration(days: 6-selectedDay)).day).toList()[index].title,
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
                       subtitle: Text(
-                        tasks.categoriesString(tasks.visibleTasks[index].id),
+                        tasks.categoriesString(tasks.recentTasks.where((tsk) => tsk.latestPause.day == DateTime.now().subtract(Duration(days: 6-selectedDay)).day).toList()[index].id),
                         style: Theme.of(context).textTheme.bodyText2,
                       ),
                       trailing: Text(
-                        tasks.visibleTasks[index].getRunningTimeString(),
+                        tasks.recentTasks.where((tsk) => tsk.latestPause.day == DateTime.now().subtract(Duration(days: 6-selectedDay)).day).toList()[index].getRunningTimeString(),
                       ),
                     ),
                   ),
