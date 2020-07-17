@@ -81,39 +81,60 @@ class _TasksScreenState extends State<TasksScreen> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Text(
                         'YOUR TASKS -',
                         style: TextStyle(
-                          color: Colors.grey,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.5
-                        ),
+                            color: Colors.grey,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.5),
                       ),
                       Text(
                         ' ${(tasks.weekTasks[selectedDay]['time'] as Duration).inHours}h ${(tasks.weekTasks[selectedDay]['time'] as Duration).inMinutes.remainder(60)}min',
                         style: TextStyle(
-                          color: Colors.grey,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1.5
-                        ),
+                            color: Colors.grey,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.5),
                       ),
                     ],
                   ),
                 ),
                 Expanded(
                   child: ListView.builder(
-                    itemCount: tasks.recentTasks.where((tsk) => tsk.latestPause.day == DateTime.now().subtract(Duration(days: 6-selectedDay)).day).length,
+                    itemCount: tasks.recentTasks
+                        .where((tsk) =>
+                            tsk.latestPause.day ==
+                            DateTime.now()
+                                .subtract(Duration(days: 6 - selectedDay))
+                                .day)
+                        .length,
                     itemBuilder: (ctx, index) => ListTile(
                       leading: IconButton(
                         onPressed: () {
-                          Navigator.of(context)
-                              .pushNamed(CurrentTaskScreen.routeName, arguments: tasks.visibleTasks[index]);
+                          Navigator.of(context).pushNamed(
+                              CurrentTaskScreen.routeName,
+                              arguments: tasks.recentTasks
+                                  .where((tsk) =>
+                                      tsk.latestPause.day ==
+                                      DateTime.now()
+                                          .subtract(
+                                              Duration(days: 6 - selectedDay))
+                                          .day)
+                                  .toList()[index]);
                           debugPrint('presed play on ' +
-                              tasks.recentTasks.where((tsk) => tsk.latestPause.day == DateTime.now().subtract(Duration(days: 6-selectedDay)).day).toList()[index].title);
+                              tasks.recentTasks
+                                  .where((tsk) =>
+                                      tsk.latestPause.day ==
+                                      DateTime.now()
+                                          .subtract(
+                                              Duration(days: 6 - selectedDay))
+                                          .day)
+                                  .toList()[index]
+                                  .title);
                         },
                         icon: Icon(
                           Icons.play_arrow,
@@ -121,21 +142,44 @@ class _TasksScreenState extends State<TasksScreen> {
                         ),
                       ),
                       title: Text(
-                        tasks.recentTasks.where((tsk) => tsk.latestPause.day == DateTime.now().subtract(Duration(days: 6-selectedDay)).day).toList()[index].title,
+                        tasks.recentTasks
+                            .where((tsk) =>
+                                tsk.latestPause.day ==
+                                DateTime.now()
+                                    .subtract(Duration(days: 6 - selectedDay))
+                                    .day)
+                            .toList()[index]
+                            .title,
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
                       subtitle: Text(
-                        tasks.categoriesString(tasks.recentTasks.where((tsk) => tsk.latestPause.day == DateTime.now().subtract(Duration(days: 6-selectedDay)).day).toList()[index].id),
+                        tasks.categoriesString(tasks.recentTasks
+                            .where((tsk) =>
+                                tsk.latestPause.day ==
+                                DateTime.now()
+                                    .subtract(Duration(days: 6 - selectedDay))
+                                    .day)
+                            .toList()[index]
+                            .id),
                         style: Theme.of(context).textTheme.bodyText2,
                       ),
                       trailing: Text(
-                        tasks.recentTasks.where((tsk) => tsk.latestPause.day == DateTime.now().subtract(Duration(days: 6-selectedDay)).day).toList()[index].getRunningTimeString(),
+                        tasks.recentTasks
+                            .where((tsk) =>
+                                tsk.latestPause.day ==
+                                DateTime.now()
+                                    .subtract(Duration(days: 6 - selectedDay))
+                                    .day)
+                            .toList()[index]
+                            .getRunningTimeString(),
                       ),
                     ),
                   ),
                 ),
               ],
             ),
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerFloat,
             floatingActionButton: FloatingActionButton(
               child: Icon(
                 Icons.add,

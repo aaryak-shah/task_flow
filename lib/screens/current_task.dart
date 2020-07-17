@@ -10,7 +10,7 @@ class DrawCircle extends CustomPainter {
   DrawCircle() {
     _paint = Paint()
       ..color = Colors.lightGreenAccent
-      ..strokeWidth = 10.0
+      ..strokeWidth = 7.0
       ..style = PaintingStyle.stroke;
   }
 
@@ -58,11 +58,13 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
             .remainder(60)
             .toString()
             .padLeft(2, "0");
+    startTimer();
+    watch.start();
     super.initState();
   }
 
   var watch = Stopwatch();
-  bool paused = true;
+  bool paused = false;
 
   void startTimer() {
     const oneSec = const Duration(seconds: 1);
@@ -83,7 +85,6 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                     .toString()
                     .padLeft(2, "0");
           } else {
-            // watch.stop();
             timer.cancel();
           }
         },
@@ -159,6 +160,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                             icon: Icon(
                               paused ? Icons.play_arrow : Icons.pause,
                               size: 35,
+                              color: Theme.of(context).accentColor,
                             ),
                             onPressed: () {
                               if (paused)
@@ -176,6 +178,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                             icon: Icon(
                               Icons.stop,
                               size: 35,
+                              color: Theme.of(context).errorColor,
                             ),
                             onPressed: () {},
                           ),

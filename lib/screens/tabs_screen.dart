@@ -48,30 +48,27 @@ class _TabsScreenState extends State<TabsScreen> {
         ),
       ),
       body: _pages[_selectedIndex],
-      bottomNavigationBar: ClipRRect(
-        borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(15), topRight: Radius.circular(15)),
-        child: BottomNavigationBar(
-          unselectedItemColor: Colors.grey,
-          selectedItemColor: Theme.of(context).accentColor,
-          currentIndex: _selectedIndex,
-          onTap: _selectPage,
-          backgroundColor: Color(0xFF252525),
-          items: [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.av_timer),
-              title: Text('Tasks'),
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.category),
-              title: Text('Projects'),
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.equalizer),
-              title: Text('Stats'),
-            ),
-          ],
-        ),
+      bottomNavigationBar: BottomNavigationBar(
+        elevation: 5,
+        unselectedItemColor: Colors.grey,
+        selectedItemColor: Theme.of(context).accentColor,
+        currentIndex: _selectedIndex,
+        onTap: _selectPage,
+        backgroundColor: Color(0xFF252525),
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.av_timer),
+            title: Text('Tasks'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.category),
+            title: Text('Projects'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.equalizer),
+            title: Text('Stats'),
+          ),
+        ],
       ),
     );
   }
