@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:task_flow/screens/current_task.dart';
 
 import '../providers/tasks.dart';
 import './category_chip.dart';
@@ -96,7 +97,10 @@ class _NewTaskState extends State<NewTask> {
                             _selectedCategories,
                             [],
                             null);
-                        Navigator.of(context).pop();
+                        Navigator.of(context).pushReplacementNamed(
+                          CurrentTaskScreen.routeName,
+                          arguments: tasks.tasks[0],
+                        );
                       }
                     }
                   : null,

@@ -97,14 +97,15 @@ class Tasks with ChangeNotifier {
 
   Future<File> get _localFile async {
     final path = await _localPath;
-    return File('$path/tasks.csv').writeAsString('');
+    return File('$path/tasks.csv');
   }
 
   void loadData() async {
-    // String csvString = await _localFile.then((file) => file.readAsString());
-    String csvString = await rootBundle.loadString('assets/data/tasks.csv');
+    String csvPath = await _localPath;
+    String csvString = File('$csvPath/tasks.csv').readAsStringSync();
+    // String csvString = await rootBundle.loadString('assets/data/tasks.csv');
     List<List<dynamic>> rowsAsListOfValues =
-        const CsvToListConverter().convert(csvString).sublist(1);
+        const CsvToListConverter().convert(csvString);
 
     DateFormat parser = DateFormat("dd-MM-yyyy HH:mm:ss");
 
@@ -116,7 +117,7 @@ class Tasks with ChangeNotifier {
         latestPause: row[3].isNotEmpty ? parser.parse(row[3]) : null,
         end: row[4].isNotEmpty ? parser.parse(row[4]) : null,
         pauses: row[5],
-        pauseTime: Duration(minutes: row[6]),
+        pauseTime: Duration(seconds: row[6]),
         isRunning: row[7] == 1,
         isPaused: row[8] == 1,
         categories: row[9].split(" "),
@@ -124,8 +125,17 @@ class Tasks with ChangeNotifier {
         superProjectName: row[11],
       );
     }).toList();
-
+    // print(_tasks);
     notifyListeners();
+  }
+
+  Future<List<List<dynamic>>> readLocalData() async {
+    final directory = await getApplicationDocumentsDirectory();
+    String csvString = File('${directory.path}/tasks.csv').readAsStringSync();
+    List<List<dynamic>> rowsAsListOfValues =
+        const CsvToListConverter().convert(csvString);
+    print('read local data');
+    return (rowsAsListOfValues);
   }
 
   List<Task> get tasks {
@@ -220,8 +230,9 @@ class Tasks with ChangeNotifier {
             row,
             mode: FileMode.append,
           )
-          .then((val) => print(val.readAsStringSync())),
+          .then((val) => readLocalData().then((value) => print(value))),
     );
+    print('added data');
     notifyListeners();
   }
 }

@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 import './screens/tabs_screen.dart';
@@ -6,7 +9,10 @@ import './screens/current_task.dart';
 import './providers/tasks.dart';
 import './providers/task.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  var path = await getApplicationDocumentsDirectory();
+  File('${path.path}/tasks.csv').writeAsString('');
   runApp(MyApp());
 }
 

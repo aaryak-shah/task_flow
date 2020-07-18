@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:task_flow/providers/tasks.dart';
 
 import '../providers/task.dart';
 
@@ -40,6 +42,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
   List<String> _categories;
   String _title;
   List<String> _labels;
+  Duration _resumeTime;
   @override
   void initState() {
     Task _task = widget.task;
@@ -47,19 +50,15 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
     _categories = _task.categories;
     _labels = _task.labels;
     _title = _task.title;
-    _time = _task.pauseTime.inHours.toString().padLeft(2, "0") +
+    _resumeTime = _task.getRunningTime();
+    _time = _resumeTime.inHours.toString().padLeft(2, "0") +
         ":" +
-        widget.task.pauseTime.inMinutes
-            .remainder(60)
-            .toString()
-            .padLeft(2, "0") +
+        _resumeTime.inMinutes.remainder(60).toString().padLeft(2, "0") +
         ":" +
-        widget.task.pauseTime.inSeconds
-            .remainder(60)
-            .toString()
-            .padLeft(2, "0");
+        _resumeTime.inSeconds.remainder(60).toString().padLeft(2, "0");
     startTimer();
     watch.start();
+    if (widget.task.latestPause != null) widget.task.resume();
     super.initState();
   }
 
@@ -73,14 +72,19 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
       (timer) => setState(
         () {
           if (!paused) {
-            _time = watch.elapsed.inHours.toString().padLeft(2, "0") +
+            _time = (watch.elapsed + _resumeTime)
+                    .inHours
+                    .toString()
+                    .padLeft(2, "0") +
                 ":" +
-                watch.elapsed.inMinutes
+                (watch.elapsed + _resumeTime)
+                    .inMinutes
                     .remainder(60)
                     .toString()
                     .padLeft(2, "0") +
                 ":" +
-                watch.elapsed.inSeconds
+                (watch.elapsed + _resumeTime)
+                    .inSeconds
                     .remainder(60)
                     .toString()
                     .padLeft(2, "0");
@@ -105,6 +109,13 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            if (!paused) widget.task.pause();
+            Navigator.pushReplacementNamed(context, '/');
+          },
+        ),
         elevation: 0.0,
         backgroundColor: Theme.of(context).primaryColor,
         title: Text(
@@ -163,10 +174,13 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                               color: Theme.of(context).accentColor,
                             ),
                             onPressed: () {
-                              if (paused)
+                              if (paused) {
                                 watch.start();
-                              else
+                                widget.task.resume();
+                              } else {
                                 watch.stop();
+                                widget.task.pause();
+                              }
                               paused = !paused;
                               startTimer();
                             },

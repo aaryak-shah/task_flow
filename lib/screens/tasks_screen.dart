@@ -115,17 +115,18 @@ class _TasksScreenState extends State<TasksScreen> {
                     itemBuilder: (ctx, index) => ListTile(
                       leading: IconButton(
                         onPressed: () {
-                          Navigator.of(context).pushNamed(
-                              CurrentTaskScreen.routeName,
-                              arguments: tasks.recentTasks
-                                  .where((tsk) =>
-                                      tsk.latestPause.day ==
-                                      DateTime.now()
-                                          .subtract(
-                                              Duration(days: 6 - selectedDay))
-                                          .day)
-                                  .toList()[index]);
-                          debugPrint('presed play on ' +
+                          Navigator.of(context).pushReplacementNamed(
+                            CurrentTaskScreen.routeName,
+                            arguments: tasks.recentTasks
+                                .where((tsk) =>
+                                    tsk.latestPause.day ==
+                                    DateTime.now()
+                                        .subtract(
+                                            Duration(days: 6 - selectedDay))
+                                        .day)
+                                .toList()[index],
+                          );
+                          debugPrint('pressed play on ' +
                               tasks.recentTasks
                                   .where((tsk) =>
                                       tsk.latestPause.day ==
