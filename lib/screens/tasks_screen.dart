@@ -154,7 +154,7 @@ class _TasksScreenState extends State<TasksScreen> {
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
                       subtitle: Text(
-                        tasks.categoriesString(tasks.recentTasks
+                        tasks.categoryString(tasks.recentTasks
                             .where((tsk) =>
                                 tsk.latestPause.day ==
                                 DateTime.now()

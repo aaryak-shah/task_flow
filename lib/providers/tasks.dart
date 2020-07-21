@@ -120,7 +120,7 @@ class Tasks with ChangeNotifier {
         pauseTime: Duration(seconds: row[6]),
         isRunning: row[7] == 1,
         isPaused: row[8] == 1,
-        categories: row[9].split(" "),
+        category: row[9],
         labels: row[10].split(" "),
         superProjectName: row[11],
       );
@@ -172,18 +172,8 @@ class Tasks with ChangeNotifier {
         Duration(), (previousSum, day) => previousSum + day['time']);
   }
 
-  String categoriesString(String cid) {
-    String catString = '';
-    List<String> cats =
-        _tasks[_tasks.indexWhere((tsk) => cid == tsk.id)].categories;
-    for (int i = 0; i < cats.length; i++) {
-      if (i < cats.length - 1) {
-        catString += cats[i] + ', ';
-      } else {
-        catString += cats[i];
-      }
-    }
-    return catString;
+  String categoryString(String cid) {
+    return _tasks[_tasks.indexWhere((tsk) => cid == tsk.id)].category;
   }
 
   Future<void> writeCsv(List<Task> tasks) async {
@@ -203,7 +193,7 @@ class Tasks with ChangeNotifier {
               t.pauseTime.inSeconds,
               t.isRunning ? 1 : 0,
               t.isPaused ? 1 : 0,
-              t.categories.join(" "),
+              t.category,
               t.labels.join(" "),
               t.superProjectName == null ? "" : t.superProjectName
             ])
@@ -217,7 +207,7 @@ class Tasks with ChangeNotifier {
     final String id,
     final String title,
     final DateTime start,
-    final List<String> categories,
+    final String category,
     final List<String> labels,
     final String superProjectName,
   ) async {
@@ -225,7 +215,7 @@ class Tasks with ChangeNotifier {
       id: id,
       title: title,
       start: start,
-      categories: categories,
+      category: category,
       labels: labels,
       superProjectName: superProjectName,
     );
@@ -242,7 +232,7 @@ class Tasks with ChangeNotifier {
           0,
           1,
           0,
-          categories.join(" "),
+          category,
           labels.join(" "),
           superProjectName == null ? "" : superProjectName
         ],

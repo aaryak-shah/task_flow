@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:task_flow/providers/task.dart';
-import 'package:task_flow/screens/current_task.dart';
 
+import '../screens/current_task.dart';
 import '../providers/tasks.dart';
 import './category_chip.dart';
 
@@ -12,7 +11,7 @@ class NewTask extends StatefulWidget {
 }
 
 class _NewTaskState extends State<NewTask> {
-  List<String> _selectedCategories = [];
+  String _selectedCategory = '';
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _titleFocusNode = FocusNode();
@@ -36,12 +35,12 @@ class _NewTaskState extends State<NewTask> {
     var tasks = Provider.of<Tasks>(context);
     Widget returnCatChips() {
       setState(() {
-        _selectedCategories.isNotEmpty ? isDisabled = false : isDisabled = true;
+        _selectedCategory.isNotEmpty ? isDisabled = false : isDisabled = true;
       });
       return CategoryChips(
-        (selectedList) {
+        (selectedCategory) {
           setState(() {
-            _selectedCategories = selectedList;
+            _selectedCategory = selectedCategory;
           });
         },
       );
@@ -95,7 +94,7 @@ class _NewTaskState extends State<NewTask> {
                             DateTime.now().toString(),
                             _titleController.text,
                             DateTime.now(),
-                            _selectedCategories,
+                            _selectedCategory,
                             [],
                             null);
                         Navigator.of(context).pushReplacementNamed(

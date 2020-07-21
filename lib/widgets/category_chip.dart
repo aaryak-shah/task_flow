@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class CategoryChips extends StatefulWidget {
-  final Function(List<String>) onSelectionChanged;
+  final Function(String) onSelectionChanged;
   const CategoryChips(this.onSelectionChanged);
 
   @override
@@ -9,7 +9,7 @@ class CategoryChips extends StatefulWidget {
 }
 
 class _CategoryChipsState extends State<CategoryChips> {
-  List<String> selectedChoices = List();
+  String selectedChoice = '';
 
   final List<String> categories = [
     'Category 1',
@@ -30,13 +30,11 @@ class _CategoryChipsState extends State<CategoryChips> {
           selectedColor: Theme.of(context).accentColor,
           padding: EdgeInsets.all(6),
           label: Text(item),
-          selected: selectedChoices.contains(item),
+          selected: selectedChoice == item,
           onSelected: (selected) {
             setState(() {
-              selectedChoices.contains(item)
-                  ? selectedChoices.remove(item)
-                  : selectedChoices.add(item);
-              widget.onSelectionChanged(selectedChoices);
+              selectedChoice = item;
+              widget.onSelectionChanged(selectedChoice);
             });
           },
         ),

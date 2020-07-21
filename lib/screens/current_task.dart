@@ -40,7 +40,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
   var _provider;
   Timer _timer;
   String _time;
-  List<String> _categories;
+  String _category;
   String _title;
   List<String> _labels;
   Duration _resumeTime;
@@ -49,7 +49,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
     var _provider = Provider.of<Tasks>(context, listen: false);
     Task _task = _provider.tasks[widget.index];
     _timer = Timer(const Duration(seconds: 1), () {});
-    _categories = _task.categories;
+    _category = _task.category;
     _labels = _task.labels;
     _title = _task.title;
     _resumeTime = _task.getRunningTime();
@@ -214,7 +214,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          'CATEGORIES',
+                          'CATEGORY',
                           style: TextStyle(
                             color: Color.fromRGBO(120, 120, 120, 1),
                           ),
@@ -223,7 +223,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                           height: 10,
                         ),
                         Text(
-                          _categories.join(", "),
+                          _category,
                           style: TextStyle(
                             color: Color.fromRGBO(227, 227, 227, 1),
                             fontSize: 26,

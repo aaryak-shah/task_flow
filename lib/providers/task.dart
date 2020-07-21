@@ -15,7 +15,7 @@ class Task with ChangeNotifier {
   Duration pauseTime;
   bool isRunning;
   bool isPaused;
-  final List<String> categories;
+  final String category;
   final List<String> labels;
   final String superProjectName;
 
@@ -29,7 +29,7 @@ class Task with ChangeNotifier {
     this.pauseTime = Duration.zero,
     this.isRunning = true,
     this.isPaused = false,
-    @required this.categories,
+    @required this.category,
     @required this.labels,
     @required this.superProjectName,
   });
@@ -86,7 +86,7 @@ class Task with ChangeNotifier {
         pauseTime: Duration(seconds: row[6]),
         isRunning: row[7] == 1,
         isPaused: row[8] == 1,
-        categories: row[9].split(" "),
+        category: row[9],
         labels: row[10].split(" "),
         superProjectName: row[11],
       );
