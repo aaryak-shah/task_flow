@@ -114,7 +114,14 @@ class _TasksScreenState extends State<TasksScreen> {
                         .length,
                     itemBuilder: (ctx, index) => ListTile(
                       leading: IconButton(
-                        onPressed: () async{
+                        onPressed: (tasks.recentTasks
+                                  .where((tsk) =>
+                                      tsk.latestPause.day ==
+                                      DateTime.now()
+                                          .subtract(
+                                              Duration(days: 6 - selectedDay))
+                                          .day)
+                                  .toList()[index].end != null) ? null: () async{
                           Navigator.of(context).pushReplacementNamed(
                             CurrentTaskScreen.routeName,
                             arguments: await tasks.recentTasks
@@ -139,7 +146,14 @@ class _TasksScreenState extends State<TasksScreen> {
                         },
                         icon: Icon(
                           Icons.play_arrow,
-                          color: Colors.white,
+                          color: (tasks.recentTasks
+                                  .where((tsk) =>
+                                      tsk.latestPause.day ==
+                                      DateTime.now()
+                                          .subtract(
+                                              Duration(days: 6 - selectedDay))
+                                          .day)
+                                  .toList()[index].end != null) ? Colors.grey : Colors.white,
                         ),
                       ),
                       title: Text(
@@ -151,7 +165,16 @@ class _TasksScreenState extends State<TasksScreen> {
                                     .day)
                             .toList()[index]
                             .title,
-                        style: Theme.of(context).textTheme.bodyText1,
+                        style: Theme.of(context).textTheme.bodyText1.copyWith(
+                          color: (tasks.recentTasks
+                                  .where((tsk) =>
+                                      tsk.latestPause.day ==
+                                      DateTime.now()
+                                          .subtract(
+                                              Duration(days: 6 - selectedDay))
+                                          .day)
+                                  .toList()[index].end != null) ? Colors.grey : Colors.white,
+                        ),
                       ),
                       subtitle: Text(
                         tasks.categoryString(tasks.recentTasks
