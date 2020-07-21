@@ -197,7 +197,13 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                               size: 35,
                               color: Theme.of(context).errorColor,
                             ),
-                            onPressed: () {},
+                            onPressed: () async {
+                              watch.reset();
+                              watch.stop();
+                              paused = true;
+                              await _provider.complete(widget.index);
+                              Navigator.pushReplacementNamed(context, '/');
+                            },
                           ),
                         ],
                       ),

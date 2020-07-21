@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import './screens/tabs_screen.dart';
 import './screens/current_task.dart';
 import './providers/tasks.dart';
-import './providers/task.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -101,15 +101,4 @@ class Task with ChangeNotifier {
     print('Length: ${t.length}');
     return t.indexWhere((t) => t.id == id);
   }
-
-  // void complete() async {
-  //   final index = await getIndex;
-  //   var taskList = await tasks;
-  //   taskList[index].isRunning = false;
-  //   taskList[index].isPaused = true;
-  //   taskList[index].end = DateTime.now();
-  //   taskList[index].latestPause = DateTime.now();
-  //   writeCsv(taskList);
-  //   notifyListeners();
-  // }
 }

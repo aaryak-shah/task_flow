@@ -137,6 +137,21 @@ class Tasks with ChangeNotifier {
   //   return (rowsAsListOfValues);
   // }
 
+  Future<void> purgeOldTasks() async {
+    await loadData();
+    _tasks.removeWhere((task) {
+      return task.latestPause.isBefore(
+        DateTime.now().subtract(
+          Duration(
+            days: 7,
+          ),
+        ),
+      );
+    });
+    await writeCsv(_tasks);
+    notifyListeners();
+  }
+
   List<Task> get tasks {
     final t = _tasks == null ? null : [..._tasks];
     return t;
@@ -262,11 +277,11 @@ class Tasks with ChangeNotifier {
     notifyListeners();
   }
 
-  void complete(int index) async {
+  Future<void> complete(int index) async {
     _tasks[index].isRunning = false;
     _tasks[index].isPaused = true;
     _tasks[index].end = DateTime.now();
-    _tasks[index].latestPause = DateTime.now();
+    _tasks[index].latestPause = _tasks[index].end;
     await writeCsv(_tasks);
     notifyListeners();
   }
