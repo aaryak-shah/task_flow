@@ -137,6 +137,20 @@ class Tasks with ChangeNotifier {
   //   return (rowsAsListOfValues);
   // }
 
+  Future<void> purgeOldTasks() async {
+    _tasks.removeWhere((task) {
+      return task.latestPause.isBefore(
+        DateTime.now().subtract(
+          Duration(
+            days: 7,
+          ),
+        ),
+      );
+    });
+    await writeCsv(_tasks);
+    notifyListeners();
+  }
+
   List<Task> get tasks {
     final t = _tasks == null ? null : [..._tasks];
     return t;

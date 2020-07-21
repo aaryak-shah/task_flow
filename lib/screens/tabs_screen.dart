@@ -26,6 +26,7 @@ class _TabsScreenState extends State<TabsScreen> {
   void didChangeDependencies() {
     if(_isInit){
       Provider.of<Tasks>(context).loadData();
+      Provider.of<Tasks>(context).purgeOldTasks();
       _isInit=false;
     }
     super.didChangeDependencies();
