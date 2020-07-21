@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import '../screens/settings_screen.dart';
 
 class MainDrawer extends StatelessWidget {
-  Widget buildDrawerTile(IconData icon, String title) {
+  Widget buildDrawerTile(
+      BuildContext context, IconData icon, String title, String route) {
     return InkWell(
       child: ListTile(
         leading: Icon(
@@ -12,6 +14,7 @@ class MainDrawer extends StatelessWidget {
       ),
       onTap: () {
         print(title);
+        Navigator.of(context).pushReplacementNamed(route);
       },
     );
   }
@@ -60,11 +63,11 @@ class MainDrawer extends StatelessWidget {
             SizedBox(
               height: 30,
             ),
-            buildDrawerTile(Icons.perm_contact_calendar, 'Clients'),
-            buildDrawerTile(Icons.info, 'About'),
-            buildDrawerTile(Icons.feedback, 'Feedback'),
+            buildDrawerTile(context,Icons.perm_contact_calendar, 'Clients', "/"),
+            buildDrawerTile(context,Icons.info, 'About', "/"),
+            buildDrawerTile(context,Icons.feedback, 'Feedback', "/"),
             Spacer(),
-            buildDrawerTile(Icons.settings, 'Settings'),
+            buildDrawerTile(context,Icons.settings, 'Settings', SettingsScreen.routeName),
             SizedBox(
               height: 30,
             ),
