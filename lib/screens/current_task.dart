@@ -29,14 +29,15 @@ class DrawCircle extends CustomPainter {
 
 class CurrentTaskScreen extends StatefulWidget {
   static const routeName = '/current-task';
-  final Task task;
-  CurrentTaskScreen({this.task});
+  final int index;
+  CurrentTaskScreen({this.index});
 
   @override
   _CurrentTaskScreenState createState() => _CurrentTaskScreenState();
 }
 
 class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
+  var _provider;
   Timer _timer;
   String _time;
   List<String> _categories;
@@ -45,7 +46,8 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
   Duration _resumeTime;
   @override
   void initState() {
-    Task _task = widget.task;
+    var _provider = Provider.of<Tasks>(context, listen: false);
+    Task _task = _provider.tasks[widget.index];
     _timer = Timer(const Duration(seconds: 1), () {});
     _categories = _task.categories;
     _labels = _task.labels;
@@ -58,7 +60,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
         _resumeTime.inSeconds.remainder(60).toString().padLeft(2, "0");
     startTimer();
     watch.start();
-    if (widget.task.latestPause != null) widget.task.resume();
+    if (_task.latestPause != null) _provider.resume(widget.index);
     super.initState();
   }
 
@@ -105,14 +107,15 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _provider = Provider.of<Tasks>(context);
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            if (!paused) widget.task.pause();
+          onPressed: () async {
+            if (!paused) await _provider.pause(widget.index);
             Navigator.pushReplacementNamed(context, '/');
           },
         ),
@@ -173,13 +176,13 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                               size: 35,
                               color: Theme.of(context).accentColor,
                             ),
-                            onPressed: () {
+                            onPressed: () async {
                               if (paused) {
                                 watch.start();
-                                widget.task.resume();
+                                await _provider.resume(widget.index);
                               } else {
                                 watch.stop();
-                                widget.task.pause();
+                                await _provider.pause(widget.index);
                               }
                               paused = !paused;
                               startTimer();

@@ -100,9 +100,9 @@ class Tasks with ChangeNotifier {
     return File('$path/tasks.csv');
   }
 
-  void loadData() async {
+  Future<void> loadData() async {
     String csvPath = await _localPath;
-    String csvString = File('$csvPath/tasks.csv').readAsStringSync();
+    String csvString = await File('$csvPath/tasks.csv').readAsString();
     // String csvString = await rootBundle.loadString('assets/data/tasks.csv');
     List<List<dynamic>> rowsAsListOfValues =
         const CsvToListConverter().convert(csvString);
@@ -129,14 +129,13 @@ class Tasks with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<List<List<dynamic>>> readLocalData() async {
-    final directory = await getApplicationDocumentsDirectory();
-    String csvString = File('${directory.path}/tasks.csv').readAsStringSync();
-    List<List<dynamic>> rowsAsListOfValues =
-        const CsvToListConverter().convert(csvString);
-    print('read local data');
-    return (rowsAsListOfValues);
-  }
+  // Future<List<List<dynamic>>> readLocalData() async {
+  //   final directory = await getApplicationDocumentsDirectory();
+  //   String csvString = await File('${directory.path}/tasks.csv').readAsString();
+  //   List<List<dynamic>> rowsAsListOfValues =
+  //       const CsvToListConverter().convert(csvString);
+  //   return (rowsAsListOfValues);
+  // }
 
   List<Task> get tasks {
     final t = _tasks == null ? null : [..._tasks];
@@ -187,14 +186,41 @@ class Tasks with ChangeNotifier {
     return catString;
   }
 
-  void addTask(
+  Future<void> writeCsv(List<Task> tasks) async {
+    // print('Writing to CSV');
+    final rows = ListToCsvConverter().convert(tasks
+        .map((t) => [
+              t.id,
+              t.title,
+              DateFormat("dd-MM-yyyy HH:mm:ss").format(t.start),
+              t.latestPause != null
+                  ? DateFormat("dd-MM-yyyy HH:mm:ss").format(t.latestPause)
+                  : "",
+              t.end != null
+                  ? DateFormat("dd-MM-yyyy HH:mm:ss").format(t.end)
+                  : "",
+              t.pauses,
+              t.pauseTime.inSeconds,
+              t.isRunning ? 1 : 0,
+              t.isPaused ? 1 : 0,
+              t.categories.join(" "),
+              t.labels.join(" "),
+              t.superProjectName == null ? "" : t.superProjectName
+            ])
+        .toList());
+    File f = await _localFile;
+    await f.writeAsString(rows, mode: FileMode.writeOnly);
+    notifyListeners();
+  }
+
+  Future<void> addTask(
     final String id,
     final String title,
     final DateTime start,
     final List<String> categories,
     final List<String> labels,
     final String superProjectName,
-  ) {
+  ) async {
     final task = Task(
       id: id,
       title: title,
@@ -204,7 +230,6 @@ class Tasks with ChangeNotifier {
       superProjectName: superProjectName,
     );
 
-    _tasks.insert(0, task);
     final row = const ListToCsvConverter().convert(
       [
         [
@@ -223,16 +248,36 @@ class Tasks with ChangeNotifier {
         ],
       ],
     );
+    File f = await _localFile;
+    await f.writeAsString(row, mode: FileMode.append, flush: true);
+    _tasks.add(task);
+    notifyListeners();
+  }
 
-    _localFile.then(
-      (file) => file
-          .writeAsString(
-            row,
-            mode: FileMode.append,
-          )
-          .then((val) => readLocalData().then((value) => print(value))),
-    );
-    print('added data');
+  Future<void> resume(int index) async {
+    _tasks[index].isRunning = true;
+    _tasks[index].isPaused = false;
+    _tasks[index].pauseTime +=
+        DateTime.now().difference(_tasks[index].latestPause);
+    await writeCsv(_tasks);
+    notifyListeners();
+  }
+
+  Future<void> pause(int index) async {
+    _tasks[index].isRunning = false;
+    _tasks[index].isPaused = true;
+    _tasks[index].pauses++;
+    _tasks[index].latestPause = DateTime.now();
+    await writeCsv(_tasks);
+    notifyListeners();
+  }
+
+  void complete(int index) async {
+    _tasks[index].isRunning = false;
+    _tasks[index].isPaused = true;
+    _tasks[index].end = DateTime.now();
+    _tasks[index].latestPause = DateTime.now();
+    await writeCsv(_tasks);
     notifyListeners();
   }
 }

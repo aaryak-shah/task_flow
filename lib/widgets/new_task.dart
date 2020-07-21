@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:task_flow/providers/task.dart';
 import 'package:task_flow/screens/current_task.dart';
 
 import '../providers/tasks.dart';
@@ -32,6 +33,7 @@ class _NewTaskState extends State<NewTask> {
   @override
   Widget build(BuildContext context) {
     bool isDisabled = true;
+    var tasks = Provider.of<Tasks>(context);
     Widget returnCatChips() {
       setState(() {
         _selectedCategories.isNotEmpty ? isDisabled = false : isDisabled = true;
@@ -87,10 +89,9 @@ class _NewTaskState extends State<NewTask> {
               color: Theme.of(context).accentColor,
               textColor: Theme.of(context).primaryColor,
               onPressed: (!isDisabled)
-                  ? () {
-                      final tasks = Provider.of<Tasks>(context, listen: false);
+                  ? () async {
                       if (_formKey.currentState.validate()) {
-                        tasks.addTask(
+                        await tasks.addTask(
                             DateTime.now().toString(),
                             _titleController.text,
                             DateTime.now(),
@@ -99,7 +100,7 @@ class _NewTaskState extends State<NewTask> {
                             null);
                         Navigator.of(context).pushReplacementNamed(
                           CurrentTaskScreen.routeName,
-                          arguments: tasks.tasks[0],
+                          arguments: tasks.tasks.length -1,
                         );
                       }
                     }

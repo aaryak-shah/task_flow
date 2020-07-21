@@ -114,17 +114,17 @@ class _TasksScreenState extends State<TasksScreen> {
                         .length,
                     itemBuilder: (ctx, index) => ListTile(
                       leading: IconButton(
-                        onPressed: () {
+                        onPressed: () async{
                           Navigator.of(context).pushReplacementNamed(
                             CurrentTaskScreen.routeName,
-                            arguments: tasks.recentTasks
+                            arguments: await tasks.recentTasks
                                 .where((tsk) =>
                                     tsk.latestPause.day ==
                                     DateTime.now()
                                         .subtract(
                                             Duration(days: 6 - selectedDay))
                                         .day)
-                                .toList()[index],
+                                .toList()[index].getIndex,
                           );
                           debugPrint('pressed play on ' +
                               tasks.recentTasks

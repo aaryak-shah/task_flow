@@ -12,7 +12,10 @@ import './providers/task.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   var path = await getApplicationDocumentsDirectory();
-  File('${path.path}/tasks.csv').writeAsString('');
+  File f = File('${path.path}/tasks.csv');
+  if (!f.existsSync()) {
+    f.writeAsStringSync('');
+  }
   runApp(MyApp());
 }
 
@@ -53,9 +56,9 @@ class MyApp extends StatelessWidget {
         home: TabsScreen(),
         onGenerateRoute: (settings) {
           if (settings.name == CurrentTaskScreen.routeName) {
-            final Task task = settings.arguments;
+            final int index = settings.arguments;
             return MaterialPageRoute(builder: (context) {
-              return CurrentTaskScreen(task: task);
+              return CurrentTaskScreen(index: index);
             });
           }
         },

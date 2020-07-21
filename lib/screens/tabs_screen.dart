@@ -14,6 +14,7 @@ class TabsScreen extends StatefulWidget {
 class _TabsScreenState extends State<TabsScreen> {
   List<dynamic> _pages;
   int _selectedIndex = 0;
+  bool _isInit = true;
 
   @override
   void initState() {
@@ -23,7 +24,10 @@ class _TabsScreenState extends State<TabsScreen> {
 
   @override
   void didChangeDependencies() {
-    Provider.of<Tasks>(context).loadData();
+    if(_isInit){
+      Provider.of<Tasks>(context).loadData();
+      _isInit=false;
+    }
     super.didChangeDependencies();
   }
 

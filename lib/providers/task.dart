@@ -69,7 +69,7 @@ class Task with ChangeNotifier {
 
   Future<List<Task>> get tasks async {
     File csvFile = await _localFile;
-    String csvString = csvFile.readAsStringSync();
+    String csvString = await csvFile.readAsString();
     print('Tasks getter called');
     List<List<dynamic>> rowsAsListOfValues =
         const CsvToListConverter().convert(csvString);
@@ -95,39 +95,6 @@ class Task with ChangeNotifier {
     return rows;
   }
 
-  void writeCsv(List<Task> tasks) {
-    // print('Writing to CSV');
-    final rows = ListToCsvConverter().convert(tasks
-        .map((t) => [
-              t.id,
-              t.title,
-              DateFormat("dd-MM-yyyy HH:mm:ss").format(t.start),
-              t.latestPause != null
-                  ? DateFormat("dd-MM-yyyy HH:mm:ss").format(t.latestPause)
-                  : "",
-              t.end != null
-                  ? DateFormat("dd-MM-yyyy HH:mm:ss").format(t.end)
-                  : "",
-              t.pauses,
-              t.pauseTime.inSeconds,
-              t.isRunning ? 1 : 0,
-              t.isPaused ? 1 : 0,
-              t.categories.join(" "),
-              t.labels.join(" "),
-              t.superProjectName == null ? "" : t.superProjectName
-            ])
-        .toList());
-    _localFile.then((file) {
-      file.writeAsStringSync(
-        rows,
-        mode: FileMode.writeOnly,
-      );
-      // print(rows);
-    });
-
-    notifyListeners();
-  }
-
   Future<int> get getIndex async {
     print('Get Index called');
     var t = await tasks;
@@ -135,43 +102,14 @@ class Task with ChangeNotifier {
     return t.indexWhere((t) => t.id == id);
   }
 
-  void resume() {
-    print('resumed');
-    getIndex.then((index) {
-      tasks.then((taskList) {
-        taskList[index].isRunning = true;
-        taskList[index].isPaused = false;
-        taskList[index].pauseTime +=
-            DateTime.now().difference(taskList[index].latestPause);
-        writeCsv(taskList);
-        notifyListeners();
-      });
-    });
-  }
-
-  void pause() {
-    print('paused');
-    getIndex.then((index) {
-      print(index);
-      tasks.then((taskList) {
-        taskList[index].isRunning = false;
-        taskList[index].isPaused = true;
-        taskList[index].pauses++;
-        taskList[index].latestPause = DateTime.now();
-        writeCsv(taskList);
-        notifyListeners();
-      });
-    });
-  }
-
-  void complete() async {
-    final index = await getIndex;
-    var taskList = await tasks;
-    taskList[index].isRunning = false;
-    taskList[index].isPaused = true;
-    taskList[index].end = DateTime.now();
-    taskList[index].latestPause = DateTime.now();
-    writeCsv(taskList);
-    notifyListeners();
-  }
+  // void complete() async {
+  //   final index = await getIndex;
+  //   var taskList = await tasks;
+  //   taskList[index].isRunning = false;
+  //   taskList[index].isPaused = true;
+  //   taskList[index].end = DateTime.now();
+  //   taskList[index].latestPause = DateTime.now();
+  //   writeCsv(taskList);
+  //   notifyListeners();
+  // }
 }
