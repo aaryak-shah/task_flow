@@ -14,6 +14,8 @@ class TasksScreen extends StatefulWidget {
 void showNewTaskForm(BuildContext context) {
   showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      isDismissible: true,
       builder: (_) {
         return GestureDetector(
           onTap: () {},

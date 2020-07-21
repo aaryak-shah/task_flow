@@ -47,7 +47,17 @@ class _NewTaskState extends State<NewTask> {
     }
 
     return Container(
-      color: Theme.of(context).primaryColor,
+      height: MediaQuery.of(context).size.height * 0.75,
+      // height: 460,
+      decoration: BoxDecoration(
+        color: Theme.of(context).primaryColor,
+        boxShadow: [BoxShadow(
+          color: Colors.black45,
+          blurRadius: 100,
+          spreadRadius: 100,
+          offset: Offset(0, -100),
+        ),],
+      ),
       padding: const EdgeInsets.all(10),
       child: Form(
         key: _formKey,
@@ -67,6 +77,9 @@ class _NewTaskState extends State<NewTask> {
                 labelText: 'Title',
               ),
             ),
+            SizedBox(
+              height: 50,
+            ),
             Container(
               height: 20,
               margin: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
@@ -82,7 +95,13 @@ class _NewTaskState extends State<NewTask> {
                 ],
               ),
             ),
-            returnCatChips(),
+            SizedBox(
+              width: double.infinity,
+              child: Center(
+                child: returnCatChips(),
+              ),
+            ),
+            Spacer(),
             RaisedButton(
               child: Text('START'),
               color: Theme.of(context).accentColor,
@@ -99,12 +118,12 @@ class _NewTaskState extends State<NewTask> {
                             null);
                         Navigator.of(context).pushReplacementNamed(
                           CurrentTaskScreen.routeName,
-                          arguments: tasks.tasks.length -1,
+                          arguments: tasks.tasks.length - 1,
                         );
                       }
                     }
                   : null,
-            )
+            ),
           ],
         ),
       ),
