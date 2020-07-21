@@ -117,45 +117,54 @@ class _TasksScreenState extends State<TasksScreen> {
                     itemBuilder: (ctx, index) => ListTile(
                       leading: IconButton(
                         onPressed: (tasks.recentTasks
-                                  .where((tsk) =>
-                                      tsk.latestPause.day ==
-                                      DateTime.now()
-                                          .subtract(
-                                              Duration(days: 6 - selectedDay))
-                                          .day)
-                                  .toList()[index].end != null) ? null: () async{
-                          Navigator.of(context).pushReplacementNamed(
-                            CurrentTaskScreen.routeName,
-                            arguments: await tasks.recentTasks
-                                .where((tsk) =>
-                                    tsk.latestPause.day ==
-                                    DateTime.now()
-                                        .subtract(
-                                            Duration(days: 6 - selectedDay))
-                                        .day)
-                                .toList()[index].getIndex,
-                          );
-                          debugPrint('pressed play on ' +
-                              tasks.recentTasks
-                                  .where((tsk) =>
-                                      tsk.latestPause.day ==
-                                      DateTime.now()
-                                          .subtract(
-                                              Duration(days: 6 - selectedDay))
-                                          .day)
-                                  .toList()[index]
-                                  .title);
-                        },
+                                    .where((tsk) =>
+                                        tsk.latestPause.day ==
+                                        DateTime.now()
+                                            .subtract(
+                                                Duration(days: 6 - selectedDay))
+                                            .day)
+                                    .toList()[index]
+                                    .end !=
+                                null)
+                            ? null
+                            : () async {
+                                Navigator.of(context).pushReplacementNamed(
+                                  CurrentTaskScreen.routeName,
+                                  arguments: await tasks.recentTasks
+                                      .where((tsk) =>
+                                          tsk.latestPause.day ==
+                                          DateTime.now()
+                                              .subtract(Duration(
+                                                  days: 6 - selectedDay))
+                                              .day)
+                                      .toList()[index]
+                                      .getIndex,
+                                );
+                                debugPrint('pressed play on ' +
+                                    tasks.recentTasks
+                                        .where((tsk) =>
+                                            tsk.latestPause.day ==
+                                            DateTime.now()
+                                                .subtract(Duration(
+                                                    days: 6 - selectedDay))
+                                                .day)
+                                        .toList()[index]
+                                        .title);
+                              },
                         icon: Icon(
                           Icons.play_arrow,
                           color: (tasks.recentTasks
-                                  .where((tsk) =>
-                                      tsk.latestPause.day ==
-                                      DateTime.now()
-                                          .subtract(
-                                              Duration(days: 6 - selectedDay))
-                                          .day)
-                                  .toList()[index].end != null) ? Colors.grey : Colors.white,
+                                      .where((tsk) =>
+                                          tsk.latestPause.day ==
+                                          DateTime.now()
+                                              .subtract(Duration(
+                                                  days: 6 - selectedDay))
+                                              .day)
+                                      .toList()[index]
+                                      .end !=
+                                  null)
+                              ? Colors.grey
+                              : Colors.white,
                         ),
                       ),
                       title: Text(
@@ -168,15 +177,19 @@ class _TasksScreenState extends State<TasksScreen> {
                             .toList()[index]
                             .title,
                         style: Theme.of(context).textTheme.bodyText1.copyWith(
-                          color: (tasks.recentTasks
-                                  .where((tsk) =>
-                                      tsk.latestPause.day ==
-                                      DateTime.now()
-                                          .subtract(
-                                              Duration(days: 6 - selectedDay))
-                                          .day)
-                                  .toList()[index].end != null) ? Colors.grey : Colors.white,
-                        ),
+                              color: (tasks.recentTasks
+                                          .where((tsk) =>
+                                              tsk.latestPause.day ==
+                                              DateTime.now()
+                                                  .subtract(Duration(
+                                                      days: 6 - selectedDay))
+                                                  .day)
+                                          .toList()[index]
+                                          .end !=
+                                      null)
+                                  ? Colors.grey
+                                  : Colors.white,
+                            ),
                       ),
                       subtitle: Text(
                         tasks.categoryString(tasks.recentTasks
@@ -203,18 +216,17 @@ class _TasksScreenState extends State<TasksScreen> {
                   ),
                 ),
               ],
-            ),
-            floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerFloat,
-            floatingActionButton: FloatingActionButton(
-              child: Icon(
-                Icons.add,
-                size: 35,
-              ),
-              backgroundColor: Color(0xFF252525),
-              foregroundColor: Theme.of(context).accentColor,
-              onPressed: () => showNewTaskForm(context),
-            ),
-          );
+    //   floatingActionButtonLocation:
+    //       FloatingActionButtonLocation.centerFloat,
+    //   floatingActionButton: FloatingActionButton(
+    //     child: Icon(
+    //       Icons.add,
+    //       size: 35,
+    //     ),
+    //     backgroundColor: Color(0xFF252525),
+    //     foregroundColor: Theme.of(context).accentColor,
+    //     onPressed: () => showNewTaskForm(context),
+      ),
+    );
   }
 }

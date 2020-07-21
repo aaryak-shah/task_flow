@@ -52,7 +52,7 @@ class _NewTaskState extends State<NewTask> {
       decoration: BoxDecoration(
         color: Theme.of(context).primaryColor,
         boxShadow: [BoxShadow(
-          color: Colors.black45,
+          color: Colors.black26,
           blurRadius: 100,
           spreadRadius: 100,
           offset: Offset(0, -100),
