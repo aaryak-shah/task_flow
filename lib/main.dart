@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:task_flow/screens/settings_screen.dart';
 
 import './screens/tabs_screen.dart';
 import './screens/current_task.dart';
@@ -53,6 +54,9 @@ class MyApp extends StatelessWidget {
           ),
         ),
         home: TabsScreen(),
+        routes: {
+          SettingsScreen.routeName: (_) => SettingsScreen()
+        },
         onGenerateRoute: (settings) {
           if (settings.name == CurrentTaskScreen.routeName) {
             final int index = settings.arguments;

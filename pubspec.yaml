@@ -28,6 +28,7 @@ dependencies:
   intl: ^0.16.1
   csv: ^4.0.3
   path_provider: ^1.6.11
+  shared_preferences: ^0.5.8
 
 
   # The following adds the Cupertino Icons font to your application.
