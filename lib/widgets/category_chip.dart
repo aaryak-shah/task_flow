@@ -12,32 +12,32 @@ class _CategoryChipsState extends State<CategoryChips> {
   String selectedChoice = '';
 
   final List<String> categories = [
-    'Category 1',
-    'Category 2',
-    'Category 3',
-    'Category 4',
-    'Category 5',
-    'Category 6',
-    'Category 7'
+    'Academics',
+    'Personal Development',
+    'Chores',
+    'Wellness',
+    'Recreational',
+    // 'Category 6',
+    // 'Category 7',
   ];
 
-  _buildChoiceList() {
+  List<Widget> _buildChoiceList() {
     List<Widget> choices = List();
     categories.forEach((item) {
-      choices.add(Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: ChoiceChip(
-          selectedColor: Theme.of(context).accentColor,
-          padding: EdgeInsets.all(6),
-          label: Text(item),
-          selected: selectedChoice == item,
-          onSelected: (selected) {
-            setState(() {
-              selectedChoice = item;
-              widget.onSelectionChanged(selectedChoice);
-            });
-          },
+      choices.add(ChoiceChip(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(6),
         ),
+        selectedColor: Theme.of(context).accentColor,
+        padding: EdgeInsets.all(6),
+        label: Text(item),
+        selected: selectedChoice == item,
+        onSelected: (selected) {
+          setState(() {
+            selectedChoice = item;
+            widget.onSelectionChanged(selectedChoice);
+          });
+        },
       ));
     });
     return choices;
@@ -46,7 +46,9 @@ class _CategoryChipsState extends State<CategoryChips> {
   @override
   Widget build(BuildContext context) {
     return Wrap(
-      alignment: WrapAlignment.spaceBetween,
+      alignment: WrapAlignment.start,
+      spacing: 10,
+      runSpacing: -6,
       children: _buildChoiceList(),
     );
   }
