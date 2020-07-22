@@ -165,10 +165,11 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
                         FittedBox(
+                          fit: BoxFit.cover,
                           child: Text(
-                            _title.toUpperCase(),
+                            _title.length <= 21 ? _title.toUpperCase() : (_title.substring(0, 21) + '...').toUpperCase(),
                             style: TextStyle(
-                              fontSize: 20,
+                              fontSize: 18,
                               color:
                                   Theme.of(context).textTheme.headline6.color,
                               fontWeight: FontWeight.bold,
@@ -176,6 +177,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                           ),
                         ),
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
                           children: <Widget>[
                             IconButton(
                               icon: Icon(
@@ -195,9 +197,9 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                                 startTimer();
                               },
                             ),
-                            SizedBox(
-                              width: 15,
-                            ),
+                            // SizedBox(
+                            //   width: 6,
+                            // ),
                             IconButton(
                               icon: Icon(
                                 Icons.stop,
