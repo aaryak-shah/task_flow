@@ -108,172 +108,180 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
   @override
   Widget build(BuildContext context) {
     _provider = Provider.of<Tasks>(context);
-    return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
-      appBar: AppBar(
-        centerTitle: true,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () async {
-            if (!paused) await _provider.pause(widget.index);
-            Navigator.pushReplacementNamed(context, '/');
-          },
-        ),
-        elevation: 0.0,
+    return WillPopScope(
+      onWillPop: () async {
+        if (!paused) await _provider.pause(widget.index);
+        Navigator.pushReplacementNamed(context, '/');
+        return true;
+      },
+      child: Scaffold(
         backgroundColor: Theme.of(context).primaryColor,
-        title: Text(
-          'TASKFLOW',
-          style: Theme.of(context).appBarTheme.textTheme.headline6,
+        appBar: AppBar(
+          centerTitle: true,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () async {
+              if (!paused) await _provider.pause(widget.index);
+              Navigator.pushReplacementNamed(context, '/');
+            },
+          ),
+          elevation: 0.0,
+          backgroundColor: Theme.of(context).primaryColor,
+          title: Text(
+            'TASKFLOW',
+            style: Theme.of(context).appBarTheme.textTheme.headline6,
+          ),
         ),
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          Expanded(
-            child: Center(
-              child: Stack(
-                children: <Widget>[
-                  Text(
-                    _time,
-                    style: TextStyle(
-                      fontSize: 50,
-                      color: Theme.of(context).textTheme.headline6.color,
-                      fontWeight: FontWeight.bold,
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Expanded(
+              child: Center(
+                child: Stack(
+                  children: <Widget>[
+                    Text(
+                      _time,
+                      style: TextStyle(
+                        fontSize: 50,
+                        color: Theme.of(context).textTheme.headline6.color,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  CustomPaint(
-                    painter: DrawCircle(),
-                  )
-                ],
+                    CustomPaint(
+                      painter: DrawCircle(),
+                    )
+                  ],
+                ),
               ),
             ),
-          ),
-          Expanded(
-            child: Column(
-              children: <Widget>[
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                  margin: const EdgeInsets.only(bottom: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      FittedBox(
-                        child: Text(
-                          _title.toUpperCase(),
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: Theme.of(context).textTheme.headline6.color,
-                            fontWeight: FontWeight.bold,
+            Expanded(
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                    margin: const EdgeInsets.only(bottom: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        FittedBox(
+                          child: Text(
+                            _title.toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 20,
+                              color:
+                                  Theme.of(context).textTheme.headline6.color,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                      Row(
-                        children: <Widget>[
-                          IconButton(
-                            icon: Icon(
-                              paused ? Icons.play_arrow : Icons.pause,
-                              size: 35,
-                              color: Theme.of(context).accentColor,
+                        Row(
+                          children: <Widget>[
+                            IconButton(
+                              icon: Icon(
+                                paused ? Icons.play_arrow : Icons.pause,
+                                size: 35,
+                                color: Theme.of(context).accentColor,
+                              ),
+                              onPressed: () async {
+                                if (paused) {
+                                  watch.start();
+                                  await _provider.resume(widget.index);
+                                } else {
+                                  watch.stop();
+                                  await _provider.pause(widget.index);
+                                }
+                                paused = !paused;
+                                startTimer();
+                              },
                             ),
-                            onPressed: () async {
-                              if (paused) {
-                                watch.start();
-                                await _provider.resume(widget.index);
-                              } else {
+                            SizedBox(
+                              width: 15,
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.stop,
+                                size: 35,
+                                color: Theme.of(context).errorColor,
+                              ),
+                              onPressed: () async {
+                                watch.reset();
                                 watch.stop();
-                                await _provider.pause(widget.index);
-                              }
-                              paused = !paused;
-                              startTimer();
-                            },
+                                paused = true;
+                                await _provider.complete(widget.index);
+                                Navigator.pushReplacementNamed(context, '/');
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  Card(
+                    margin: EdgeInsets.only(left: 15, right: 15, bottom: 15),
+                    color: Color.fromRGBO(37, 37, 37, 1),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(15.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            'CATEGORY',
+                            style: TextStyle(
+                              color: Color.fromRGBO(120, 120, 120, 1),
+                            ),
                           ),
                           SizedBox(
-                            width: 15,
+                            height: 10,
                           ),
-                          IconButton(
-                            icon: Icon(
-                              Icons.stop,
-                              size: 35,
-                              color: Theme.of(context).errorColor,
+                          Text(
+                            _category,
+                            style: TextStyle(
+                              color: Color.fromRGBO(227, 227, 227, 1),
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
                             ),
-                            onPressed: () async {
-                              watch.reset();
-                              watch.stop();
-                              paused = true;
-                              await _provider.complete(widget.index);
-                              Navigator.pushReplacementNamed(context, '/');
-                            },
-                          ),
+                          )
                         ],
                       ),
-                    ],
-                  ),
-                ),
-                Card(
-                  margin: EdgeInsets.only(left: 15, right: 15, bottom: 15),
-                  color: Color.fromRGBO(37, 37, 37, 1),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(15.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          'CATEGORY',
-                          style: TextStyle(
-                            color: Color.fromRGBO(120, 120, 120, 1),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          _category,
-                          style: TextStyle(
-                            color: Color.fromRGBO(227, 227, 227, 1),
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      ],
                     ),
                   ),
-                ),
-                Card(
-                  margin: EdgeInsets.symmetric(horizontal: 15),
-                  color: Color.fromRGBO(37, 37, 37, 1),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(15.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          'LABELS',
-                          style: TextStyle(
-                            color: Color.fromRGBO(120, 120, 120, 1),
+                  Card(
+                    margin: EdgeInsets.symmetric(horizontal: 15),
+                    color: Color.fromRGBO(37, 37, 37, 1),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(15.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            'LABELS',
+                            style: TextStyle(
+                              color: Color.fromRGBO(120, 120, 120, 1),
+                            ),
                           ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          _labels.join(", ").replaceAll(new RegExp(r"'"), ""),
-                          style: TextStyle(
-                            color: Color.fromRGBO(227, 227, 227, 1),
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
+                          SizedBox(
+                            height: 10,
                           ),
-                        )
-                      ],
+                          Text(
+                            _labels.join(", ").replaceAll(new RegExp(r"'"), ""),
+                            style: TextStyle(
+                              color: Color.fromRGBO(227, 227, 227, 1),
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          )
-        ],
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

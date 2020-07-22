@@ -76,7 +76,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           style: Theme.of(context).appBarTheme.textTheme.headline6,
         ),
       ),
-      drawer: MainDrawer(),
       backgroundColor: Theme.of(context).primaryColor,
       body: Column(
         children: <Widget>[
