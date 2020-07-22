@@ -5,6 +5,7 @@ import 'package:csv/csv.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import './task.dart';
 
@@ -121,11 +122,10 @@ class Tasks with ChangeNotifier {
         isRunning: row[7] == 1,
         isPaused: row[8] == 1,
         category: row[9],
-        labels: row[10].split(" "),
+        labels: row[10].split("|"),
         superProjectName: row[11],
       );
     }).toList();
-    // print(_tasks);
     notifyListeners();
   }
 
@@ -192,7 +192,6 @@ class Tasks with ChangeNotifier {
   }
 
   Future<void> writeCsv(List<Task> tasks) async {
-    // print('Writing to CSV');
     final rows = ListToCsvConverter().convert(tasks
         .map((t) => [
               t.id,
@@ -209,7 +208,7 @@ class Tasks with ChangeNotifier {
               t.isRunning ? 1 : 0,
               t.isPaused ? 1 : 0,
               t.category,
-              t.labels.join(" "),
+              t.labels.join("|"),
               t.superProjectName == null ? "" : t.superProjectName
             ])
         .toList());
@@ -248,7 +247,7 @@ class Tasks with ChangeNotifier {
           1,
           0,
           category,
-          labels.join(" "),
+          labels.join("|"),
           superProjectName == null ? "" : superProjectName
         ],
       ],
@@ -259,10 +258,19 @@ class Tasks with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addLabel(int index, String label) async {
-    _tasks[index].labels.add(label);
+  Future<void> addLabels(
+      int index, List<String> selected, List<String> labels) async {
+    _tasks[index].labels.addAll(selected);
+    _tasks[index].labels = _tasks[index].labels.toSet().toList();
     await writeCsv(_tasks);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('AvailableLabels', labels);
     notifyListeners();
+  }
+
+  Future<List<String>> get availableLabels async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList('AvailableLabels') ?? [];
   }
 
   Future<void> resume(int index) async {
@@ -279,6 +287,21 @@ class Tasks with ChangeNotifier {
     _tasks[index].isPaused = true;
     _tasks[index].pauses++;
     _tasks[index].latestPause = DateTime.now();
+    await writeCsv(_tasks);
+    notifyListeners();
+  }
+
+  Future<void> suspend(int index) async {
+    _tasks[index].isRunning = false;
+    _tasks[index].isPaused = true;
+    _tasks[index].latestPause = DateTime.now();
+    await writeCsv(_tasks);
+    notifyListeners();
+  }
+
+  Future<void> unSuspend(int index) async {
+    _tasks[index].isRunning = true;
+    _tasks[index].isPaused = false;
     await writeCsv(_tasks);
     notifyListeners();
   }

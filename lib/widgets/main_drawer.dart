@@ -13,7 +13,6 @@ class MainDrawer extends StatelessWidget {
         title: Text(title),
       ),
       onTap: () {
-        print(title);
         Navigator.of(context).pushNamed(route);
       },
     );
@@ -28,7 +27,6 @@ class MainDrawer extends StatelessWidget {
           children: <Widget>[
             InkWell(
               onTap: () {
-                print('Profile');
               },
               child: Stack(
                 alignment: Alignment.bottomCenter,

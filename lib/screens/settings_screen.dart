@@ -15,9 +15,9 @@ class SettingsScreen extends StatefulWidget {
   Future<Map<String, bool>> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     return {
-      'setting1': prefs.getBool('setting1') ?? false ,
-      'setting2': prefs.getBool('setting2') ?? false ,
-      'setting3': prefs.getBool('setting3') ?? false ,
+      'showTaskChart': prefs.getBool('showTaskChart') ?? false ,
+      'isDarkTheme': prefs.getBool('isDarkTheme') ?? true ,
+      'showSeconds': prefs.getBool('showSeconds') ?? false ,
       'setting4': prefs.getBool('setting4') ?? false ,
     };
   }
@@ -27,9 +27,9 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool _setting1 = false;
-  bool _setting2 = false;
-  bool _setting3 = false;
+  bool _showTaskChart = false;
+  bool _isDarkTheme = true;
+  bool _showSeconds = false;
   bool _setting4 = false;
 
   @override
@@ -38,9 +38,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget._loadSettings().then((settings) {
         setState(() {
-          _setting1 = settings['setting1'];
-          _setting2 = settings['setting2'];
-          _setting3 = settings['setting3'];
+          _showTaskChart = settings['showTaskChart'];
+          _isDarkTheme = settings['isDarkTheme'];
+          _showSeconds = settings['showSeconds'];
           _setting4 = settings['setting4'];
         });
       });
@@ -78,72 +78,131 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       backgroundColor: Theme.of(context).primaryColor,
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Padding(
-            padding: EdgeInsets.all(20),
+            padding: EdgeInsets.fromLTRB(20, 30, 20, 5),
             child: Text(
-              'Your preferences',
-              style: Theme.of(context).textTheme.headline6,
+              'APPEARANCE',
+              style: TextStyle(
+                color: Colors.white38,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+              textAlign: TextAlign.start,
             ),
           ),
-          Expanded(
-            child: ListView(
-              children: <Widget>[
-                switchTile(_setting1, 'Setting 1', 'Description 1',
-                    (val) async {
-                  setState(() {
-                    _setting1 = val;
-                  });
-                  Map<String, bool> _settings = {
-                    'setting1': _setting1,
-                    'setting2': _setting2,
-                    'setting3': _setting3,
-                    'setting4': _setting4,
-                  };
-                  await widget._saveSettings(_settings);
-                }),
-                switchTile(_setting2, 'Setting 2', 'Description 2',
-                    (val) async {
-                  setState(() {
-                    _setting2 = val;
-                  });
-                  Map<String, bool> _settings = {
-                    'setting1': _setting1,
-                    'setting2': _setting2,
-                    'setting3': _setting3,
-                    'setting4': _setting4,
-                  };
-                  await widget._saveSettings(_settings);
-                }),
-                switchTile(_setting3, 'Setting 3', 'Description 3',
-                    (val) async {
-                  setState(() {
-                    _setting3 = val;
-                  });
-                  Map<String, bool> _settings = {
-                    'setting1': _setting1,
-                    'setting2': _setting2,
-                    'setting3': _setting3,
-                    'setting4': _setting4,
-                  };
-                  await widget._saveSettings(_settings);
-                }),
-                switchTile(_setting4, 'Setting 4', 'Description 4',
-                    (val) async {
-                  setState(() {
-                    _setting4 = val;
-                  });
-                  Map<String, bool> _settings = {
-                    'setting1': _setting1,
-                    'setting2': _setting2,
-                    'setting3': _setting3,
-                    'setting4': _setting4,
-                  };
-                  await widget._saveSettings(_settings);
-                }),
-              ],
+          Column(
+            children: <Widget>[
+              // switchTile(_showTaskChart, 'Show Chart on Tasks Tab', 'Toggle the chart on the Tasks tab',
+              //     (val) async {
+              //   setState(() {
+              //     _showTaskChart = val;
+              //   });
+              //   Map<String, bool> _settings = {
+              //     'showTaskChart': _showTaskChart,
+              //     'isDarkTheme': _isDarkTheme,
+              //     'showSeconds': _showSeconds,
+              //     'setting4': _setting4,
+              //   };
+              //   await widget._saveSettings(_settings);
+              // }),
+              switchTile(_isDarkTheme, 'Dark Theme', 'Set a dark theme for the app',
+                  (val) async {
+                setState(() {
+                  _isDarkTheme = val;
+                });
+                Map<String, bool> _settings = {
+                  'showTaskChart': _showTaskChart,
+                  'isDarkTheme': _isDarkTheme,
+                  'showSeconds': _showSeconds,
+                  'setting4': _setting4,
+                };
+                await widget._saveSettings(_settings);
+              }),
+              // switchTile(_showSeconds, 'Show Seconds', 'Include seconds in elapsed time',
+              //     (val) async {
+              //   setState(() {
+              //     _showSeconds = val;
+              //   });
+              //   Map<String, bool> _settings = {
+              //     'showTaskChart': _showTaskChart,
+              //     'isDarkTheme': _isDarkTheme,
+              //     'showSeconds': _showSeconds,
+              //     'setting4': _setting4,
+              //   };
+              //   await widget._saveSettings(_settings);
+              // }),
+              // switchTile(_setting4, 'Setting 4', 'Description 4',
+              //     (val) async {
+              //   setState(() {
+              //     _setting4 = val;
+              //   });
+              //   Map<String, bool> _settings = {
+              //     'showTaskChart': _showTaskChart,
+              //     'isDarkTheme': _isDarkTheme,
+              //     'showSeconds': _showSeconds,
+              //     'setting4': _setting4,
+              //   };
+              //   await widget._saveSettings(_settings);
+              // }),
+            ],
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(20, 30, 20, 5),
+            child: Text(
+              'GENERAL',
+              style: TextStyle(
+                color: Colors.white38,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+              textAlign: TextAlign.start,
             ),
-          )
+          ),
+          Column(
+            children: <Widget>[
+              switchTile(_showTaskChart, 'Show Chart on Tasks Tab', 'Toggle the chart on the Tasks tab',
+                  (val) async {
+                setState(() {
+                  _showTaskChart = val;
+                });
+                Map<String, bool> _settings = {
+                  'showTaskChart': _showTaskChart,
+                  'isDarkTheme': _isDarkTheme,
+                  'showSeconds': _showSeconds,
+                  'setting4': _setting4,
+                };
+                await widget._saveSettings(_settings);
+              }),
+              switchTile(_showSeconds, 'Show Seconds', 'Include seconds in elapsed time',
+                  (val) async {
+                setState(() {
+                  _showSeconds = val;
+                });
+                Map<String, bool> _settings = {
+                  'showTaskChart': _showTaskChart,
+                  'isDarkTheme': _isDarkTheme,
+                  'showSeconds': _showSeconds,
+                  'setting4': _setting4,
+                };
+                await widget._saveSettings(_settings);
+              }),
+              switchTile(_setting4, 'Setting 4', 'Description 4',
+                  (val) async {
+                setState(() {
+                  _setting4 = val;
+                });
+                Map<String, bool> _settings = {
+                  'showTaskChart': _showTaskChart,
+                  'isDarkTheme': _isDarkTheme,
+                  'showSeconds': _showSeconds,
+                  'setting4': _setting4,
+                };
+                await widget._saveSettings(_settings);
+              }),
+            ],
+          ),
         ],
       ),
     );

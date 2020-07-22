@@ -118,7 +118,7 @@ class _NewTaskState extends State<NewTask> {
                             null);
                         Navigator.of(context).pushReplacementNamed(
                           CurrentTaskScreen.routeName,
-                          arguments: tasks.tasks.length - 1,
+                          arguments: {'index': tasks.tasks.length - 1, 'wasSuspended': false}
                         );
                       }
                     }

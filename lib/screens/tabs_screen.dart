@@ -49,11 +49,12 @@ class _TabsScreenState extends State<TabsScreen> {
     String title,
     Function callback,
   ) {
-    return Padding(
-      padding: const EdgeInsets.all(10.0),
-      child: GestureDetector(
-        onTap: callback,
+    return GestureDetector(
+      onTap: callback,
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
         child: Container(
+          color: Colors.transparent,
           height: 50,
           width: 75,
           child: Column(
@@ -152,7 +153,7 @@ class _TabsScreenState extends State<TabsScreen> {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(15), topRight: Radius.circular(15)),
+              topLeft: Radius.circular(0), topRight: Radius.circular(0)),
           child: BottomAppBar(
             color: Color(0xFF252525),
             notchMargin: -22,

@@ -4,6 +4,7 @@ import 'package:csv/csv.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Task with ChangeNotifier {
   final String id;
@@ -16,7 +17,7 @@ class Task with ChangeNotifier {
   bool isRunning;
   bool isPaused;
   final String category;
-  final List<String> labels;
+  List<String> labels;
   final String superProjectName;
 
   Task({
@@ -70,7 +71,6 @@ class Task with ChangeNotifier {
   Future<List<Task>> get tasks async {
     File csvFile = await _localFile;
     String csvString = await csvFile.readAsString();
-    print('Tasks getter called');
     List<List<dynamic>> rowsAsListOfValues =
         const CsvToListConverter().convert(csvString);
 
@@ -91,14 +91,13 @@ class Task with ChangeNotifier {
         superProjectName: row[11],
       );
     }).toList();
-    print(rows[0].title);
     return rows;
   }
 
   Future<int> get getIndex async {
-    print('Get Index called');
     var t = await tasks;
-    print('Length: ${t.length}');
     return t.indexWhere((t) => t.id == id);
   }
+
+  
 }

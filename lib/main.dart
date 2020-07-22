@@ -3,8 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:task_flow/screens/settings_screen.dart';
 
+import './providers/task.dart';
+import './screens/settings_screen.dart';
 import './screens/tabs_screen.dart';
 import './screens/current_task.dart';
 import './providers/tasks.dart';
@@ -23,8 +24,15 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => Tasks(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => Tasks(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => Task(),
+        )
+      ],
       child: MaterialApp(
         title: 'Task Flow',
         theme: ThemeData(
@@ -54,14 +62,13 @@ class MyApp extends StatelessWidget {
           ),
         ),
         home: TabsScreen(),
-        routes: {
-          SettingsScreen.routeName: (_) => SettingsScreen()
-        },
+        routes: {SettingsScreen.routeName: (_) => SettingsScreen()},
         onGenerateRoute: (settings) {
           if (settings.name == CurrentTaskScreen.routeName) {
-            final int index = settings.arguments;
+            final int index = (settings.arguments as Map)['index'];
+            final bool wasSuspended = (settings.arguments as Map)['wasSuspended'];
             return MaterialPageRoute(builder: (context) {
-              return CurrentTaskScreen(index: index);
+              return CurrentTaskScreen(index: index, wasSuspended: wasSuspended,);
             });
           }
         },

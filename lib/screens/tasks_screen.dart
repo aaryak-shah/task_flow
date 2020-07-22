@@ -11,20 +11,6 @@ class TasksScreen extends StatefulWidget {
   _TasksScreenState createState() => _TasksScreenState();
 }
 
-void showNewTaskForm(BuildContext context) {
-  showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      isDismissible: true,
-      builder: (_) {
-        return GestureDetector(
-          onTap: () {},
-          child: NewTask(),
-          behavior: HitTestBehavior.opaque,
-        );
-      });
-}
-
 class _TasksScreenState extends State<TasksScreen> {
   int selectedDay = 6;
   Widget chartBtn(int i) {
@@ -34,7 +20,6 @@ class _TasksScreenState extends State<TasksScreen> {
       color: Color(0x00000000),
       child: GestureDetector(
         onTap: () {
-          debugPrint(i.toString());
           setState(() {
             selectedDay = i;
           });
@@ -125,144 +110,60 @@ class _TasksScreenState extends State<TasksScreen> {
                                 .subtract(Duration(days: 6 - selectedDay))
                                 .day)
                         .length,
-                    itemBuilder: (ctx, index) => Padding(
-                      padding: const EdgeInsets.all(3.0),
-                      child: ListTile(
-                        leading: IconButton(
-                          onPressed: (tasks.recentTasks.reversed
-                                      .where((tsk) =>
-                                          tsk.latestPause.day ==
-                                          DateTime.now()
-                                              .subtract(Duration(
-                                                  days: 6 - selectedDay))
-                                              .day)
-                                      .toList()[index]
-                                      .end !=
-                                  null)
-                              ? null
-                              : () async {
-                                  Navigator.of(context).pushReplacementNamed(
-                                    CurrentTaskScreen.routeName,
-                                    arguments: await tasks.recentTasks.reversed
-                                        .where((tsk) =>
-                                            tsk.latestPause.day ==
-                                            DateTime.now()
-                                                .subtract(Duration(
-                                                    days: 6 - selectedDay))
-                                                .day)
-                                        .toList()[index]
-                                        .getIndex,
-                                  );
-                                  debugPrint('pressed play on ' +
-                                      tasks.recentTasks.reversed
-                                          .where((tsk) =>
-                                              tsk.latestPause.day ==
-                                              DateTime.now()
-                                                  .subtract(Duration(
-                                                      days: 6 - selectedDay))
-                                                  .day)
-                                          .toList()[index]
-                                          .title);
-                                },
-                          icon: Icon(
-                            Icons.play_arrow,
-                            color: (tasks.recentTasks.reversed
-                                        .where((tsk) =>
-                                            tsk.latestPause.day ==
-                                            DateTime.now()
-                                                .subtract(Duration(
-                                                    days: 6 - selectedDay))
-                                                .day)
-                                        .toList()[index]
-                                        .end !=
-                                    null)
-                                ? Colors.grey
-                                : Colors.white,
+                    itemBuilder: (ctx, index) {
+                      final t = tasks.recentTasks.reversed
+                          .where((tsk) =>
+                              tsk.latestPause.day ==
+                              DateTime.now()
+                                  .subtract(Duration(days: 6 - selectedDay))
+                                  .day)
+                          .toList()[index];
+                      return Padding(
+                        padding: const EdgeInsets.all(3.0),
+                        child: ListTile(
+                          leading: IconButton(
+                            onPressed: (t.end != null)
+                                ? null
+                                : () async {
+                                    Navigator.of(context).pushReplacementNamed(
+                                        CurrentTaskScreen.routeName,
+                                        arguments: {
+                                          'index': await t.getIndex,
+                                          'wasSuspended': false
+                                        });
+                                  },
+                            icon: Icon(
+                              Icons.play_arrow,
+                              color:
+                                  (t.end != null) ? Colors.grey : Colors.white,
+                            ),
+                          ),
+                          title: Text(
+                            t.title.length <= 40
+                                ? t.title
+                                : (t.title.substring(0, 40) + '...'),
+                            style:
+                                Theme.of(context).textTheme.bodyText1.copyWith(
+                                      decoration: t.end == null ? null : TextDecoration.lineThrough,
+                                      fontWeight: t.end == null ? FontWeight.bold : FontWeight.normal,
+                                      color: (t.end != null)
+                                          ? Colors.grey
+                                          : Colors.white,
+                                    ),
+                          ),
+                          subtitle: Text(
+                            tasks.categoryString(t.id),
+                            style: Theme.of(context).textTheme.bodyText2,
+                          ),
+                          trailing: Text(
+                            t.end == null ? t.getRunningTimeString() : 'Completed',
                           ),
                         ),
-                        title: Text(
-                          tasks.recentTasks.reversed
-                                      .where((tsk) =>
-                                          tsk.latestPause.day ==
-                                          DateTime.now()
-                                              .subtract(Duration(
-                                                  days: 6 - selectedDay))
-                                              .day)
-                                      .toList()[index]
-                                      .title
-                                      .length <=
-                                  40
-                              ? tasks.recentTasks.reversed
-                                  .where((tsk) =>
-                                      tsk.latestPause.day ==
-                                      DateTime.now()
-                                          .subtract(
-                                              Duration(days: 6 - selectedDay))
-                                          .day)
-                                  .toList()[index]
-                                  .title
-                              : (tasks.recentTasks.reversed
-                                      .where((tsk) =>
-                                          tsk.latestPause.day ==
-                                          DateTime.now()
-                                              .subtract(Duration(
-                                                  days: 6 - selectedDay))
-                                              .day)
-                                      .toList()[index]
-                                      .title
-                                      .substring(0, 40) +
-                                  '...'),
-                          style: Theme.of(context).textTheme.bodyText1.copyWith(
-                                color: (tasks.recentTasks.reversed
-                                            .where((tsk) =>
-                                                tsk.latestPause.day ==
-                                                DateTime.now()
-                                                    .subtract(Duration(
-                                                        days: 6 - selectedDay))
-                                                    .day)
-                                            .toList()[index]
-                                            .end !=
-                                        null)
-                                    ? Colors.grey
-                                    : Colors.white,
-                              ),
-                        ),
-                        subtitle: Text(
-                          tasks.categoryString(tasks.recentTasks.reversed
-                              .where((tsk) =>
-                                  tsk.latestPause.day ==
-                                  DateTime.now()
-                                      .subtract(Duration(days: 6 - selectedDay))
-                                      .day)
-                              .toList()[index]
-                              .id),
-                          style: Theme.of(context).textTheme.bodyText2,
-                        ),
-                        trailing: Text(
-                          tasks.recentTasks.reversed
-                              .where((tsk) =>
-                                  tsk.latestPause.day ==
-                                  DateTime.now()
-                                      .subtract(Duration(days: 6 - selectedDay))
-                                      .day)
-                              .toList()[index]
-                              .getRunningTimeString(),
-                        ),
-                      ),
-                    ),
+                      );
+                    },
                   ),
                 ),
               ],
-              //   floatingActionButtonLocation:
-              //       FloatingActionButtonLocation.centerFloat,
-              //   floatingActionButton: FloatingActionButton(
-              //     child: Icon(
-              //       Icons.add,
-              //       size: 35,
-              //     ),
-              //     backgroundColor: Color(0xFF252525),
-              //     foregroundColor: Theme.of(context).accentColor,
-              //     onPressed: () => showNewTaskForm(context),
             ),
           );
   }
