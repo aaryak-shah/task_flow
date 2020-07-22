@@ -259,6 +259,12 @@ class Tasks with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> addLabel(int index, String label) async {
+    _tasks[index].labels.add(label);
+    await writeCsv(_tasks);
+    notifyListeners();
+  }
+
   Future<void> resume(int index) async {
     _tasks[index].isRunning = true;
     _tasks[index].isPaused = false;

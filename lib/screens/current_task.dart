@@ -256,11 +256,21 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          Text(
-                            'LABELS',
-                            style: TextStyle(
-                              color: Color.fromRGBO(120, 120, 120, 1),
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                'LABELS',
+                                style: TextStyle(
+                                  color: Color.fromRGBO(120, 120, 120, 1),
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.add_box),
+                                onPressed: () {},
+                              )
+                            ],
                           ),
                           SizedBox(
                             height: 10,
