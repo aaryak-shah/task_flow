@@ -46,7 +46,7 @@ class MyApp extends StatelessWidget {
               color: Colors.white,
             ),
             bodyText2: TextStyle(
-              color: Colors.white60,
+              color: Colors.white38,
             ),
             headline6: TextStyle(
               color: Colors.white,

@@ -27,10 +27,10 @@ class ChartState extends State<Chart> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 15),
         child: Card(
-          elevation: 5,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          color: Color(0xFF252525),
+          elevation: 0,
+          // shape:
+          //     RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          color: Theme.of(context).primaryColor,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: BarChart(

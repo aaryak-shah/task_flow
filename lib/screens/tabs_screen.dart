@@ -54,7 +54,7 @@ class _TabsScreenState extends State<TabsScreen> {
       child: GestureDetector(
         onTap: callback,
         child: Container(
-          height: 45,
+          height: 50,
           width: 75,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -107,69 +107,109 @@ class _TabsScreenState extends State<TabsScreen> {
       drawer: MainDrawer(),
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
-        centerTitle: true,
-        elevation: 0.0,
-        backgroundColor: Theme.of(context).primaryColor,
-        title: Text(
-          'TASKFLOW',
-          style: Theme.of(context).appBarTheme.textTheme.headline6,
-        ),
-        // actions: <Widget>[
-        //   IconButton(
-        //     icon: Icon(Icons.equalizer),
-        //     onPressed: () {},
-        //     enableFeedback: false,
-        //   ),
-        // ],
-      ),
+          centerTitle: true,
+          elevation: 0.0,
+          backgroundColor: Theme.of(context).primaryColor,
+          title: RichText(
+            text: new TextSpan(children: <TextSpan>[
+              new TextSpan(
+                text: 'TASK',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontFamily: 'Montserrat',
+                  fontWeight: FontWeight.w300,
+                ),
+              ),
+              new TextSpan(
+                text: 'FLOW',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontFamily: 'Montserrat',
+                  fontWeight: FontWeight.w700,
+                  color: Theme.of(context).accentColor,
+                ),
+              ),
+            ]),
+          )
+          // actions: <Widget>[
+          //   IconButton(
+          //     icon: Icon(Icons.equalizer),
+          //     onPressed: () {},
+          //     enableFeedback: false,
+          //   ),
+          // ],
+          ),
       body: _pages[_selectedIndex],
-      bottomNavigationBar: BottomAppBar(
-        color: Color(0xFF252525),
-        notchMargin: -12,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            SizedBox(width: 0,),
-            navBtn(0, Icons.av_timer, 'Tasks', () {
-              setState(() {
-                _selectedIndex = 0;
-                setGreen();
-              });
-            }),
-            navBtn(1, Icons.category, 'Projects', () {
-              setState(() {
-                _selectedIndex = 1;
-                setGreen();
-              });
-            }),
-            navBtn(2, Icons.equalizer, 'Stats', () {
-              setState(() {
-                _selectedIndex = 2;
-                setGreen();
-              });
-            }),
-            _selectedIndex != 2 ? SizedBox(
-              width: 75,
-            ) : SizedBox(width: 0.0,),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            const BoxShadow(
+              blurRadius: 30,
+              spreadRadius: 30,
+              color: Colors.black26,
+            )
           ],
         ),
-        shape: CircularNotchedRectangle(),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      floatingActionButton: _selectedIndex == 2 ? null : Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18),
-        child: FloatingActionButton(
-          child: Icon(
-            Icons.add,
-            size: 35,
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(15), topRight: Radius.circular(15)),
+          child: BottomAppBar(
+            color: Color(0xFF252525),
+            notchMargin: -22,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                SizedBox(
+                  width: 0,
+                ),
+                navBtn(0, Icons.av_timer, 'Tasks', () {
+                  setState(() {
+                    _selectedIndex = 0;
+                    setGreen();
+                  });
+                }),
+                navBtn(1, Icons.category, 'Projects', () {
+                  setState(() {
+                    _selectedIndex = 1;
+                    setGreen();
+                  });
+                }),
+                navBtn(2, Icons.equalizer, 'Stats', () {
+                  setState(() {
+                    _selectedIndex = 2;
+                    setGreen();
+                  });
+                }),
+                _selectedIndex != 2
+                    ? SizedBox(
+                        width: 75,
+                      )
+                    : SizedBox(
+                        width: 0.0,
+                      ),
+              ],
+            ),
+            shape: CircularNotchedRectangle(),
           ),
-          backgroundColor: Color(0xFF252525),
-          foregroundColor: Theme.of(context).accentColor,
-          onPressed: () => showNewTaskForm(context),
         ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: _selectedIndex == 2
+          ? null
+          : Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: FloatingActionButton(
+                child: Icon(
+                  Icons.add,
+                  size: 35,
+                ),
+                backgroundColor: Color(0xFF252525),
+                foregroundColor: Theme.of(context).accentColor,
+                onPressed: () => showNewTaskForm(context),
+              ),
+            ),
 
       // bottomNavigationBar: BottomNavigationBar(
       //   elevation: 5,
