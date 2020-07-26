@@ -4,7 +4,6 @@ import 'package:csv/csv.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class Task with ChangeNotifier {
   final String id;
@@ -19,6 +18,7 @@ class Task with ChangeNotifier {
   final String category;
   List<String> labels;
   final String superProjectName;
+  final Duration goalTime;
 
   Task({
     @required this.id,
@@ -33,6 +33,7 @@ class Task with ChangeNotifier {
     @required this.category,
     @required this.labels,
     @required this.superProjectName,
+    this.goalTime = Duration.zero,
   });
 
   Duration getRunningTime() {
@@ -45,10 +46,10 @@ class Task with ChangeNotifier {
     }
   }
 
-  String getRunningTimeString() {
-    Duration runTime = getRunningTime();
+  String getTimeString(String mode) {
+    Duration getTime = mode == 'run' ? getRunningTime() : mode == 'goal' ? goalTime : Duration.zero;
     String h, m;
-    int time = runTime.inMinutes;
+    int time = getTime.inMinutes;
     int hrs = (time / 60).floor();
     int mins = time % 60;
     (hrs / 10).floor() == 0
@@ -89,6 +90,7 @@ class Task with ChangeNotifier {
         category: row[9],
         labels: row[10].split(" "),
         superProjectName: row[11],
+        goalTime: Duration(seconds: row[12]),
       );
     }).toList();
     return rows;
@@ -98,6 +100,4 @@ class Task with ChangeNotifier {
     var t = await tasks;
     return t.indexWhere((t) => t.id == id);
   }
-
-  
 }

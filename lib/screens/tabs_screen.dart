@@ -1,26 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:task_flow/providers/tasks.dart';
+
+import '../providers/goals.dart';
+import './goals_screen.dart';
+import '../widgets/plus_btn_controllers.dart';
+import '../providers/tasks.dart';
 import '../widgets/main_drawer.dart';
 import './projects_screen.dart';
 import './stats_screen.dart';
 import './tasks_screen.dart';
-import '../widgets/new_task.dart';
-
-void showNewTaskForm(BuildContext context) {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    isDismissible: true,
-    builder: (_) {
-      return GestureDetector(
-        onTap: () {},
-        child: NewTask(),
-        behavior: HitTestBehavior.opaque,
-      );
-    },
-  );
-}
 
 class TabsScreen extends StatefulWidget {
   @override
@@ -81,8 +69,8 @@ class _TabsScreenState extends State<TabsScreen> {
   void initState() {
     _pages = [
       TasksScreen(),
+      GoalsScreen(),
       ProjectsScreen(),
-      StatsScreen(),
     ];
     _tabColors = [
       Colors.lightGreenAccent,
@@ -96,6 +84,7 @@ class _TabsScreenState extends State<TabsScreen> {
   void didChangeDependencies() {
     if (_isInit) {
       Provider.of<Tasks>(context).loadData();
+      Provider.of<Goals>(context).loadData();
       Provider.of<Tasks>(context).purgeOldTasks();
       _isInit = false;
     }
@@ -108,38 +97,40 @@ class _TabsScreenState extends State<TabsScreen> {
       drawer: MainDrawer(),
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
-          centerTitle: true,
-          elevation: 0.0,
-          backgroundColor: Theme.of(context).primaryColor,
-          title: RichText(
-            text: new TextSpan(children: <TextSpan>[
-              new TextSpan(
-                text: 'TASK',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontFamily: 'Montserrat',
-                  fontWeight: FontWeight.w300,
-                ),
+        centerTitle: true,
+        elevation: 0.0,
+        backgroundColor: Theme.of(context).primaryColor,
+        title: RichText(
+          text: new TextSpan(children: <TextSpan>[
+            new TextSpan(
+              text: 'TASK',
+              style: TextStyle(
+                fontSize: 20,
+                fontFamily: 'Montserrat',
+                fontWeight: FontWeight.w300,
               ),
-              new TextSpan(
-                text: 'FLOW',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontFamily: 'Montserrat',
-                  fontWeight: FontWeight.w700,
-                  color: Theme.of(context).accentColor,
-                ),
+            ),
+            new TextSpan(
+              text: 'FLOW',
+              style: TextStyle(
+                fontSize: 20,
+                fontFamily: 'Montserrat',
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).accentColor,
               ),
-            ]),
-          )
-          // actions: <Widget>[
-          //   IconButton(
-          //     icon: Icon(Icons.equalizer),
-          //     onPressed: () {},
-          //     enableFeedback: false,
-          //   ),
-          // ],
+            ),
+          ]),
+        ),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.equalizer),
+            onPressed: () {
+              Navigator.of(context).pushNamed(StatsScreen.routeName);
+            },
+            enableFeedback: false,
           ),
+        ],
+      ),
       body: _pages[_selectedIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -162,34 +153,27 @@ class _TabsScreenState extends State<TabsScreen> {
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                SizedBox(
-                  width: 0,
-                ),
-                navBtn(0, Icons.av_timer, 'Tasks', () {
+                navBtn(0, Icons.timer, 'Tasks', () {
                   setState(() {
                     _selectedIndex = 0;
                     setGreen();
                   });
                 }),
-                navBtn(1, Icons.category, 'Projects', () {
+                navBtn(1, Icons.flag, 'Goals', () {
                   setState(() {
                     _selectedIndex = 1;
                     setGreen();
                   });
                 }),
-                navBtn(2, Icons.equalizer, 'Stats', () {
+                navBtn(2, Icons.category, 'Projects', () {
                   setState(() {
                     _selectedIndex = 2;
                     setGreen();
                   });
                 }),
-                _selectedIndex != 2
-                    ? SizedBox(
-                        width: 75,
-                      )
-                    : SizedBox(
-                        width: 0.0,
-                      ),
+                SizedBox(
+                  width: 75,
+                ),
               ],
             ),
             shape: CircularNotchedRectangle(),
@@ -197,43 +181,22 @@ class _TabsScreenState extends State<TabsScreen> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      floatingActionButton: _selectedIndex == 2
-          ? null
-          : Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30),
-              child: FloatingActionButton(
-                child: Icon(
-                  Icons.add,
-                  size: 35,
-                ),
-                backgroundColor: Color(0xFF252525),
-                foregroundColor: Theme.of(context).accentColor,
-                onPressed: () => showNewTaskForm(context),
-              ),
-            ),
-
-      // bottomNavigationBar: BottomNavigationBar(
-      //   elevation: 5,
-      //   unselectedItemColor: Colors.grey,
-      //   selectedItemColor: Theme.of(context).accentColor,
-      //   currentIndex: _selectedIndex,
-      //   onTap: _selectPage,
-      //   backgroundColor: Color(0xFF252525),
-      //   items: [
-      //     BottomNavigationBarItem(
-      //       icon: Icon(Icons.av_timer),
-      //       title: Text('Tasks'),
-      //     ),
-      //     BottomNavigationBarItem(
-      //       icon: Icon(Icons.category),
-      //       title: Text('Projects'),
-      //     ),
-      //     BottomNavigationBarItem(
-      //       icon: Icon(Icons.equalizer),
-      //       title: Text('Stats'),
-      //     ),
-      //   ],
-      // ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 30),
+        child: FloatingActionButton(
+          child: Icon(
+            Icons.add,
+            size: 35,
+          ),
+          backgroundColor: Color(0xFF252525),
+          foregroundColor: Theme.of(context).accentColor,
+          onPressed: () => _selectedIndex == 0
+              ? showNewTaskForm(context)
+              : _selectedIndex == 1
+                  ? showNewGoalForm(context)
+                  : showNewProjectForm(context),
+        ),
+      ),
     );
   }
 }

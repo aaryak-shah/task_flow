@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/screens/current_task.dart';
+import 'package:task_flow/screens/current_goal_screen.dart';
 
 // import './label_chip.dart';
 import '../providers/tasks.dart';
+import '../providers/goals.dart';
 
 List<String> _labels = [];
 
 class NewLabels extends StatefulWidget {
+  final String mode;
   final int taskIndex;
-  NewLabels(this.taskIndex);
+  NewLabels(this.mode, this.taskIndex);
 
   @override
   _NewLabelsState createState() => _NewLabelsState();
@@ -60,9 +63,13 @@ class _NewLabelsState extends State<NewLabels> {
   @override
   void didChangeDependencies() {
     if (_isInit) {
-      Provider.of<Tasks>(context)
-          .availableLabels
-          .then((value) => _labels = value);
+      widget.mode == 'task'
+          ? Provider.of<Tasks>(context)
+              .availableLabels
+              .then((value) => _labels = value)
+          : Provider.of<Goals>(context)
+              .availableLabels
+              .then((value) => _labels = value);
       _isInit = false;
     }
     super.didChangeDependencies();
@@ -77,6 +84,7 @@ class _NewLabelsState extends State<NewLabels> {
   @override
   Widget build(BuildContext context) {
     final tasks = Provider.of<Tasks>(context);
+    final goals = Provider.of<Goals>(context);
     Widget returnLabelChips() {
       return labelChips(
         (selectedLabels) {
@@ -150,13 +158,19 @@ class _NewLabelsState extends State<NewLabels> {
               color: Theme.of(context).accentColor,
               textColor: Theme.of(context).primaryColor,
               onPressed: () async {
-                await tasks.addLabels(
-                    widget.taskIndex, _selectedLabels, _labels);
+                widget.mode == 'task'
+                    ? await tasks.addLabels(
+                        widget.taskIndex, _selectedLabels, _labels)
+                    : await goals.addLabels(
+                        widget.taskIndex, _selectedLabels, _labels);
+                
+                widget.mode == 'task' ?
                 Navigator.of(context)
                     .popAndPushNamed(CurrentTaskScreen.routeName, arguments: {
                   'index': widget.taskIndex,
                   'wasSuspended': true
-                });
+                }) : 
+                Navigator.of(context).popAndPushNamed(CurrentGoalScreen.routeName, arguments: widget.taskIndex);
               },
             ),
           ],

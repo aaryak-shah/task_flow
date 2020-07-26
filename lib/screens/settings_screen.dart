@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../widgets/main_drawer.dart';
 
 class SettingsScreen extends StatefulWidget {
   static const routeName = '/settings';

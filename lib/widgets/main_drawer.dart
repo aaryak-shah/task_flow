@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:task_flow/screens/stats_screen.dart';
 import '../screens/settings_screen.dart';
 
 class MainDrawer extends StatelessWidget {
@@ -62,6 +63,7 @@ class MainDrawer extends StatelessWidget {
               height: 30,
             ),
             buildDrawerTile(context,Icons.perm_contact_calendar, 'Clients', "/"),
+            buildDrawerTile(context,Icons.equalizer, 'Stats', StatsScreen.routeName),
             buildDrawerTile(context,Icons.info, 'About', "/"),
             buildDrawerTile(context,Icons.feedback, 'Feedback', "/"),
             Spacer(),

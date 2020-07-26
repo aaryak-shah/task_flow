@@ -29,6 +29,7 @@ dependencies:
   csv: ^4.0.3
   path_provider: ^1.6.11
   shared_preferences: ^0.5.8
+  circular_countdown_timer: ^0.0.4
 
 
   # The following adds the Cupertino Icons font to your application.

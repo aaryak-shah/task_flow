@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../widgets/chart.dart';
-import '../widgets/new_task.dart';
 import '../providers/tasks.dart';
 import '../screens/current_task.dart';
 
@@ -156,7 +155,7 @@ class _TasksScreenState extends State<TasksScreen> {
                             style: Theme.of(context).textTheme.bodyText2,
                           ),
                           trailing: Text(
-                            t.end == null ? t.getRunningTimeString() : 'Completed',
+                            t.end == null ? t.getTimeString('run') : 'Completed',
                           ),
                         ),
                       );

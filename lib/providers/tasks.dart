@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:csv/csv.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
@@ -124,6 +123,7 @@ class Tasks with ChangeNotifier {
         category: row[9],
         labels: row[10].split("|"),
         superProjectName: row[11],
+        goalTime: Duration(seconds: row[12]),
       );
     }).toList();
     notifyListeners();
@@ -159,7 +159,7 @@ class Tasks with ChangeNotifier {
 
   List<Task> get recentTasks {
     final recent = tasks.where((t) {
-      return t.isPaused &&
+      return t.goalTime == Duration.zero && t.isPaused &&
           t.latestPause.isAfter(DateTime.now().subtract(Duration(days: 7)));
     }).toList();
     return recent;
@@ -209,7 +209,8 @@ class Tasks with ChangeNotifier {
               t.isPaused ? 1 : 0,
               t.category,
               t.labels.join("|"),
-              t.superProjectName == null ? "" : t.superProjectName
+              t.superProjectName == null ? "" : t.superProjectName,
+              t.goalTime.inSeconds,
             ])
         .toList());
     File f = await _localFile;
@@ -248,7 +249,8 @@ class Tasks with ChangeNotifier {
           0,
           category,
           labels.join("|"),
-          superProjectName == null ? "" : superProjectName
+          superProjectName == null ? "" : superProjectName,
+          0,
         ],
       ],
     );

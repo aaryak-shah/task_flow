@@ -4,10 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
-import './providers/task.dart';
+import './screens/current_goal_screen.dart';
+import './screens/stats_screen.dart';
 import './screens/settings_screen.dart';
 import './screens/tabs_screen.dart';
 import './screens/current_task.dart';
+
+import './providers/goals.dart';
+import './providers/task.dart';
 import './providers/tasks.dart';
 
 void main() async {
@@ -31,6 +35,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (context) => Task(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => Goals(),
         )
       ],
       child: MaterialApp(
@@ -62,13 +69,27 @@ class MyApp extends StatelessWidget {
           ),
         ),
         home: TabsScreen(),
-        routes: {SettingsScreen.routeName: (_) => SettingsScreen()},
+        routes: {
+          SettingsScreen.routeName: (_) => SettingsScreen(),
+          StatsScreen.routeName: (_) => StatsScreen(),
+        },
         onGenerateRoute: (settings) {
           if (settings.name == CurrentTaskScreen.routeName) {
             final int index = (settings.arguments as Map)['index'];
-            final bool wasSuspended = (settings.arguments as Map)['wasSuspended'];
+            final bool wasSuspended =
+                (settings.arguments as Map)['wasSuspended'];
             return MaterialPageRoute(builder: (context) {
-              return CurrentTaskScreen(index: index, wasSuspended: wasSuspended,);
+              return CurrentTaskScreen(
+                index: index,
+                wasSuspended: wasSuspended,
+              );
+            });
+          } else if (settings.name == CurrentGoalScreen.routeName) {
+            final int index = settings.arguments;
+            return MaterialPageRoute(builder: (context) {
+              return CurrentGoalScreen(
+                index: index,
+              );
             });
           }
         },

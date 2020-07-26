@@ -1,10 +1,10 @@
-import 'dart:async';
 
+import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../widgets/app_bar.dart';
-import '../providers/tasks.dart';
+import '../providers/goals.dart';
 import '../widgets/new_labels.dart';
 import '../providers/task.dart';
 
@@ -16,153 +16,73 @@ void showLabelForm(BuildContext context, int i) {
     builder: (_) {
       return GestureDetector(
         onTap: () {},
-        child: NewLabels('task', i),
+        child: NewLabels('goal', i),
         behavior: HitTestBehavior.opaque,
       );
     },
   );
 }
 
-class DrawCircle extends CustomPainter {
-  Paint _paint;
-
-  DrawCircle() {
-    _paint = Paint()
-      ..color = Colors.lightGreenAccent
-      ..strokeWidth = 7.0
-      ..style = PaintingStyle.stroke;
-  }
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.drawCircle(Offset(100.0, 30.0), 120.0, _paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return false;
-  }
-}
-
-class CurrentTaskScreen extends StatefulWidget {
-  static const routeName = '/current-task';
+class CurrentGoalScreen extends StatefulWidget {
+  static const routeName = '/current-goal-screen';
   final int index;
-  final bool wasSuspended;
-  CurrentTaskScreen({this.index, this.wasSuspended});
-
+  CurrentGoalScreen({this.index});
   @override
-  _CurrentTaskScreenState createState() => _CurrentTaskScreenState();
+  _CurrentGoalScreenState createState() => _CurrentGoalScreenState();
 }
 
-class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
+class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
   var _provider;
-  Timer _timer;
-  String _time;
+  Duration _goalTime;
   String _category;
   String _title;
   List<String> _labels;
-  Duration _resumeTime;
-
   bool _isInit = true;
 
   @override
   void didChangeDependencies() {
     if (_isInit) {
-      var _provider = Provider.of<Tasks>(context, listen: true);
-      Task _task = _provider.tasks[widget.index];
-      _timer = Timer(const Duration(seconds: 1), () {});
-      _category = _task.category;
-      _labels = _task.labels;
-      _title = _task.title;
-      _resumeTime = _task.getRunningTime();
-      _time = _resumeTime.inHours.toString().padLeft(2, "0") +
-          ":" +
-          _resumeTime.inMinutes.remainder(60).toString().padLeft(2, "0") +
-          ":" +
-          _resumeTime.inSeconds.remainder(60).toString().padLeft(2, "0");
-      startTimer();
-      watch.start();
-      if (_task.latestPause != null) {
-        widget.wasSuspended ? _provider.unSuspend(widget.index) : _provider.resume(widget.index);
-      }
+      var _provider = Provider.of<Goals>(context, listen: true);
+      Task _goal = _provider.goals[widget.index];
+      _category = _goal.category;
+      _labels = _goal.labels;
+      _title = _goal.title;
+      _goalTime = _goal.goalTime;
+      print(
+          'state variables: provider:$_provider goal:$_goal title:$_title goaltime:$_goalTime');
       _isInit = false;
     }
     super.didChangeDependencies();
   }
 
-  var watch = Stopwatch();
-  bool paused = false;
-
-  void startTimer() {
-    const oneSec = const Duration(seconds: 1);
-    _timer = new Timer.periodic(
-      oneSec,
-      (timer) => setState(
-        () {
-          if (!paused) {
-            _time = (watch.elapsed + _resumeTime)
-                    .inHours
-                    .toString()
-                    .padLeft(2, "0") +
-                ":" +
-                (watch.elapsed + _resumeTime)
-                    .inMinutes
-                    .remainder(60)
-                    .toString()
-                    .padLeft(2, "0") +
-                ":" +
-                (watch.elapsed + _resumeTime)
-                    .inSeconds
-                    .remainder(60)
-                    .toString()
-                    .padLeft(2, "0");
-          } else {
-            timer.cancel();
-          }
-        },
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    watch.stop();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
-    _provider = Provider.of<Tasks>(context);
+    _provider = Provider.of<Goals>(context);
     return WillPopScope(
       onWillPop: () async {
-        if (!paused) await _provider.pause(widget.index);
+        await _provider.complete(widget.index);
         Navigator.pushReplacementNamed(context, '/');
         return true;
       },
       child: Scaffold(
-        backgroundColor: Theme.of(context).primaryColor,
         appBar: showAppBar(context),
+        backgroundColor: Theme.of(context).primaryColor,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Expanded(
-              child: Center(
-                child: Stack(
-                  children: <Widget>[
-                    Text(
-                      _time,
-                      style: TextStyle(
-                        fontSize: 50,
-                        color: Theme.of(context).textTheme.headline6.color,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    CustomPaint(
-                      painter: DrawCircle(),
-                    )
-                  ],
+              child: CircularCountDownTimer(
+                color: Color(0xFF252525),
+                fillColor: Theme.of(context).accentColor,
+                isReverse: true,
+                textStyle: Theme.of(context).textTheme.headline6.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 50,
                 ),
+                strokeWidth: 7.0,
+                width: MediaQuery.of(context).size.width / 1.5,
+                height: MediaQuery.of(context).size.height / 1.5,
+                duration: _goalTime.inSeconds,
               ),
             ),
             Expanded(
@@ -190,45 +110,16 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                             ),
                           ),
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: <Widget>[
-                            IconButton(
-                              icon: Icon(
-                                paused ? Icons.play_arrow : Icons.pause,
-                                size: 35,
-                                color: Theme.of(context).accentColor,
-                              ),
-                              onPressed: () async {
-                                if (paused) {
-                                  watch.start();
-                                  await _provider.resume(widget.index);
-                                } else {
-                                  watch.stop();
-                                  await _provider.pause(widget.index);
-                                }
-                                paused = !paused;
-                                startTimer();
-                              },
-                            ),
-                            // SizedBox(
-                            //   width: 6,
-                            // ),
-                            IconButton(
-                              icon: Icon(
-                                Icons.stop,
-                                size: 35,
-                                color: Theme.of(context).errorColor,
-                              ),
-                              onPressed: () async {
-                                watch.reset();
-                                watch.stop();
-                                paused = true;
-                                await _provider.complete(widget.index);
-                                Navigator.pushReplacementNamed(context, '/');
-                              },
-                            ),
-                          ],
+                        IconButton(
+                          icon: Icon(
+                            Icons.stop,
+                            size: 35,
+                            color: Theme.of(context).errorColor,
+                          ),
+                          onPressed: () async {
+                            await _provider.complete(widget.index);
+                            Navigator.of(context).pop();
+                          },
                         ),
                       ],
                     ),
