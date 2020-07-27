@@ -28,7 +28,21 @@ void showNewGoalForm(BuildContext context) {
     builder: (_) {
       return GestureDetector(
         onTap: () {},
-        child: NewGoal(),
+        child: NewGoal([]),
+        behavior: HitTestBehavior.opaque,
+      );
+    },
+  );
+}
+void showEditGoalForm(BuildContext context, List<dynamic> data) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    isDismissible: true,
+    builder: (_) {
+      return GestureDetector(
+        onTap: () {},
+        child: NewGoal(data),
         behavior: HitTestBehavior.opaque,
       );
     },

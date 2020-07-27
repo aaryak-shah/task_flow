@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/goals.dart';
+import '../widgets/plus_btn_controllers.dart';
 
 class GoalsScreen extends StatefulWidget {
   static const routeName = '/goals-screen';
@@ -60,8 +61,8 @@ class _GoalsScreenState extends State<GoalsScreen> {
                               color: Colors.white,
                             ),
                             onPressed: () {
-                              // Navigator.pushNamed(
-                              //     context, CurrentGoalScreen.routeName);
+                              showEditGoalForm(
+                                  context, [g.title, g.category, g.goalTime]);
                             },
                           ),
                           title: Text(

@@ -38,6 +38,7 @@ class _NewTaskState extends State<NewTask> {
         _selectedCategory.isNotEmpty ? isDisabled = false : isDisabled = true;
       });
       return CategoryChips(
+        '',
         (selectedCategory) {
           setState(() {
             _selectedCategory = selectedCategory;

@@ -118,10 +118,12 @@ class _NewLabelsState extends State<NewLabels> {
           children: <Widget>[
             TextFormField(
               onFieldSubmitted: (val) {
-                setState(() {
-                  _titleController.clear();
-                  _labels.add(val);
-                });
+                if (val.isNotEmpty) {
+                  setState(() {
+                    _titleController.clear();
+                    _labels.add(val);
+                  });
+                }
               },
               controller: _titleController,
               decoration: InputDecoration(
@@ -163,14 +165,17 @@ class _NewLabelsState extends State<NewLabels> {
                         widget.taskIndex, _selectedLabels, _labels)
                     : await goals.addLabels(
                         widget.taskIndex, _selectedLabels, _labels);
-                
-                widget.mode == 'task' ?
-                Navigator.of(context)
-                    .popAndPushNamed(CurrentTaskScreen.routeName, arguments: {
-                  'index': widget.taskIndex,
-                  'wasSuspended': true
-                }) : 
-                Navigator.of(context).popAndPushNamed(CurrentGoalScreen.routeName, arguments: widget.taskIndex);
+
+                widget.mode == 'task'
+                    ? Navigator.of(context).popAndPushNamed(
+                        CurrentTaskScreen.routeName,
+                        arguments: {
+                            'index': widget.taskIndex,
+                            'wasSuspended': true
+                          })
+                    :
+                    // Navigator.of(context).popAndPushNamed(CurrentGoalScreen.routeName, arguments: widget.taskIndex);
+                    Navigator.of(context).pop();
               },
             ),
           ],

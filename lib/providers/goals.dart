@@ -150,9 +150,11 @@ class Goals with ChangeNotifier {
 
   List<Task> get recentGoals {
     final recent = goals.where((g) {
-      return g.goalTime > Duration.zero && g.end != null;
-    }).toList();
-    return recent;
+      return g.goalTime > Duration.zero &&
+          g.end != null &&
+          g.start.isAfter(DateTime.now().subtract(Duration(days: 7)));
+    });
+    return recent.toList();
   }
 
   String categoryString(String cid) {
