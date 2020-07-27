@@ -140,7 +140,7 @@ class Tasks with ChangeNotifier {
   Future<void> purgeOldTasks() async {
     await loadData();
     _tasks.removeWhere((task) {
-      return task.latestPause.isBefore(
+      return task.latestPause != null && task.latestPause.isBefore(
         DateTime.now().subtract(
           Duration(
             days: 7,
@@ -159,7 +159,8 @@ class Tasks with ChangeNotifier {
 
   List<Task> get recentTasks {
     final recent = tasks.where((t) {
-      return t.goalTime == Duration.zero && t.isPaused &&
+      return t.goalTime == Duration.zero &&
+          t.isPaused &&
           t.latestPause.isAfter(DateTime.now().subtract(Duration(days: 7)));
     }).toList();
     return recent;

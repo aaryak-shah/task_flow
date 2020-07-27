@@ -68,7 +68,7 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-        home: TabsScreen(),
+        home: TabsScreen(0),
         routes: {
           SettingsScreen.routeName: (_) => SettingsScreen(),
           StatsScreen.routeName: (_) => StatsScreen(),

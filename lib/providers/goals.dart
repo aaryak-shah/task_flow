@@ -207,4 +207,19 @@ class Goals with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getStringList('AvailableLabels') ?? [];
   }
+
+    Future<void> purgeOldGoals() async {
+    await loadData();
+    _goals.removeWhere((goal) {
+      return goal.start.isBefore(
+        DateTime.now().subtract(
+          Duration(
+            days: 7,
+          ),
+        ),
+      );
+    });
+    await writeCsv(_goals);
+    notifyListeners();
+  }
 }

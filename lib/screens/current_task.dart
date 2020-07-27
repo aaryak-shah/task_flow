@@ -67,13 +67,13 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
 
   @override
   void didChangeDependencies() {
+    var _provider = Provider.of<Tasks>(context, listen: true);
+    Task _task = _provider.tasks[widget.index];
+    _timer = Timer(const Duration(seconds: 1), () {});
+    _category = _task.category;
+    _labels = _task.labels;
+    _title = _task.title;
     if (_isInit) {
-      var _provider = Provider.of<Tasks>(context, listen: true);
-      Task _task = _provider.tasks[widget.index];
-      _timer = Timer(const Duration(seconds: 1), () {});
-      _category = _task.category;
-      _labels = _task.labels;
-      _title = _task.title;
       _resumeTime = _task.getRunningTime();
       _time = _resumeTime.inHours.toString().padLeft(2, "0") +
           ":" +
@@ -83,7 +83,9 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
       startTimer();
       watch.start();
       if (_task.latestPause != null) {
-        widget.wasSuspended ? _provider.unSuspend(widget.index) : _provider.resume(widget.index);
+        widget.wasSuspended
+            ? _provider.unSuspend(widget.index)
+            : _provider.resume(widget.index);
       }
       _isInit = false;
     }
@@ -95,39 +97,35 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
 
   void startTimer() {
     const oneSec = const Duration(seconds: 1);
-    _timer = new Timer.periodic(
-      oneSec,
-      (timer) => setState(
-        () {
-          if (!paused) {
-            _time = (watch.elapsed + _resumeTime)
-                    .inHours
-                    .toString()
-                    .padLeft(2, "0") +
-                ":" +
-                (watch.elapsed + _resumeTime)
-                    .inMinutes
-                    .remainder(60)
-                    .toString()
-                    .padLeft(2, "0") +
-                ":" +
-                (watch.elapsed + _resumeTime)
-                    .inSeconds
-                    .remainder(60)
-                    .toString()
-                    .padLeft(2, "0");
-          } else {
-            timer.cancel();
-          }
-        },
-      ),
-    );
+    _timer = new Timer.periodic(oneSec, (timer) {
+      if (!paused) {
+        setState(() {
+          _time =
+              (watch.elapsed + _resumeTime).inHours.toString().padLeft(2, "0") +
+                  ":" +
+                  (watch.elapsed + _resumeTime)
+                      .inMinutes
+                      .remainder(60)
+                      .toString()
+                      .padLeft(2, "0") +
+                  ":" +
+                  (watch.elapsed + _resumeTime)
+                      .inSeconds
+                      .remainder(60)
+                      .toString()
+                      .padLeft(2, "0");
+        });
+      } else {
+        timer.cancel();
+      }
+    });
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    paused = true;
     watch.stop();
+    _timer.cancel();
     super.dispose();
   }
 

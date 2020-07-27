@@ -11,13 +11,15 @@ import './stats_screen.dart';
 import './tasks_screen.dart';
 
 class TabsScreen extends StatefulWidget {
+  int selected;
+  TabsScreen(this.selected);
   @override
   _TabsScreenState createState() => _TabsScreenState();
 }
 
 class _TabsScreenState extends State<TabsScreen> {
   List<dynamic> _pages;
-  int _selectedIndex = 0;
+  int _selectedIndex;
   bool _isInit = true;
 
   List<dynamic> _tabColors;
@@ -67,16 +69,21 @@ class _TabsScreenState extends State<TabsScreen> {
 
   @override
   void initState() {
+    _selectedIndex = widget.selected;
+
     _pages = [
       TasksScreen(),
       GoalsScreen(),
       ProjectsScreen(),
     ];
-    _tabColors = [
-      Colors.lightGreenAccent,
-      Colors.grey,
-      Colors.grey,
-    ];
+    _tabColors = [];
+    for (int i = 0; i < 3; i++) {
+      if (i == _selectedIndex) {
+        _tabColors.add(Colors.lightGreenAccent);
+      } else {
+        _tabColors.add(Colors.grey);
+      }
+    }
     super.initState();
   }
 
@@ -86,6 +93,7 @@ class _TabsScreenState extends State<TabsScreen> {
       Provider.of<Tasks>(context).loadData();
       Provider.of<Goals>(context).loadData();
       Provider.of<Tasks>(context).purgeOldTasks();
+      Provider.of<Goals>(context).purgeOldGoals();
       _isInit = false;
     }
     super.didChangeDependencies();

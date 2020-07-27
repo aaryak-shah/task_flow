@@ -1,6 +1,7 @@
 import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import './tabs_screen.dart';
 
 import '../widgets/app_bar.dart';
 import '../providers/goals.dart';
@@ -36,21 +37,16 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
   String _category;
   String _title;
   List<String> _labels;
-  bool _isInit = true;
+  bool dummy = false;
 
   @override
   void didChangeDependencies() {
-    if (_isInit) {
-      var _provider = Provider.of<Goals>(context, listen: true);
-      Task _goal = _provider.goals[widget.index];
-      _category = _goal.category;
-      _labels = _goal.labels;
-      _title = _goal.title;
-      _goalTime = _goal.goalTime - (DateTime.now().difference(_goal.start));
-      print(
-          'state variables: provider:$_provider goal:$_goal title:$_title goaltime:$_goalTime');
-      _isInit = false;
-    }
+    var _provider = Provider.of<Goals>(context, listen: true);
+    Task _goal = _provider.goals[widget.index];
+    _category = _goal.category;
+    _labels = _goal.labels;
+    _title = _goal.title;
+    _goalTime = _goal.goalTime - (DateTime.now().difference(_goal.start));
     super.didChangeDependencies();
   }
 
@@ -60,7 +56,11 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
     return WillPopScope(
       onWillPop: () async {
         await _provider.complete(widget.index);
-        Navigator.pushReplacementNamed(context, '/');
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TabsScreen(1),
+            ));
         return true;
       },
       child: Scaffold(
@@ -79,8 +79,8 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
                       fontSize: 50,
                     ),
                 strokeWidth: 7.0,
-                width: MediaQuery.of(context).size.width / 1.5,
-                height: MediaQuery.of(context).size.height / 1.5,
+                width: MediaQuery.of(context).size.width / 1.75,
+                height: MediaQuery.of(context).size.height / 1.75,
                 duration: _goalTime.inSeconds,
               ),
             ),

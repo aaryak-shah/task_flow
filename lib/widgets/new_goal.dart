@@ -22,7 +22,7 @@ class _NewGoalState extends State<NewGoal> {
 
   TextEditingController _titleController = TextEditingController();
   final _titleFocusNode = FocusNode();
-  Duration time = Duration(hours: 1);
+  Duration time;
 
   bool _isInit = true;
 
@@ -40,7 +40,10 @@ class _NewGoalState extends State<NewGoal> {
       _titleController = TextEditingController(text: widget.data[0]);
       _selectedCategory = widget.data[1];
       _initTime = widget.data[2];
+    } else {
+      _initTime = Duration(hours: 1);
     }
+    time = _initTime;
     super.initState();
   }
 
