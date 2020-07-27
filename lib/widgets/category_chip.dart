@@ -11,7 +11,6 @@ class CategoryChips extends StatefulWidget {
 
 class _CategoryChipsState extends State<CategoryChips> {
   String selectedChoice = '';
-  bool _isInit = true;
 
 @override
   void initState() {

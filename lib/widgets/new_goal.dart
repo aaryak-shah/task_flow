@@ -7,7 +7,7 @@ import '../providers/goals.dart';
 import './category_chip.dart';
 
 class NewGoal extends StatefulWidget {
-  List<dynamic> data;
+  final List<dynamic> data;
   NewGoal(this.data);
 
   @override
@@ -15,7 +15,6 @@ class NewGoal extends StatefulWidget {
 }
 
 class _NewGoalState extends State<NewGoal> {
-  String _initTitle;
   String _selectedCategory = '';
   Duration _initTime = Duration(hours: 1);
   final _formKey = GlobalKey<FormState>();
@@ -23,8 +22,6 @@ class _NewGoalState extends State<NewGoal> {
   TextEditingController _titleController = TextEditingController();
   final _titleFocusNode = FocusNode();
   Duration time;
-
-  bool _isInit = true;
 
   @override
   void dispose() {
@@ -46,19 +43,6 @@ class _NewGoalState extends State<NewGoal> {
     time = _initTime;
     super.initState();
   }
-
-  // @override
-  // void didChangeDependencies() {
-  //   if (_isInit) {
-  //     if (widget.data.isNotEmpty) {
-  //       _initTitle = widget.data[0];
-  //       _selectedCategory = widget.data[1];
-  //       _initTime = widget.data[2];
-  //     }
-  //     _isInit = false;
-  //   }
-  //   super.didChangeDependencies();
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +86,6 @@ class _NewGoalState extends State<NewGoal> {
             TextFormField(
               focusNode: _titleFocusNode,
               controller: _titleController,
-              initialValue: _initTitle,
               validator: (value) {
                 if (value.isEmpty) {
                   return "Enter a title";

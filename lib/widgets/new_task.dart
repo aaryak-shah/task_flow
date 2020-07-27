@@ -6,6 +6,8 @@ import '../providers/tasks.dart';
 import './category_chip.dart';
 
 class NewTask extends StatefulWidget {
+  final List<dynamic> data;
+  NewTask(this.data);
   @override
   _NewTaskState createState() => _NewTaskState();
 }
@@ -13,7 +15,7 @@ class NewTask extends StatefulWidget {
 class _NewTaskState extends State<NewTask> {
   String _selectedCategory = '';
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
+  TextEditingController _titleController = TextEditingController();
   final _titleFocusNode = FocusNode();
 
   @override
@@ -25,6 +27,10 @@ class _NewTaskState extends State<NewTask> {
 
   @override
   void initState() {
+    if (widget.data.isNotEmpty) {
+      _titleController = TextEditingController(text: widget.data[0]);
+      _selectedCategory = widget.data[1];
+    }
     _titleFocusNode.requestFocus();
     super.initState();
   }
@@ -38,7 +44,7 @@ class _NewTaskState extends State<NewTask> {
         _selectedCategory.isNotEmpty ? isDisabled = false : isDisabled = true;
       });
       return CategoryChips(
-        '',
+        widget.data.isEmpty ? '' : widget.data[1],
         (selectedCategory) {
           setState(() {
             _selectedCategory = selectedCategory;
@@ -52,12 +58,14 @@ class _NewTaskState extends State<NewTask> {
       // height: 460,
       decoration: BoxDecoration(
         color: Theme.of(context).primaryColor,
-        boxShadow: [BoxShadow(
-          color: Colors.black26,
-          blurRadius: 100,
-          spreadRadius: 100,
-          offset: Offset(0, -100),
-        ),],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 100,
+            spreadRadius: 100,
+            offset: Offset(0, -100),
+          ),
+        ],
       ),
       padding: const EdgeInsets.all(10),
       child: Form(
@@ -118,9 +126,11 @@ class _NewTaskState extends State<NewTask> {
                             [],
                             null);
                         Navigator.of(context).pushReplacementNamed(
-                          CurrentTaskScreen.routeName,
-                          arguments: {'index': tasks.tasks.length - 1, 'wasSuspended': false}
-                        );
+                            CurrentTaskScreen.routeName,
+                            arguments: {
+                              'index': tasks.tasks.length - 1,
+                              'wasSuspended': false
+                            });
                       }
                     }
                   : null,

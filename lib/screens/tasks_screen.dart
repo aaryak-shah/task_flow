@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:task_flow/widgets/plus_btn_controllers.dart';
 
 import '../widgets/chart.dart';
 import '../providers/tasks.dart';
@@ -120,10 +121,18 @@ class _TasksScreenState extends State<TasksScreen> {
                       return Padding(
                         padding: const EdgeInsets.all(3.0),
                         child: ListTile(
-                          leading: IconButton(
-                            onPressed: (t.end != null)
-                                ? null
-                                : () async {
+                          leading: (t.end != null)
+                              ? IconButton(
+                                  onPressed: () {
+                                    showEditTaskForm(
+                                        context, [t.title, t.category]);
+                                  },
+                                  icon: Icon(
+                                    Icons.refresh,
+                                  ),
+                                )
+                              : IconButton(
+                                  onPressed: () async {
                                     Navigator.of(context).pushReplacementNamed(
                                         CurrentTaskScreen.routeName,
                                         arguments: {
@@ -131,20 +140,22 @@ class _TasksScreenState extends State<TasksScreen> {
                                           'wasSuspended': false
                                         });
                                   },
-                            icon: Icon(
-                              Icons.play_arrow,
-                              color:
-                                  (t.end != null) ? Colors.grey : Colors.white,
-                            ),
-                          ),
+                                  icon: Icon(
+                                    Icons.play_arrow,
+                                    color: (t.end != null)
+                                        ? Colors.grey
+                                        : Colors.white,
+                                  ),
+                                ),
                           title: Text(
                             t.title.length <= 40
                                 ? t.title
                                 : (t.title.substring(0, 40) + '...'),
                             style:
                                 Theme.of(context).textTheme.bodyText1.copyWith(
-                                      decoration: t.end == null ? null : TextDecoration.lineThrough,
-                                      fontWeight: t.end == null ? FontWeight.bold : FontWeight.normal,
+                                      fontWeight: t.end == null
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
                                       color: (t.end != null)
                                           ? Colors.grey
                                           : Colors.white,
@@ -155,7 +166,9 @@ class _TasksScreenState extends State<TasksScreen> {
                             style: Theme.of(context).textTheme.bodyText2,
                           ),
                           trailing: Text(
-                            t.end == null ? t.getTimeString('run') : 'Completed',
+                            t.end == null
+                                ? t.getTimeString('run')
+                                : 'Completed',
                           ),
                         ),
                       );

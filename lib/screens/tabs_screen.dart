@@ -11,7 +11,7 @@ import './stats_screen.dart';
 import './tasks_screen.dart';
 
 class TabsScreen extends StatefulWidget {
-  int selected;
+  final int selected;
   TabsScreen(this.selected);
   @override
   _TabsScreenState createState() => _TabsScreenState();

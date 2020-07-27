@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:task_flow/screens/current_task.dart';
-import 'package:task_flow/screens/current_goal_screen.dart';
 
 // import './label_chip.dart';
 import '../providers/tasks.dart';

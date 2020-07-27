@@ -12,7 +12,22 @@ void showNewTaskForm(BuildContext context) {
     builder: (_) {
       return GestureDetector(
         onTap: () {},
-        child: NewTask(),
+        child: NewTask([]),
+        behavior: HitTestBehavior.opaque,
+      );
+    },
+  );
+}
+
+void showEditTaskForm(BuildContext context, List<dynamic> data) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    isDismissible: true,
+    builder: (_) {
+      return GestureDetector(
+        onTap: () {},
+        child: NewTask(data),
         behavior: HitTestBehavior.opaque,
       );
     },
