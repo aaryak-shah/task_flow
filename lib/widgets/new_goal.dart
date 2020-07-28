@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../screens/current_goal_screen.dart';
@@ -160,6 +161,7 @@ class _NewGoalState extends State<NewGoal> {
                   minuteInterval: 10,
                   mode: CupertinoTimerPickerMode.hm,
                   onTimerDurationChanged: (t) {
+                    HapticFeedback.lightImpact();
                     setState(() {
                       time = t;
                     });
