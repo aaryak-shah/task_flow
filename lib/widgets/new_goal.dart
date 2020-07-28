@@ -7,6 +7,10 @@ import '../providers/goals.dart';
 import './category_chip.dart';
 
 class NewGoal extends StatefulWidget {
+  // Arguments => data: List of data to be set as initial values for the form
+  //                    in case an existing goal is restarted instead of creating a new goal
+  //
+  // Form to add a new goal
   final List<dynamic> data;
   NewGoal(this.data);
 
@@ -34,6 +38,7 @@ class _NewGoalState extends State<NewGoal> {
   void initState() {
     _titleFocusNode.requestFocus();
     if (widget.data.isNotEmpty) {
+      // to populate form with data of existing goal in case the existing goal is restarted
       _titleController = TextEditingController(text: widget.data[0]);
       _selectedCategory = widget.data[1];
       _initTime = widget.data[2];
@@ -49,6 +54,7 @@ class _NewGoalState extends State<NewGoal> {
     bool isDisabled = true;
     var goals = Provider.of<Goals>(context);
     Widget returnCatChips() {
+      // function to return Category chips in the modal sheet
       setState(() {
         isDisabled = _selectedCategory.isEmpty;
       });
@@ -141,12 +147,14 @@ class _NewGoalState extends State<NewGoal> {
               height: 50,
             ),
             Container(
+              // timer picker spinner widget
               height: 150,
               child: CupertinoTheme(
                 data: CupertinoThemeData(
-                    textTheme: CupertinoTextThemeData(
-                  pickerTextStyle: Theme.of(context).textTheme.headline6,
-                )),
+                  textTheme: CupertinoTextThemeData(
+                    pickerTextStyle: Theme.of(context).textTheme.headline6,
+                  ),
+                ),
                 child: CupertinoTimerPicker(
                   initialTimerDuration: _initTime,
                   minuteInterval: 10,
@@ -167,6 +175,7 @@ class _NewGoalState extends State<NewGoal> {
               onPressed: (!isDisabled && (time > Duration.zero))
                   ? () async {
                       if (_formKey.currentState.validate()) {
+                        // if the form is valid
                         await goals.addGoal(
                           DateTime.now().toString(),
                           _titleController.text,
@@ -176,6 +185,7 @@ class _NewGoalState extends State<NewGoal> {
                           null,
                           time,
                         );
+                        // redirect to the CurrentGoalScreen
                         Navigator.of(context).pushReplacementNamed(
                           CurrentGoalScreen.routeName,
                           arguments: goals.goals.length - 1,

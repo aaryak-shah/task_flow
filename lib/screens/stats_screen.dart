@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/app_bar.dart';
 
+// Screen to display statistics from the Flask API
 class StatsScreen extends StatefulWidget {
   static const routeName = '/stats-screen';
   @override

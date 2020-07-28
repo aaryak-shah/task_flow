@@ -6,6 +6,11 @@ import 'package:provider/provider.dart';
 import '../providers/tasks.dart';
 
 class Chart extends StatefulWidget {
+  // Arguments => selectedDay: the day on the chart selected by the user, to be highlighted in the accent colour
+  // 
+  // Creates a chart widget showing the fraction of time spent working on tasks on a particular day
+  // in the past week compared to the total time spent working in the week
+
   final int selectedDay;
   Chart(this.selectedDay);
 

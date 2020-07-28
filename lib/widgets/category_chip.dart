@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
 class CategoryChips extends StatefulWidget {
+  // Arguments => sel: The category currently chosen by the user
+  //              onSelectionChanged: The function to be called when the user's selection changes
+  //
+  // Creates a list of Category chips to be shown in modal sheets
+
   final String sel;
   final Function(String) onSelectionChanged;
   const CategoryChips(this.sel, this.onSelectionChanged);
@@ -18,7 +23,7 @@ class _CategoryChipsState extends State<CategoryChips> {
     super.initState();
   }
 
-
+  // list of available Categories
   final List<String> categories = [
     'Education',
     'Personal Development',
@@ -26,10 +31,10 @@ class _CategoryChipsState extends State<CategoryChips> {
     'Wellness',
     'Recreational',
     'Miscellaneous',
-    // 'Category 7',
   ];
 
   List<Widget> _buildChoiceList() {
+    // function to build a list of Category chip widgets
     List<Widget> choices = List();
     categories.forEach((item) {
       choices.add(ChoiceChip(

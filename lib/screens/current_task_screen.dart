@@ -8,7 +8,14 @@ import '../providers/tasks.dart';
 import '../widgets/new_labels.dart';
 import '../providers/task.dart';
 
+// Screen which shows the stopwatch for the currently running task
+
 void showLabelForm(BuildContext context, int i) {
+  // Arguments => context: The context for the modal sheet to be created in
+  //              i: The index of the task to which the labels are to be added to
+  //
+  // Opens up a modal sheet to add labels to the current task
+
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -24,6 +31,7 @@ void showLabelForm(BuildContext context, int i) {
 }
 
 class DrawCircle extends CustomPainter {
+  // Circle widget that surrounds the stopwatch
   Paint _paint;
 
   DrawCircle() {
@@ -45,6 +53,9 @@ class DrawCircle extends CustomPainter {
 }
 
 class CurrentTaskScreen extends StatefulWidget {
+  // Arguments => index: The index of the currently running task
+  //              wasSuspended: Boolean to indicate whether the task is being brought out of suspension or not
+
   static const routeName = '/current-task';
   final int index;
   final bool wasSuspended;

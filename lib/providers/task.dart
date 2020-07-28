@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 
 class Task with ChangeNotifier {
+  // creating a model for Task objects
   final String id;
   final String title;
   final DateTime start;
@@ -37,6 +38,8 @@ class Task with ChangeNotifier {
   });
 
   Duration getRunningTime() {
+    // function to get the total time this task has been running for
+    // excluding pause time
     if (end != null) {
       return end.difference(start) - pauseTime;
     } else if (isPaused) {
@@ -47,7 +50,15 @@ class Task with ChangeNotifier {
   }
 
   String getTimeString(String mode) {
-    Duration getTime = mode == 'run' ? getRunningTime() : mode == 'goal' ? goalTime : Duration.zero;
+    // Arguments => mode: Mode in which the function runs, either 'run' or 'goal'
+    //
+    // returns the time as a formatted string
+    // if mode is 'run', it gets the running time for the task
+    // if mode is 'goal', it returns zero
+
+    Duration getTime = mode == 'run'
+        ? getRunningTime()
+        : mode == 'goal' ? goalTime : Duration.zero;
     String h, m;
     int time = getTime.inMinutes;
     int hrs = (time / 60).floor();
@@ -60,16 +71,19 @@ class Task with ChangeNotifier {
   }
 
   Future<String> get _localPath async {
+    // gets the AppData directory
     final directory = await getApplicationDocumentsDirectory();
     return directory.path;
   }
 
   Future<File> get _localFile async {
+    // gets the tasks.csv file from the AppData directory
     final path = await _localPath;
     return File('$path/tasks.csv');
   }
 
   Future<List<Task>> get tasks async {
+    // getter to read the tasks.csv file and get a list of Task objects
     File csvFile = await _localFile;
     String csvString = await csvFile.readAsString();
     List<List<dynamic>> rowsAsListOfValues =
@@ -97,6 +111,7 @@ class Task with ChangeNotifier {
   }
 
   Future<int> get getIndex async {
+    // getter that gets the index of this task in the tasks list
     var t = await tasks;
     return t.indexWhere((t) => t.id == id);
   }

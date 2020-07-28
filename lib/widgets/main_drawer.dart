@@ -3,8 +3,20 @@ import 'package:task_flow/screens/stats_screen.dart';
 import '../screens/settings_screen.dart';
 
 class MainDrawer extends StatelessWidget {
+  // Drawer widget for the TabsScreen
   Widget buildDrawerTile(
-      BuildContext context, IconData icon, String title, String route) {
+      BuildContext context,
+      IconData icon, 
+      String title, 
+      String route,
+    ) {
+    // Arguments: context: Context for this widget,
+    //            icon: Icon for the tile,
+    //            title: Title for the tile,
+    //            route: Route to be redirected to on tapping on the tile
+    //
+    // Creates a tile in the drawer
+
     return InkWell(
       child: ListTile(
         leading: Icon(
@@ -62,6 +74,7 @@ class MainDrawer extends StatelessWidget {
             SizedBox(
               height: 30,
             ),
+            // Drawer tiles
             buildDrawerTile(context,Icons.perm_contact_calendar, 'Clients', "/"),
             buildDrawerTile(context,Icons.equalizer, 'Stats', StatsScreen.routeName),
             buildDrawerTile(context,Icons.info, 'About', "/"),

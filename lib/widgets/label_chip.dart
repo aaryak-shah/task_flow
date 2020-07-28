@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 
 class LabelChips extends StatefulWidget {
+  // Arguments => onSelectionChanged: The function to be called when the user's selection changes,
+  //              availableLabels: List of available labels
+  //
+  // Creates a list of Label chips to be shown in modal sheets
+
   final Function(List<String>) onSelectionChanged;
   final List<String> availableLabels;
   const LabelChips(this.onSelectionChanged, this.availableLabels);
@@ -15,6 +20,7 @@ class _LabelChipsState extends State<LabelChips> {
   final List<String> labels = [];
 
   List<Widget> _buildChoiceList() {
+    // function to build a list of Label chip widgets
     List<Widget> choices = List();
     labels.forEach((item) {
       choices.add(ChoiceChip(

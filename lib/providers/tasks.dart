@@ -9,7 +9,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import './task.dart';
 
 class Tasks with ChangeNotifier {
+  // variable that stores list of tasks
   List<Task> _tasks;
+
+  // DUMMY DATA
   //   Task(
   //     id: 't1',
   //     title: 'Math Homework',
@@ -91,16 +94,21 @@ class Tasks with ChangeNotifier {
   //   ),
   // ];
   Future<String> get _localPath async {
+    // gets the AppData directory
     final directory = await getApplicationDocumentsDirectory();
     return directory.path;
   }
 
   Future<File> get _localFile async {
+    // gets the tasks.csv file from the AppData directory
     final path = await _localPath;
     return File('$path/tasks.csv');
   }
 
   Future<void> loadData() async {
+    // function to load the data from the tasks.csv file into Task
+    // models which are then put into the _tasks list
+
     String csvPath = await _localPath;
     String csvString = await File('$csvPath/tasks.csv').readAsString();
     // String csvString = await rootBundle.loadString('assets/data/tasks.csv');
@@ -129,6 +137,7 @@ class Tasks with ChangeNotifier {
     notifyListeners();
   }
 
+  // DEBUG FUNCTION
   // Future<List<List<dynamic>>> readLocalData() async {
   //   final directory = await getApplicationDocumentsDirectory();
   //   String csvString = await File('${directory.path}/tasks.csv').readAsString();
@@ -138,26 +147,32 @@ class Tasks with ChangeNotifier {
   // }
 
   Future<void> purgeOldTasks() async {
+    // function to delete (purge) tasks which have a latest pause date
+    // older than 1 week so as to save space and computation time
+
     await loadData();
     _tasks.removeWhere((task) {
-      return task.latestPause != null && task.latestPause.isBefore(
-        DateTime.now().subtract(
-          Duration(
-            days: 7,
-          ),
-        ),
-      );
+      return task.latestPause != null &&
+          task.latestPause.isBefore(
+            DateTime.now().subtract(
+              Duration(
+                days: 7,
+              ),
+            ),
+          );
     });
     await writeCsv(_tasks);
     notifyListeners();
   }
 
   List<Task> get tasks {
+    // tasks getter, gives a copy of _tasks
     final t = _tasks == null ? null : [..._tasks];
     return t;
   }
 
   List<Task> get recentTasks {
+    // gets a list of paused tasks whose latest pause is within the past 7 days
     final recent = tasks.where((t) {
       return t.goalTime == Duration.zero &&
           t.isPaused &&
@@ -167,6 +182,10 @@ class Tasks with ChangeNotifier {
   }
 
   List<Map<String, Object>> get weekTasks {
+    // function that groups up the tasks according to their day of latest pause
+    // returns a list of maps containing the day of the week (0,1,... 6) as the key
+    // and the total time spent working on tasks on that day as the value
+
     return List.generate(7, (index) {
       final weekDay = DateTime.now().subtract(Duration(days: index));
       Duration total = Duration();
@@ -184,15 +203,20 @@ class Tasks with ChangeNotifier {
   }
 
   Duration get totalTime {
+    // getter to calculate the total cumulative time spent working on tasks in the past week
     return weekTasks.fold(
         Duration(), (previousSum, day) => previousSum + day['time']);
   }
 
   String categoryString(String cid) {
+    // Arguments => cid: String id of the task whose category is needed
+    // Returns => category of the task with id as cid
+
     return _tasks[_tasks.indexWhere((tsk) => cid == tsk.id)].category;
   }
 
   Future<void> writeCsv(List<Task> tasks) async {
+    // Arguments => tasks: a list of Task objects to be written to the tasks.csv file
     final rows = ListToCsvConverter().convert(tasks
         .map((t) => [
               t.id,
@@ -227,6 +251,16 @@ class Tasks with ChangeNotifier {
     final List<String> labels,
     final String superProjectName,
   ) async {
+    // Arguments => id: The id of the task to be added,
+    //              title: Title of the task to be added,
+    //              start: DateTime object of the start of the task to be added,
+    //              category: Category of the task to be added,
+    //              labels: List of labels of the task to be added,
+    //              superProjectName: Name of the project the task to be added is under
+    //
+    // Adds the Task object with the above arguments to the _tasks list
+    // and also to the tasks.csv file
+
     final task = Task(
       id: id,
       title: title,
@@ -262,7 +296,17 @@ class Tasks with ChangeNotifier {
   }
 
   Future<void> addLabels(
-      int index, List<String> selected, List<String> labels) async {
+    final int index,
+    final List<String> selected,
+    final List<String> labels,
+  ) async {
+    // Arguments => index: The index of the task in the list to which the labels are to be added,
+    //              selected: The list of labels to be added to the Task,
+    //              labels: The list of available labels (shown as chips),
+    //
+    // Adds 'selected' labels to the task at 'index' in the _tasks list
+    // Also updates the 'AvailableLabels' key in SharedPreferences
+
     _tasks[index].labels.addAll(selected);
     _tasks[index].labels = _tasks[index].labels.toSet().toList();
     await writeCsv(_tasks);
@@ -272,11 +316,15 @@ class Tasks with ChangeNotifier {
   }
 
   Future<List<String>> get availableLabels async {
+    // getter to fetch the list of available labels from SharedPreferences
     final prefs = await SharedPreferences.getInstance();
     return prefs.getStringList('AvailableLabels') ?? [];
   }
 
   Future<void> resume(int index) async {
+    // Arguments => index: The index of the task to be resumed
+    // Resumes the task at 'index' in the _tasks list
+
     _tasks[index].isRunning = true;
     _tasks[index].isPaused = false;
     _tasks[index].pauseTime +=
@@ -286,6 +334,9 @@ class Tasks with ChangeNotifier {
   }
 
   Future<void> pause(int index) async {
+    // Arguments => index: The index of the task to be paused
+    // Pauses the task at 'index' in the _tasks list
+    
     _tasks[index].isRunning = false;
     _tasks[index].isPaused = true;
     _tasks[index].pauses++;
@@ -295,6 +346,10 @@ class Tasks with ChangeNotifier {
   }
 
   Future<void> suspend(int index) async {
+    // Arguments => index: The index of the task to be suspended
+    // Suspends (i.e. Pauses without incrementing the no. of pauses) 
+    // the task at 'index' in the _tasks list
+    
     _tasks[index].isRunning = false;
     _tasks[index].isPaused = true;
     _tasks[index].latestPause = DateTime.now();
@@ -303,6 +358,9 @@ class Tasks with ChangeNotifier {
   }
 
   Future<void> unSuspend(int index) async {
+    // Arguments => index: The index of the task to be unsuspended
+    // Brings the task at 'index' in the _tasks list out of suspension
+    // (i.e. Resumes the task without updating the pause time)
     _tasks[index].isRunning = true;
     _tasks[index].isPaused = false;
     await writeCsv(_tasks);
@@ -310,6 +368,9 @@ class Tasks with ChangeNotifier {
   }
 
   Future<void> complete(int index) async {
+    // Arguments => index: The index of the task to be marked as complete
+    // Ends the task at 'index' in the _tasks list
+
     _tasks[index].isRunning = false;
     _tasks[index].isPaused = true;
     _tasks[index].end = DateTime.now();

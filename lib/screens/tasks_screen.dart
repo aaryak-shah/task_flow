@@ -4,7 +4,7 @@ import 'package:task_flow/widgets/plus_btn_controllers.dart';
 
 import '../widgets/chart.dart';
 import '../providers/tasks.dart';
-import '../screens/current_task.dart';
+import 'current_task_screen.dart';
 
 class TasksScreen extends StatefulWidget {
   @override

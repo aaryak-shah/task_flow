@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 Widget showAppBar(BuildContext context) {
+  // AppBar widget to be shown on pages
   return AppBar(
     centerTitle: true,
     elevation: 0.0,

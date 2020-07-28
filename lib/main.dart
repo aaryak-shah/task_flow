@@ -8,7 +8,7 @@ import './screens/current_goal_screen.dart';
 import './screens/stats_screen.dart';
 import './screens/settings_screen.dart';
 import './screens/tabs_screen.dart';
-import './screens/current_task.dart';
+import 'screens/current_task_screen.dart';
 
 import './providers/goals.dart';
 import './providers/task.dart';
@@ -17,6 +17,7 @@ import './providers/tasks.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   var path = await getApplicationDocumentsDirectory();
+  // create the tasks.csv file if it doesn't exist
   File f = File('${path.path}/tasks.csv');
   if (!f.existsSync()) {
     f.writeAsStringSync('');
@@ -43,6 +44,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Task Flow',
         theme: ThemeData(
+          // dark theme
           brightness: Brightness.dark,
           primaryColor: Color(0xFF121212),
           errorColor: Colors.redAccent,
@@ -68,12 +70,14 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
+        // setting home screen as tasks screen
         home: TabsScreen(0),
         routes: {
           SettingsScreen.routeName: (_) => SettingsScreen(),
           StatsScreen.routeName: (_) => StatsScreen(),
         },
         onGenerateRoute: (settings) {
+          // passing arguments to routes
           if (settings.name == CurrentTaskScreen.routeName) {
             final int index = (settings.arguments as Map)['index'];
             final bool wasSuspended =

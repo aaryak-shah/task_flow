@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-// import './label_chip.dart';
 import '../providers/tasks.dart';
 import '../providers/goals.dart';
 
 List<String> _labels = [];
 
 class NewLabels extends StatefulWidget {
+  // Arguments => mode: The mode in which labels are to be added, either 'tasks' or 'goals',
+  //              taskIndex: The index of the task (or goal) in the _tasks (or _goals)
+  //                         list to which labels are to be added
+  //
+  // Modal sheet to add labels to a task or a goal (depending on mode)
+
   final String mode;
   final int taskIndex;
   NewLabels(this.mode, this.taskIndex);
@@ -19,8 +24,13 @@ class NewLabels extends StatefulWidget {
 class _NewLabelsState extends State<NewLabels> {
   List<String> _selectedLabels = [];
   Widget labelChips(Function(List<String>) onSelectionChanged) {
+    // Arguments => onSelectionChanged: Function to be called when the user's selection changes
+    //
+    // returns a set of label chips to be displayed on the modal sheet
+
     final List<String> labels = _labels;
     List<Widget> _buildChoiceList() {
+      // function to create a list of label chips
       List<Widget> choices = List();
       labels.forEach((item) {
         choices.add(ChoiceChip(
@@ -84,6 +94,7 @@ class _NewLabelsState extends State<NewLabels> {
     final tasks = Provider.of<Tasks>(context);
     final goals = Provider.of<Goals>(context);
     Widget returnLabelChips() {
+      // function that returns the label chips
       return labelChips(
         (selectedLabels) {
           setState(() {

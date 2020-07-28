@@ -10,7 +10,9 @@ import './projects_screen.dart';
 import './stats_screen.dart';
 import './tasks_screen.dart';
 
+// Screen that displays all the tabs
 class TabsScreen extends StatefulWidget {
+  // Arguments => selected: The index of the selected tab to be highlighted
   final int selected;
   TabsScreen(this.selected);
   @override
@@ -25,6 +27,7 @@ class _TabsScreenState extends State<TabsScreen> {
   List<dynamic> _tabColors;
 
   void setGreen() {
+    // function that sets the tab of index 'selected' as the accent colour
     _tabColors[_selectedIndex] = Colors.lightGreenAccent;
     for (int i = 0; i < 3; i++) {
       if (i != _selectedIndex) {
@@ -39,6 +42,13 @@ class _TabsScreenState extends State<TabsScreen> {
     String title,
     Function callback,
   ) {
+    // Arguments => selfIndex: Index of the currently selected tab
+    //              icon: The icon to be used for the tab
+    //              title: The title for the tab
+    //              callback: The function to be executed on tapping on the tab
+    //
+    // Creates a tab to be displayed in the bottom navigation bar 
+
     return GestureDetector(
       onTap: callback,
       child: Padding(
@@ -188,6 +198,7 @@ class _TabsScreenState extends State<TabsScreen> {
           ),
         ),
       ),
+      // Plus button
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       floatingActionButton: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30),

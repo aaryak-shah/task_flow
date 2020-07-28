@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../screens/current_task.dart';
+import '../screens/current_task_screen.dart';
 import '../providers/tasks.dart';
 import './category_chip.dart';
 
 class NewTask extends StatefulWidget {
+  // Arguments => data: List of data to be set as initial values for the form
+  //                    in case an existing task is restarted instead of creating a new task
+  //
+  // Form to add a new task
+
   final List<dynamic> data;
   NewTask(this.data);
   @override
@@ -28,6 +33,7 @@ class _NewTaskState extends State<NewTask> {
   @override
   void initState() {
     if (widget.data.isNotEmpty) {
+      // to populate form with data of existing task in case the existing task is restarted
       _titleController = TextEditingController(text: widget.data[0]);
       _selectedCategory = widget.data[1];
     }
@@ -40,6 +46,7 @@ class _NewTaskState extends State<NewTask> {
     bool isDisabled = true;
     var tasks = Provider.of<Tasks>(context);
     Widget returnCatChips() {
+      // function to return Category chips in the modal sheet
       setState(() {
         _selectedCategory.isNotEmpty ? isDisabled = false : isDisabled = true;
       });
@@ -118,6 +125,7 @@ class _NewTaskState extends State<NewTask> {
               onPressed: (!isDisabled)
                   ? () async {
                       if (_formKey.currentState.validate()) {
+                        // if the form is valid
                         await tasks.addTask(
                             DateTime.now().toString(),
                             _titleController.text,
@@ -125,6 +133,7 @@ class _NewTaskState extends State<NewTask> {
                             _selectedCategory,
                             [],
                             null);
+                        // redirect to the CurrentTaskScreen with appropriate arguments
                         Navigator.of(context).pushReplacementNamed(
                             CurrentTaskScreen.routeName,
                             arguments: {

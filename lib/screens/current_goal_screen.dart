@@ -8,7 +8,14 @@ import '../providers/goals.dart';
 import '../widgets/new_labels.dart';
 import '../providers/task.dart';
 
+// Screen which shows the timer for the currently running goal
+
 void showLabelForm(BuildContext context, int i) {
+  // Arguments => context: The context for the modal sheet to be created in
+  //              i: The index of the goal to which the labels are to be added to
+  //
+  // Opens up a modal sheet to add labels to the current goal
+
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -24,6 +31,8 @@ void showLabelForm(BuildContext context, int i) {
 }
 
 class CurrentGoalScreen extends StatefulWidget {
+  // Arguments => index: The index of the currently running goal
+
   static const routeName = '/current-goal-screen';
   final int index;
   CurrentGoalScreen({this.index});

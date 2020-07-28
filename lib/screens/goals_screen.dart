@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../providers/goals.dart';
 import '../widgets/plus_btn_controllers.dart';
 
+// Screen to display all the goals in the past week
+
 class GoalsScreen extends StatefulWidget {
   static const routeName = '/goals-screen';
   @override
@@ -49,6 +51,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                 ),
                 Expanded(
                   child: ListView.builder(
+                    // ListView builder to display goal tiles
                     itemCount: goals.recentGoals.reversed.length,
                     itemBuilder: (ctx, index) {
                       final g = goals.recentGoals.reversed.toList()[index];
@@ -61,6 +64,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                               color: Colors.white,
                             ),
                             onPressed: () {
+                              // opens the modal sheet to restart this goal
                               showEditGoalForm(
                                   context, [g.title, g.category, g.goalTime]);
                             },
