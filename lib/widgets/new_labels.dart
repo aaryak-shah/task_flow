@@ -127,11 +127,17 @@ class _NewLabelsState extends State<NewLabels> {
           children: <Widget>[
             TextFormField(
               onFieldSubmitted: (val) {
-                if (val.isNotEmpty) {
+                if (_formKey.currentState.validate()) {
                   setState(() {
                     _titleController.clear();
-                    _labels.add(val);
+                    _labels.add(val.trim());
+                    _selectedLabels.add(val.trim());
                   });
+                }
+              },
+              validator: (value) {
+                if (value.trim().isEmpty) {
+                  return "Enter a label";
                 }
               },
               controller: _titleController,
@@ -169,12 +175,14 @@ class _NewLabelsState extends State<NewLabels> {
               color: Theme.of(context).accentColor,
               textColor: Theme.of(context).primaryColor,
               onPressed: () async {
-                widget.mode == 'task'
-                    ? await tasks.addLabels(
-                        widget.taskIndex, _selectedLabels, _labels)
-                    : await goals.addLabels(
-                        widget.taskIndex, _selectedLabels, _labels);
-                Navigator.of(context).pop();
+                if (_formKey.currentState.validate()) {
+                  widget.mode == 'task'
+                      ? await tasks.addLabels(
+                          widget.taskIndex, _selectedLabels, _labels)
+                      : await goals.addLabels(
+                          widget.taskIndex, _selectedLabels, _labels);
+                  Navigator.of(context).pop();
+                }
               },
             ),
           ],

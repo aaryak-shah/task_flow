@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
+import './screens/login_screen.dart';
 import './screens/current_goal_screen.dart';
 import './screens/stats_screen.dart';
 import './screens/settings_screen.dart';
@@ -71,7 +72,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
         // setting home screen as tasks screen
-        home: TabsScreen(0),
+        home: LoginScreen(),
         routes: {
           SettingsScreen.routeName: (_) => SettingsScreen(),
           StatsScreen.routeName: (_) => StatsScreen(),
@@ -94,6 +95,11 @@ class MyApp extends StatelessWidget {
               return CurrentGoalScreen(
                 index: index,
               );
+            });
+          } else if (settings.name == TabsScreen.routeName) {
+            final int selected = settings.arguments;
+            return MaterialPageRoute(builder: (context) {
+              return TabsScreen(selected);
             });
           }
         },

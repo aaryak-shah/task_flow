@@ -12,6 +12,7 @@ class NewGoal extends StatefulWidget {
   //                    in case an existing goal is restarted instead of creating a new goal
   //
   // Form to add a new goal
+  
   final List<dynamic> data;
   NewGoal(this.data);
 

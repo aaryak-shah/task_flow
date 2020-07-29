@@ -129,7 +129,7 @@ class Tasks with ChangeNotifier {
         isRunning: row[7] == 1,
         isPaused: row[8] == 1,
         category: row[9],
-        labels: row[10].split("|"),
+        labels: row[10] != "" ? row[10].split("|") : [],
         superProjectName: row[11],
         goalTime: Duration(seconds: row[12]),
       );
@@ -233,7 +233,7 @@ class Tasks with ChangeNotifier {
               t.isRunning ? 1 : 0,
               t.isPaused ? 1 : 0,
               t.category,
-              t.labels.join("|"),
+              t.labels.isNotEmpty ? t.labels.join("|") : "",
               t.superProjectName == null ? "" : t.superProjectName,
               t.goalTime.inSeconds,
             ])

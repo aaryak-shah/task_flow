@@ -13,6 +13,7 @@ import './tasks_screen.dart';
 // Screen that displays all the tabs
 class TabsScreen extends StatefulWidget {
   // Arguments => selected: The index of the selected tab to be highlighted
+  static const routeName = '/tabs-screen';
   final int selected;
   TabsScreen(this.selected);
   @override
@@ -47,7 +48,7 @@ class _TabsScreenState extends State<TabsScreen> {
     //              title: The title for the tab
     //              callback: The function to be executed on tapping on the tab
     //
-    // Creates a tab to be displayed in the bottom navigation bar 
+    // Creates a tab to be displayed in the bottom navigation bar
 
     return GestureDetector(
       onTap: callback,

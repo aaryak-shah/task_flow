@@ -3,9 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../screens/tabs_screen.dart';
 import '../widgets/app_bar.dart';
-import '../providers/tasks.dart';
 import '../widgets/new_labels.dart';
+import '../providers/tasks.dart';
 import '../providers/task.dart';
 
 // Screen which shows the stopwatch for the currently running task
@@ -34,16 +35,15 @@ class DrawCircle extends CustomPainter {
   // Circle widget that surrounds the stopwatch
   Paint _paint;
 
-  DrawCircle() {
+  @override
+  void paint(Canvas canvas, Size size) {
     _paint = Paint()
       ..color = Colors.lightGreenAccent
       ..strokeWidth = 7.0
+      ..strokeCap = StrokeCap.butt
       ..style = PaintingStyle.stroke;
-  }
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.drawCircle(Offset(100.0, 30.0), 120.0, _paint);
+    canvas.drawCircle(size.center(Offset.zero), size.width / 2.0, _paint);
   }
 
   @override
@@ -146,10 +146,12 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
     return WillPopScope(
       onWillPop: () async {
         if (!paused) await _provider.pause(widget.index);
-        Navigator.pushReplacementNamed(context, '/');
+        Navigator.pushReplacementNamed(context, TabsScreen.routeName,
+            arguments: 0);
         return true;
       },
       child: Scaffold(
+        resizeToAvoidBottomPadding: false,
         backgroundColor: Theme.of(context).primaryColor,
         appBar: showAppBar(context),
         body: Column(
@@ -158,6 +160,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
             Expanded(
               child: Center(
                 child: Stack(
+                  alignment: Alignment.center,
                   children: <Widget>[
                     Text(
                       _time,
@@ -167,8 +170,12 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    CustomPaint(
-                      painter: DrawCircle(),
+                    Container(
+                      width: MediaQuery.of(context).size.width / 1.65,
+                      height: MediaQuery.of(context).size.height / 1.65,
+                      child: CustomPaint(
+                        painter: DrawCircle(),
+                      ),
                     )
                   ],
                 ),
@@ -184,13 +191,10 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
-                        FittedBox(
-                          fit: BoxFit.cover,
+                        Flexible(
                           child: Text(
-                            _title.length <= 21
-                                ? _title.toUpperCase()
-                                : (_title.substring(0, 21) + '...')
-                                    .toUpperCase(),
+                            _title.toUpperCase(),
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 18,
                               color:
@@ -234,7 +238,9 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                                 watch.stop();
                                 paused = true;
                                 await _provider.complete(widget.index);
-                                Navigator.pushReplacementNamed(context, '/');
+                                Navigator.pushReplacementNamed(
+                                    context, TabsScreen.routeName,
+                                    arguments: 0);
                               },
                             ),
                           ],
@@ -294,9 +300,6 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                               IconButton(
                                 icon: Icon(Icons.add_box),
                                 onPressed: () async {
-                                  // List<String> availableLabels =
-                                  // await Provider.of<Task>(context, listen: false)
-                                  //     .availableLabels;
                                   showLabelForm(context, widget.index);
                                 },
                               )

@@ -1,17 +1,17 @@
 import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import './tabs_screen.dart';
 
+import './tabs_screen.dart';
 import '../widgets/app_bar.dart';
-import '../providers/goals.dart';
 import '../widgets/new_labels.dart';
+import '../providers/goals.dart';
 import '../providers/task.dart';
 
 // Screen which shows the timer for the currently running goal
 
 void showLabelForm(BuildContext context, int i) {
-  // Arguments => context: The context for the modal sheet to be created in
+  // Arguments => context: The context for the modal sheet to be created in,
   //              i: The index of the goal to which the labels are to be added to
   //
   // Opens up a modal sheet to add labels to the current goal
@@ -65,14 +65,15 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
     return WillPopScope(
       onWillPop: () async {
         await _provider.complete(widget.index);
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => TabsScreen(1),
-            ));
+        Navigator.pushReplacementNamed(
+          context,
+          TabsScreen.routeName,
+          arguments: 1,
+        );
         return true;
       },
       child: Scaffold(
+        resizeToAvoidBottomPadding: false,
         appBar: showAppBar(context),
         backgroundColor: Theme.of(context).primaryColor,
         body: Column(
@@ -88,8 +89,8 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
                       fontSize: 50,
                     ),
                 strokeWidth: 7.0,
-                width: MediaQuery.of(context).size.width / 1.75,
-                height: MediaQuery.of(context).size.height / 1.75,
+                width: MediaQuery.of(context).size.width / 1.65,
+                height: MediaQuery.of(context).size.height / 1.65,
                 duration: _goalTime.inSeconds,
               ),
             ),
@@ -103,13 +104,10 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
-                        FittedBox(
-                          fit: BoxFit.cover,
+                        Flexible(
                           child: Text(
-                            _title.length <= 21
-                                ? _title.toUpperCase()
-                                : (_title.substring(0, 21) + '...')
-                                    .toUpperCase(),
+                            _title.toUpperCase(),
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 18,
                               color:
@@ -126,7 +124,11 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
                           ),
                           onPressed: () async {
                             await _provider.complete(widget.index);
-                            Navigator.pushReplacementNamed(context, '/');
+                            Navigator.pushReplacementNamed(
+                              context,
+                              TabsScreen.routeName,
+                              arguments: 1,
+                            );
                           },
                         ),
                       ],
@@ -184,9 +186,6 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
                               IconButton(
                                 icon: Icon(Icons.add_box),
                                 onPressed: () async {
-                                  // List<String> availableLabels =
-                                  // await Provider.of<Task>(context, listen: false)
-                                  //     .availableLabels;
                                   showLabelForm(context, widget.index);
                                 },
                               )
