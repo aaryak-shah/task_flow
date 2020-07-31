@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:task_flow/providers/auth.dart';
 import 'package:task_flow/screens/stats_screen.dart';
 import '../screens/settings_screen.dart';
 
-class MainDrawer extends StatelessWidget {
+class MainDrawer extends StatefulWidget {
   // Drawer widget for the TabsScreen
+  @override
+  _MainDrawerState createState() => _MainDrawerState();
+}
+
+class _MainDrawerState extends State<MainDrawer> {
   Widget buildDrawerTile(
-      BuildContext context,
-      IconData icon, 
-      String title, 
-      String route,
-    ) {
+    BuildContext context,
+    IconData icon,
+    String title,
+    String route,
+  ) {
     // Arguments: context: Context for this widget,
     //            icon: Icon for the tile,
     //            title: Title for the tile,
@@ -31,6 +38,16 @@ class MainDrawer extends StatelessWidget {
     );
   }
 
+  String userName = '';
+
+  @override
+  void didChangeDependencies() {
+    Provider.of<Auth>(context, listen: true).userName.then((value) {
+      userName = value;
+      super.didChangeDependencies();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -39,8 +56,7 @@ class MainDrawer extends StatelessWidget {
         body: Column(
           children: <Widget>[
             InkWell(
-              onTap: () {
-              },
+              onTap: () {},
               child: Stack(
                 alignment: Alignment.bottomCenter,
                 children: <Widget>[
@@ -59,7 +75,7 @@ class MainDrawer extends StatelessWidget {
                       ),
                     ),
                     title: Text(
-                      'Aaryak Shah',
+                      userName,
                     ),
                     subtitle: Text(
                       'profile',
@@ -75,12 +91,15 @@ class MainDrawer extends StatelessWidget {
               height: 30,
             ),
             // Drawer tiles
-            buildDrawerTile(context,Icons.perm_contact_calendar, 'Clients', "/"),
-            buildDrawerTile(context,Icons.equalizer, 'Stats', StatsScreen.routeName),
-            buildDrawerTile(context,Icons.info, 'About', "/"),
-            buildDrawerTile(context,Icons.feedback, 'Feedback', "/"),
+            buildDrawerTile(
+                context, Icons.perm_contact_calendar, 'Clients', "/"),
+            buildDrawerTile(
+                context, Icons.equalizer, 'Stats', StatsScreen.routeName),
+            buildDrawerTile(context, Icons.info, 'About', "/"),
+            buildDrawerTile(context, Icons.feedback, 'Feedback', "/"),
             Spacer(),
-            buildDrawerTile(context,Icons.settings, 'Settings', SettingsScreen.routeName),
+            buildDrawerTile(
+                context, Icons.settings, 'Settings', SettingsScreen.routeName),
             SizedBox(
               height: 30,
             ),

@@ -3,8 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:task_flow/providers/auth.dart';
 
-import './screens/login_screen.dart';
+import 'screens/auth_screen.dart';
 import './screens/current_goal_screen.dart';
 import './screens/stats_screen.dart';
 import './screens/settings_screen.dart';
@@ -33,6 +34,9 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
+          create: (context) => Auth(),
+        ),
+        ChangeNotifierProvider(
           create: (context) => Tasks(),
         ),
         ChangeNotifierProvider(
@@ -42,67 +46,69 @@ class MyApp extends StatelessWidget {
           create: (context) => Goals(),
         )
       ],
-      child: MaterialApp(
-        title: 'Task Flow',
-        theme: ThemeData(
-          // dark theme
-          brightness: Brightness.dark,
-          primaryColor: Color(0xFF121212),
-          errorColor: Colors.redAccent,
-          accentColor: Colors.lightGreenAccent,
-          appBarTheme: AppBarTheme(
+      child: Consumer<Auth>(
+        builder: (context, auth, _) => MaterialApp(
+          title: 'Task Flow',
+          theme: ThemeData(
+            // dark theme
+            brightness: Brightness.dark,
+            primaryColor: Color(0xFF121212),
+            errorColor: Colors.redAccent,
+            accentColor: Colors.lightGreenAccent,
+            appBarTheme: AppBarTheme(
+              textTheme: TextTheme(
+                headline6: TextStyle(
+                    fontFamily: 'Montserrat',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 20),
+                overline: TextStyle(fontFamily: 'Montserrat'),
+              ),
+            ),
             textTheme: TextTheme(
+              bodyText1: TextStyle(
+                color: Colors.white,
+              ),
+              bodyText2: TextStyle(
+                color: Colors.white38,
+              ),
               headline6: TextStyle(
-                  fontFamily: 'Montserrat',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 20),
-              overline: TextStyle(fontFamily: 'Montserrat'),
+                color: Colors.white,
+              ),
             ),
           ),
-          textTheme: TextTheme(
-            bodyText1: TextStyle(
-              color: Colors.white,
-            ),
-            bodyText2: TextStyle(
-              color: Colors.white38,
-            ),
-            headline6: TextStyle(
-              color: Colors.white,
-            ),
-          ),
+          // setting home screen as tasks screen
+          home: auth.isAuth ? TabsScreen(0) : LoginScreen(),
+          routes: {
+            SettingsScreen.routeName: (_) => SettingsScreen(),
+            StatsScreen.routeName: (_) => StatsScreen(),
+          },
+          onGenerateRoute: (settings) {
+            // passing arguments to routes
+            if (settings.name == CurrentTaskScreen.routeName) {
+              final int index = (settings.arguments as Map)['index'];
+              final bool wasSuspended =
+                  (settings.arguments as Map)['wasSuspended'];
+              return MaterialPageRoute(builder: (context) {
+                return CurrentTaskScreen(
+                  index: index,
+                  wasSuspended: wasSuspended,
+                );
+              });
+            } else if (settings.name == CurrentGoalScreen.routeName) {
+              final int index = settings.arguments;
+              return MaterialPageRoute(builder: (context) {
+                return CurrentGoalScreen(
+                  index: index,
+                );
+              });
+            } else if (settings.name == TabsScreen.routeName) {
+              final int selected = settings.arguments;
+              return MaterialPageRoute(builder: (context) {
+                return TabsScreen(selected);
+              });
+            }
+          },
         ),
-        // setting home screen as tasks screen
-        home: LoginScreen(),
-        routes: {
-          SettingsScreen.routeName: (_) => SettingsScreen(),
-          StatsScreen.routeName: (_) => StatsScreen(),
-        },
-        onGenerateRoute: (settings) {
-          // passing arguments to routes
-          if (settings.name == CurrentTaskScreen.routeName) {
-            final int index = (settings.arguments as Map)['index'];
-            final bool wasSuspended =
-                (settings.arguments as Map)['wasSuspended'];
-            return MaterialPageRoute(builder: (context) {
-              return CurrentTaskScreen(
-                index: index,
-                wasSuspended: wasSuspended,
-              );
-            });
-          } else if (settings.name == CurrentGoalScreen.routeName) {
-            final int index = settings.arguments;
-            return MaterialPageRoute(builder: (context) {
-              return CurrentGoalScreen(
-                index: index,
-              );
-            });
-          } else if (settings.name == TabsScreen.routeName) {
-            final int selected = settings.arguments;
-            return MaterialPageRoute(builder: (context) {
-              return TabsScreen(selected);
-            });
-          }
-        },
       ),
     );
   }
