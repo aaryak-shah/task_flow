@@ -38,11 +38,12 @@ class _MainDrawerState extends State<MainDrawer> {
     );
   }
 
-  String userName = '';
+  String userName = 'Guest';
 
   @override
   void didChangeDependencies() {
     Provider.of<Auth>(context, listen: true).userName.then((value) {
+      if(value != null)
       userName = value;
       super.didChangeDependencies();
     });

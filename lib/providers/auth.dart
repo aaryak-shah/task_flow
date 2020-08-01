@@ -1,18 +1,17 @@
 import 'dart:async';
-import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../exceptions/http_exception.dart';
-import 'package:http/http.dart' as http;
 
 class Auth with ChangeNotifier {
-  String _token;
+  IdTokenResult _token;
   DateTime _expiryDate;
   String _userId;
   Timer _authTimer;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  String get token {
+  IdTokenResult get token {
     if (_token != null &&
         _expiryDate != null &&
         _expiryDate.isAfter(DateTime.now())) return _token;
@@ -25,36 +24,40 @@ class Auth with ChangeNotifier {
     return prefs.getString('username');
   }
 
-  bool get isAuth => token != null;
-  String get userId => _userId;
+  Future<bool> get isAuth async {
+    var res = await _auth.currentUser();
+    notifyListeners();
+    return res != null;
+  }
 
-  Future<void> _authenticate(String mode, String email, String password) async {
-    String url =
-        'https://identitytoolkit.googleapis.com/v1/accounts:$mode?key=AIzaSyBse6NP5VQipm1kEYpl3RLO8G7_X4uFdTA';
+  Future<String> get userId async {
+    if (_userId == null) {
+      var res = await _auth.currentUser();
+      return res.uid;
+    }
+    return _userId;
+  }
+
+  Future<void> _authenticateWithEmail(
+    String mode,
+    String email,
+    String password,
+  ) async {
     try {
-      final res = await http.post(
-        url,
-        body: json.encode(
-          {
-            'email': email,
-            'password': password,
-            'returnSecureToken': true,
-          },
-        ),
-      );
-      var body = json.decode(res.body);
-      if (body['error'] != null) {
-        throw HttpException(body['error']['message']);
+      AuthResult res;
+      if (mode == 'signup') {
+        res = (await _auth.createUserWithEmailAndPassword(
+          email: email,
+          password: password,
+        ));
+      } else {
+        res = await _auth.signInWithEmailAndPassword(
+            email: email, password: password);
       }
-      _token = body['idToken'];
-      _userId = body['localId'];
-      _expiryDate = DateTime.now().add(
-        Duration(
-          seconds: int.parse(
-            body['expiresIn'],
-          ),
-        ),
-      );
+      FirebaseUser user = res.user;
+      _userId = user.uid;
+      _token = await user.getIdToken();
+      _expiryDate = _token.expirationTime;
     } catch (error) {
       throw error;
     }
@@ -62,24 +65,31 @@ class Auth with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> signup(String userName, String email, String password) async {
-    await _authenticate('signUp', email, password);
+  Future<void> signupWithEmail(
+    String userName,
+    String email,
+    String password,
+  ) async {
+    _authenticateWithEmail('signup', email, password);
     final prefs = await SharedPreferences.getInstance();
     prefs.setString('username', userName);
   }
 
-  Future<void> login(String email, String password) async {
-    await _authenticate('signInWithPassword', email, password);
+  Future<void> loginWithEmail(
+    String email,
+    String password,
+  ) async {
+    _authenticateWithEmail('login', email, password);
   }
 
-  void logout() {
+  Future<void> logout() async {
     _token = null;
-    _userId = null;
     _expiryDate = null;
     if (_authTimer != null) {
       _authTimer.cancel();
       _authTimer = null;
     }
+    await _auth.signOut();
     notifyListeners();
   }
 

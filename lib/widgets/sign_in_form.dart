@@ -45,7 +45,7 @@ class _SignInFormState extends State<SignInForm> {
     });
     try {
       await Provider.of<Auth>(context, listen: false)
-          .login(_authData['email'], _authData['password']);
+          .loginWithEmail(_authData['email'], _authData['password']);
       Navigator.of(context).pop();
     } on HttpException catch (error) {
       var errorMessage = 'Authentication error';

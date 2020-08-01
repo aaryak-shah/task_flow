@@ -46,7 +46,7 @@ class _SignUpFormState extends State<SignUpForm> {
     });
     try {
       await Provider.of<Auth>(context, listen: false)
-          .signup(_authData['name'] ,_authData['email'], _authData['password']);
+          .signupWithEmail(_authData['name'] ,_authData['email'], _authData['password']);
       Navigator.of(context).pop();
     } on HttpException catch (error) {
       var errorMessage = 'Authentication error';
@@ -88,8 +88,6 @@ class _SignUpFormState extends State<SignUpForm> {
   @override
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery.of(context).size;
-    final authProvider = Provider.of<Auth>(context, listen: false);
-
     return Container(
       height: 360,
       constraints: BoxConstraints(minHeight: 360),

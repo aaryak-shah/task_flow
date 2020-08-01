@@ -27,8 +27,15 @@ void main() async {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   // This widget is the root of your application.
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool isAuth = false;
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -37,17 +44,22 @@ class MyApp extends StatelessWidget {
           create: (context) => Auth(),
         ),
         ChangeNotifierProvider(
-          create: (context) => Tasks(),
+          create: (context) => Tasks(context),
         ),
         ChangeNotifierProvider(
           create: (context) => Task(),
         ),
         ChangeNotifierProvider(
-          create: (context) => Goals(),
+          create: (context) => Goals(context),
         )
       ],
-      child: Consumer<Auth>(
-        builder: (context, auth, _) => MaterialApp(
+      child: Consumer<Auth>(builder: (context, auth, _) {
+        auth.isAuth.then((value) {
+          setState(() {
+            isAuth = value;
+          });
+        });
+        return MaterialApp(
           title: 'Task Flow',
           theme: ThemeData(
             // dark theme
@@ -77,7 +89,7 @@ class MyApp extends StatelessWidget {
             ),
           ),
           // setting home screen as tasks screen
-          home: auth.isAuth ? TabsScreen(0) : LoginScreen(),
+          home: isAuth ? TabsScreen(0) : LoginScreen(),
           routes: {
             SettingsScreen.routeName: (_) => SettingsScreen(),
             StatsScreen.routeName: (_) => StatsScreen(),
@@ -108,8 +120,8 @@ class MyApp extends StatelessWidget {
               });
             }
           },
-        ),
-      ),
+        );
+      }),
     );
   }
 }

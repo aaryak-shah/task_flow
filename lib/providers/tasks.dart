@@ -1,98 +1,23 @@
 import 'dart:io';
+import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
+import 'package:http/http.dart' as http;
 import 'package:csv/csv.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import './task.dart';
+import 'auth.dart';
 
 class Tasks with ChangeNotifier {
   // variable that stores list of tasks
+  BuildContext context;
   List<Task> _tasks;
-
-  // DUMMY DATA
-  //   Task(
-  //     id: 't1',
-  //     title: 'Math Homework',
-  //     start: DateTime(2020, 7, 13, 8, 20, 0),
-  //     categories: ['College', 'Math'],
-  //     labels: ['BS Grewal'],
-  //     superProjectName: null,
-  //     isRunning: false,
-  //     isPaused: true,
-  //     latestPause: DateTime(2020, 7, 13, 10, 0, 0),
-  //     end: DateTime(2020, 7, 13, 10, 0, 0),
-  //   ),
-  //   Task(
-  //     id: 't2',
-  //     title: 'DE Homework',
-  //     start: DateTime(2020, 7, 14, 10, 5, 0),
-  //     categories: ['College', 'Electronics'],
-  //     labels: [],
-  //     superProjectName: null,
-  //     isRunning: false,
-  //     isPaused: true,
-  //     latestPause: DateTime(2020, 7, 14, 10, 40, 0),
-  //   ),
-  //   Task(
-  //     id: 't3',
-  //     title: 'Sketching Practise',
-  //     start: DateTime(2020, 7, 14, 12, 30, 0),
-  //     categories: ['Personal', 'Art'],
-  //     labels: ['Sketching'],
-  //     superProjectName: null,
-  //     isRunning: false,
-  //     isPaused: true,
-  //     latestPause: DateTime(2020, 7, 14, 14, 42, 0),
-  //     end: DateTime(2020, 7, 14, 14, 42, 0),
-  //   ),
-  //   Task(
-  //     id: 't4',
-  //     title: 'C++ Practise',
-  //     start: DateTime(2020, 7, 14, 15, 0, 0),
-  //     categories: ['College', 'Computers'],
-  //     labels: ['C++'],
-  //     superProjectName: null,
-  //     isRunning: false,
-  //     isPaused: true,
-  //     latestPause: DateTime(2020, 7, 14, 15, 50, 0),
-  //   ),
-  //   Task(
-  //     id: 't5',
-  //     title: 'House Chores',
-  //     start: DateTime(2020, 7, 14, 16, 0, 0),
-  //     categories: ['Personal'],
-  //     labels: [],
-  //     superProjectName: null,
-  //     isRunning: false,
-  //     isPaused: true,
-  //     latestPause: DateTime(2020, 7, 14, 17, 0, 0),
-  //   ),
-  //   Task(
-  //     id: 't6',
-  //     title: 'Cook Dinner',
-  //     start: DateTime(2020, 7, 14, 19, 0, 0),
-  //     categories: ['Cooking'],
-  //     labels: [],
-  //     superProjectName: null,
-  //     isRunning: false,
-  //     isPaused: true,
-  //     latestPause: DateTime(2020, 7, 14, 19, 54, 0),
-  //   ),
-  //   Task(
-  //     id: 't7',
-  //     title: 'Data Science Course',
-  //     start: DateTime(2020, 7, 14, 20, 0, 0),
-  //     categories: ['Personal', 'Computers'],
-  //     labels: ['Udemy'],
-  //     superProjectName: null,
-  //     isRunning: true,
-  //     isPaused: false,
-  //     latestPause: DateTime(2020, 7, 14, 21, 30, 0),
-  //   ),
-  // ];
+  Tasks(this.context);
   Future<String> get _localPath async {
     // gets the AppData directory
     final directory = await getApplicationDocumentsDirectory();
@@ -336,7 +261,7 @@ class Tasks with ChangeNotifier {
   Future<void> pause(int index) async {
     // Arguments => index: The index of the task to be paused
     // Pauses the task at 'index' in the _tasks list
-    
+
     _tasks[index].isRunning = false;
     _tasks[index].isPaused = true;
     _tasks[index].pauses++;
@@ -347,9 +272,9 @@ class Tasks with ChangeNotifier {
 
   Future<void> suspend(int index) async {
     // Arguments => index: The index of the task to be suspended
-    // Suspends (i.e. Pauses without incrementing the no. of pauses) 
+    // Suspends (i.e. Pauses without incrementing the no. of pauses)
     // the task at 'index' in the _tasks list
-    
+
     _tasks[index].isRunning = false;
     _tasks[index].isPaused = true;
     _tasks[index].latestPause = DateTime.now();
@@ -371,11 +296,38 @@ class Tasks with ChangeNotifier {
     // Arguments => index: The index of the task to be marked as complete
     // Ends the task at 'index' in the _tasks list
 
+    var authData = Provider.of<Auth>(context, listen: false);
+    String userId = await authData.userId;
+    String token = authData.token.token;
+    final url =
+        "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token";
     _tasks[index].isRunning = false;
     _tasks[index].isPaused = true;
     _tasks[index].end = DateTime.now();
     _tasks[index].latestPause = _tasks[index].end;
     await writeCsv(_tasks);
+
+    final res = await http.post(
+      url,
+      body: json.encode(
+        {
+          'id': _tasks[index].id,
+          'title': _tasks[index].title,
+          'start':
+              DateFormat("dd-MM-yyyy HH:mm:ss").format(_tasks[index].start),
+          'latestPause': DateFormat("dd-MM-yyyy HH:mm:ss")
+              .format(_tasks[index].latestPause),
+          'end': DateFormat("dd-MM-yyyy HH:mm:ss").format(_tasks[index].end),
+          'pauses': _tasks[index].pauses,
+          'pauseTime': _tasks[index].pauseTime.inSeconds,
+          'category': _tasks[index].category,
+          'labels': _tasks[index].labels.isNotEmpty
+              ? _tasks[index].labels.join("|")
+              : "",
+        },
+      ),
+    );
+
     notifyListeners();
   }
 }

@@ -1,40 +1,22 @@
 import 'dart:io';
+import 'dart:convert';
 
+import 'package:http/http.dart' as http;
 import 'package:csv/csv.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import './task.dart';
+import 'auth.dart';
 
 class Goals with ChangeNotifier {
-  
-  // DUMMY DATA
-  // List<Task> _goals = [
-  //   Task(
-  //     id: '1',
-  //     title: 'Math Homework',
-  //     start: DateTime(2020, 7, 25, 1, 30, 0),
-  //     end: DateTime(2020, 7, 25, 2, 35, 0),
-  //     category: 'Academics',
-  //     labels: ['Erwin Kreyszig', 'Vectors', 'Maths'],
-  //     superProjectName: null,
-  //     goalTime: Duration(hours: 1),
-  //   ),
-  //   Task(
-  //     id: '2',
-  //     title: 'Physics Homework',
-  //     start: DateTime(2020, 7, 25, 4, 45, 0),
-  //     end: DateTime(2020, 7, 25, 6, 0, 0),
-  //     category: 'Academics',
-  //     labels: ['Physics', 'Semiconductors'],
-  //     superProjectName: null,
-  //     goalTime: Duration(hours: 1, minutes: 30),
-  //   ),
-  // ];
-
+  BuildContext context;
   List<Task> _goals;
+  Goals(this.context);
 
   List<Task> get goals {
     // goals getter, gives a copy of _goals
@@ -190,43 +172,42 @@ class Goals with ChangeNotifier {
   Future<void> complete(int index) async {
     // Arguments => index: The index of the goal to be marked as complete
     // Ends the goal at 'index' in the _goals list
-
+    var authData = Provider.of<Auth>(context, listen: false);
+    String userId = await authData.userId;
+    String token = authData.token.token;
+    final url =
+        "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token";
     _goals[index].isRunning = false;
     _goals[index].isPaused = true;
     _goals[index].end = DateTime.now();
     await writeCsv(_goals);
+
+    final res = await http.post(
+      url,
+      body: json.encode(
+        {
+          'id': _goals[index].id,
+          'title': _goals[index].title,
+          'start':
+              DateFormat("dd-MM-yyyy HH:mm:ss").format(_goals[index].start),
+          'end': DateFormat("dd-MM-yyyy HH:mm:ss").format(_goals[index].end),
+          'goalTime': _goals[index].goalTime.inSeconds,
+          'category': _goals[index].category,
+          'labels': _goals[index].labels.isNotEmpty
+              ? _goals[index].labels.join("|")
+              : "",
+        },
+      ),
+    );
+
     notifyListeners();
   }
 
-  // List<Map<String, Object>> get weekGoals {
-  //   return List.generate(7, (index) {
-  //     final weekDay = DateTime.now().subtract(Duration(days: index));
-  //     Duration total = Duration();
-
-  //     for (int i = 0; i < recentGoals.length; i++) {
-  //       if (recentGoals[i].latestPause.day == weekDay.day &&
-  //           recentGoals[i].latestPause.month == weekDay.month &&
-  //           recentGoals[i].latestPause.year == weekDay.year) {
-  //         total += (recentGoals[i].getRunningTime());
-  //       }
-  //     }
-
-  //     return {'day': index, 'time': total};
-  //   }).reversed.toList();
-  // }
-
-  // Duration get totalTime {
-  //   Duration time;
-  //   recentGoals.forEach((goal) {
-  //     time += goal.
-  //   });
-  // }
-
   Future<void> addLabels(
-      int index, 
-      List<String> selected, 
-      List<String> labels,
-    ) async {
+    int index,
+    List<String> selected,
+    List<String> labels,
+  ) async {
     // Arguments => index: The index of the goal in the list to which the labels are to be added,
     //              selected: The list of labels to be added to the goal,
     //              labels: The list of available labels (shown as chips),
@@ -248,7 +229,7 @@ class Goals with ChangeNotifier {
     return prefs.getStringList('AvailableLabels') ?? [];
   }
 
-    Future<void> purgeOldGoals() async {
+  Future<void> purgeOldGoals() async {
     // function to delete (purge) goals which have a latest pause date
     // older than 1 week so as to save space and computation time
 
