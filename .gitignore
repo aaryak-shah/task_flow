@@ -21,7 +21,6 @@
 
 .vscode/
 ios/
-android/
 .packages
 taskflow.iml
 test/
