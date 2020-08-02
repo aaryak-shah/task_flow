@@ -9,11 +9,11 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  bool isSigningIn = false;
+  bool isSigningIn = false; //bool flag to switch between sign in and sign up
   void _showFormDialog(BuildContext context) {
     showDialog(
       context: context,
-      child: AlertDialog(
+      child: AlertDialog( //dialog window for authentication forms
         titlePadding: EdgeInsets.fromLTRB(20, 20, 0, 0),
         contentPadding: EdgeInsets.symmetric(horizontal: 5),
         title: Text(isSigningIn ? 'Sign In' : 'Sign Up'),
@@ -21,7 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
         content: isSigningIn ? SignInForm() : SignUpForm(),
         actions: <Widget>[
           GestureDetector(
-            onTap: () {
+            onTap: () { //auth mode switcher
               isSigningIn = !isSigningIn;
               Navigator.of(context).pop();
               _showFormDialog(context);
@@ -47,6 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Spacer(),
+            //auth screen title...
             Text(
               'Welcome to'.toUpperCase(),
               textAlign: TextAlign.center,
@@ -79,35 +80,34 @@ class _LoginScreenState extends State<LoginScreen> {
               ]),
             ),
             Spacer(),
+            //auth functionality...
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                RaisedButton(
-                  padding: EdgeInsets.symmetric(vertical: 8),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30)),
-                  onPressed: () {
-                    setState(() {
-                      isSigningIn = true;
-                    });
-                    _showFormDialog(context);
-                  },
-                  color: Colors.white,
-                  textColor: Colors.black,
-                  child: Container(
-                    width: MediaQuery.of(context).size.width * 0.4,
+                //Sign in with google button
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.6,
+                  child: RaisedButton(
+                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 15),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30)),
+                    onPressed: () {
+                      //
+                    },
+                    color: Color(0xDEFFFFFF),
+                    textColor: Colors.black,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         Image.asset(
-                          "assets/images/login.png",
-                          scale: 1.3,
+                          "assets/images/google_logo.png",
+                          scale: 20,
                         ),
                         SizedBox(
                           width: 10,
                         ),
                         Text(
-                          'Sign In',
+                          'Sign In With Google',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 18,
@@ -125,29 +125,30 @@ class _LoginScreenState extends State<LoginScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                RaisedButton(
-                  padding: EdgeInsets.symmetric(vertical: 8),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30)),
-                  onPressed: () {
-                    setState(() {
-                      isSigningIn = false;
-                    });
-                    _showFormDialog(context);
-                  },
-                  color: Colors.white,
-                  textColor: Colors.black,
-                  child: Container(
-                    width: MediaQuery.of(context).size.width * 0.4,
+                //Sign in with email button
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.6,
+                  child: RaisedButton(
+                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30)),
+                    onPressed: () {
+                      setState(() {
+                        isSigningIn = true;
+                      });
+                      _showFormDialog(context);
+                    },
+                    color: Color(0xDEFFFFFF),
+                    textColor: Colors.black,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Icon(Icons.assignment_ind),
+                        Icon(Icons.email),
                         SizedBox(
                           width: 10,
                         ),
                         Text(
-                          'Sign Up',
+                          'Continue With Email',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 18,
@@ -160,8 +161,50 @@ class _LoginScreenState extends State<LoginScreen> {
               ],
             ),
             SizedBox(
-              height: 20,
+              height: 10,
             ),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.center,
+            //   children: <Widget>[
+            //     //Sign up with email button
+            //     RaisedButton(
+            //       padding: EdgeInsets.symmetric(vertical: 8),
+            //       shape: RoundedRectangleBorder(
+            //           borderRadius: BorderRadius.circular(30)),
+            //       onPressed: () {
+            //         setState(() {
+            //           isSigningIn = false;
+            //         });
+            //         _showFormDialog(context);
+            //       },
+            //       color: Colors.white,
+            //       textColor: Colors.black,
+            //       child: Container(
+            //         width: MediaQuery.of(context).size.width * 0.4,
+            //         child: Row(
+            //           mainAxisAlignment: MainAxisAlignment.center,
+            //           children: <Widget>[
+            //             Icon(Icons.assignment_ind),
+            //             SizedBox(
+            //               width: 10,
+            //             ),
+            //             Text(
+            //               'Sign Up',
+            //               textAlign: TextAlign.center,
+            //               style: TextStyle(
+            //                 fontSize: 18,
+            //               ),
+            //             ),
+            //           ],
+            //         ),
+            //       ),
+            //     ),
+            //   ],
+            // ),
+            // SizedBox(
+            //   height: 10,
+            // ),
+            
             // Row(
             //   mainAxisAlignment: MainAxisAlignment.center,
             //   children: <Widget>[
@@ -186,6 +229,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
+                //Skip authentication button
                 GestureDetector(
                   onTap: () {
                     Navigator.of(context).pushReplacementNamed(
@@ -193,7 +237,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         arguments: 0);
                   },
                   child: Text(
-                    'Continue without signing in',
+                    'Use this app without an account',
                     style: TextStyle(
                       color: Colors.grey,
                       fontSize: 16,

@@ -44,13 +44,13 @@ class _MyAppState extends State<MyApp> {
           create: (context) => Auth(),
         ),
         ChangeNotifierProvider(
-          create: (context) => Tasks(context),
+          create: (context) => Tasks(context), //passing context for calling Auth provider in Tasks
         ),
         ChangeNotifierProvider(
           create: (context) => Task(),
         ),
         ChangeNotifierProvider(
-          create: (context) => Goals(context),
+          create: (context) => Goals(context), //passing context for calling Auth provider in Goals
         )
       ],
       child: Consumer<Auth>(builder: (context, auth, _) {
