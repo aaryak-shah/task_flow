@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:task_flow/providers/auth.dart';
 import 'package:task_flow/screens/tabs_screen.dart';
 import 'package:task_flow/widgets/sign_in_form.dart';
 import 'package:task_flow/widgets/sign_up_form.dart';
@@ -13,7 +15,8 @@ class _LoginScreenState extends State<LoginScreen> {
   void _showFormDialog(BuildContext context) {
     showDialog(
       context: context,
-      child: AlertDialog( //dialog window for authentication forms
+      child: AlertDialog(
+        //dialog window for authentication forms
         titlePadding: EdgeInsets.fromLTRB(20, 20, 0, 0),
         contentPadding: EdgeInsets.symmetric(horizontal: 5),
         title: Text(isSigningIn ? 'Sign In' : 'Sign Up'),
@@ -21,7 +24,8 @@ class _LoginScreenState extends State<LoginScreen> {
         content: isSigningIn ? SignInForm() : SignUpForm(),
         actions: <Widget>[
           GestureDetector(
-            onTap: () { //auth mode switcher
+            onTap: () {
+              //auth mode switcher
               isSigningIn = !isSigningIn;
               Navigator.of(context).pop();
               _showFormDialog(context);
@@ -92,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30)),
                     onPressed: () {
-                      //
+                      Provider.of<Auth>(context, listen: false).googleAuth();
                     },
                     color: Color(0xDEFFFFFF),
                     textColor: Colors.black,
@@ -204,7 +208,7 @@ class _LoginScreenState extends State<LoginScreen> {
             // SizedBox(
             //   height: 10,
             // ),
-            
+
             // Row(
             //   mainAxisAlignment: MainAxisAlignment.center,
             //   children: <Widget>[

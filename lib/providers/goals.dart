@@ -11,7 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import './task.dart';
-import 'auth.dart';
+import './auth.dart';
 
 class Goals with ChangeNotifier {
   BuildContext context;
