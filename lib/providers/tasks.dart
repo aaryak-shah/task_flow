@@ -296,37 +296,39 @@ class Tasks with ChangeNotifier {
     // Arguments => index: The index of the task to be marked as complete
     // Ends the task at 'index' in the _tasks list
 
-    var authData = Provider.of<Auth>(context, listen: false);
-    String userId = await authData.userId;
-    String token = authData.token.token;
-    final url =
-        "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token";
     _tasks[index].isRunning = false;
     _tasks[index].isPaused = true;
     _tasks[index].end = DateTime.now();
     _tasks[index].latestPause = _tasks[index].end;
     await writeCsv(_tasks);
 
-    final res = await http.post(
-      url,
-      body: json.encode(
-        {
-          'id': _tasks[index].id,
-          'title': _tasks[index].title,
-          'start':
-              DateFormat("dd-MM-yyyy HH:mm:ss").format(_tasks[index].start),
-          'latestPause': DateFormat("dd-MM-yyyy HH:mm:ss")
-              .format(_tasks[index].latestPause),
-          'end': DateFormat("dd-MM-yyyy HH:mm:ss").format(_tasks[index].end),
-          'pauses': _tasks[index].pauses,
-          'pauseTime': _tasks[index].pauseTime.inSeconds,
-          'category': _tasks[index].category,
-          'labels': _tasks[index].labels.isNotEmpty
-              ? _tasks[index].labels.join("|")
-              : "",
-        },
-      ),
-    );
+    var authData = Provider.of<Auth>(context, listen: false);
+    if (await authData.isAuth) {
+      String userId = await authData.userId;
+      String token = authData.token.token;
+      final url =
+          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token";
+      final res = await http.post(
+        url,
+        body: json.encode(
+          {
+            'id': _tasks[index].id,
+            'title': _tasks[index].title,
+            'start':
+                DateFormat("dd-MM-yyyy HH:mm:ss").format(_tasks[index].start),
+            'latestPause': DateFormat("dd-MM-yyyy HH:mm:ss")
+                .format(_tasks[index].latestPause),
+            'end': DateFormat("dd-MM-yyyy HH:mm:ss").format(_tasks[index].end),
+            'pauses': _tasks[index].pauses,
+            'pauseTime': _tasks[index].pauseTime.inSeconds,
+            'category': _tasks[index].category,
+            'labels': _tasks[index].labels.isNotEmpty
+                ? _tasks[index].labels.join("|")
+                : "",
+          },
+        ),
+      );
+    }
 
     notifyListeners();
   }

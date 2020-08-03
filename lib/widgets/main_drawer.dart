@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/providers/auth.dart';
+import 'package:task_flow/screens/profile_screen.dart';
 import 'package:task_flow/screens/stats_screen.dart';
 import '../screens/settings_screen.dart';
 
@@ -39,12 +40,13 @@ class _MainDrawerState extends State<MainDrawer> {
   }
 
   String userName = 'Guest';
+  String photoUrl = '';
 
   @override
   void didChangeDependencies() {
+    photoUrl = Provider.of<Auth>(context, listen: true).photoUrl;
     Provider.of<Auth>(context, listen: true).userName.then((value) {
-      if(value != null)
-      userName = value;
+      if (value != null) userName = value;
       super.didChangeDependencies();
     });
   }
@@ -57,7 +59,9 @@ class _MainDrawerState extends State<MainDrawer> {
         body: Column(
           children: <Widget>[
             InkWell(
-              onTap: () {},
+              onTap: () {
+                Navigator.of(context).pushNamed(ProfileScreen.routeName);
+              },
               child: Stack(
                 alignment: Alignment.bottomCenter,
                 children: <Widget>[
@@ -71,9 +75,11 @@ class _MainDrawerState extends State<MainDrawer> {
                   ),
                   ListTile(
                     leading: CircleAvatar(
-                      backgroundImage: AssetImage(
-                        'assets/images/default_pfp.png',
-                      ),
+                      backgroundImage: photoUrl == ''
+                          ? AssetImage(
+                              'assets/images/default_pfp.png',
+                            )
+                          : NetworkImage(photoUrl),
                     ),
                     title: Text(
                       userName,

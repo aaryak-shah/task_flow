@@ -172,33 +172,35 @@ class Goals with ChangeNotifier {
   Future<void> complete(int index) async {
     // Arguments => index: The index of the goal to be marked as complete
     // Ends the goal at 'index' in the _goals list
-    var authData = Provider.of<Auth>(context, listen: false);
-    String userId = await authData.userId;
-    String token = authData.token.token;
-    final url =
-        "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token";
     _goals[index].isRunning = false;
     _goals[index].isPaused = true;
     _goals[index].end = DateTime.now();
     await writeCsv(_goals);
 
-    final res = await http.post(
-      url,
-      body: json.encode(
-        {
-          'id': _goals[index].id,
-          'title': _goals[index].title,
-          'start':
-              DateFormat("dd-MM-yyyy HH:mm:ss").format(_goals[index].start),
-          'end': DateFormat("dd-MM-yyyy HH:mm:ss").format(_goals[index].end),
-          'goalTime': _goals[index].goalTime.inSeconds,
-          'category': _goals[index].category,
-          'labels': _goals[index].labels.isNotEmpty
-              ? _goals[index].labels.join("|")
-              : "",
-        },
-      ),
-    );
+    var authData = Provider.of<Auth>(context, listen: false);
+    if (await authData.isAuth) {
+      String userId = await authData.userId;
+      String token = authData.token.token;
+      final url =
+          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token";
+      final res = await http.post(
+        url,
+        body: json.encode(
+          {
+            'id': _goals[index].id,
+            'title': _goals[index].title,
+            'start':
+                DateFormat("dd-MM-yyyy HH:mm:ss").format(_goals[index].start),
+            'end': DateFormat("dd-MM-yyyy HH:mm:ss").format(_goals[index].end),
+            'goalTime': _goals[index].goalTime.inSeconds,
+            'category': _goals[index].category,
+            'labels': _goals[index].labels.isNotEmpty
+                ? _goals[index].labels.join("|")
+                : "",
+          },
+        ),
+      );
+    }
 
     notifyListeners();
   }

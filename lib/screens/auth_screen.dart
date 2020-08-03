@@ -236,6 +236,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 //Skip authentication button
                 GestureDetector(
                   onTap: () {
+                    Provider.of<Auth>(context, listen: false).setGuest();
                     Navigator.of(context).pushReplacementNamed(
                         TabsScreen.routeName,
                         arguments: 0);

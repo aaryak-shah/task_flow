@@ -2,27 +2,29 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 //Auth Provider
 class Auth with ChangeNotifier {
+  bool _isGuestUser = false;
   IdTokenResult _token;
   DateTime _expiryDate;
   String _userId;
   Timer _authTimer;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: [
+      'email',
+      'https://www.googleapis.com/auth/userinfo.profile',
+    ],
+  );
+  String _photoUrl = '';
 
   Future<void> googleAuth() async {
+    _isGuestUser = false;
     debugPrint('googleAuth called');
     FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-    GoogleSignIn _googleSignIn = GoogleSignIn(
-      scopes: [
-        'email',
-        'https://www.googleapis.com/auth/userinfo.profile',
-      ],
-    );
+
     GoogleSignInAccount _googleUser;
     GoogleSignInAuthentication _googleAuthentication;
     AuthCredential _credential;
@@ -45,9 +47,19 @@ class Auth with ChangeNotifier {
       _token = await _currentUser.getIdToken();
       _expiryDate = _token.expirationTime;
       _userId = _currentUser.uid;
+      _photoUrl = _currentUser.photoUrl;
     } catch (error) {
       print(error);
     }
+  }
+
+  bool get isGuestUser {
+    return _isGuestUser;
+  }
+
+  void setGuest() {
+    _isGuestUser = true;
+    notifyListeners();
   }
 
   //getter for token data, returns _token
@@ -58,11 +70,15 @@ class Auth with ChangeNotifier {
     return null;
   }
 
+  String get photoUrl {
+    return _photoUrl;
+  }
+
   //getter for username from shared prefs
   Future<String> get userName async {
-    final prefs = await SharedPreferences.getInstance();
+    var user = await _auth.currentUser();
     notifyListeners();
-    return prefs.getString('username');
+    return user != null ? user.displayName : 'Guest';
   }
 
   //getter for isAuth bool flag. Utilises currentUser() method to obtain data and refresh user's token simultaneously
@@ -84,10 +100,12 @@ class Auth with ChangeNotifier {
   //general method to authenticate (sign up + sign in) user using email + password
   //uses mode parameter to switch between sign in and sign up
   Future<void> _authenticateWithEmail(
+    String name,
     String mode,
     String email,
     String password,
   ) async {
+    _isGuestUser = false;
     try {
       AuthResult res;
       if (mode == 'signup') {
@@ -106,6 +124,12 @@ class Auth with ChangeNotifier {
       _userId = user.uid;
       _token = await user.getIdToken(); //obtain user's token data
       _expiryDate = _token.expirationTime; //obtain token expiry date
+
+      if (mode == 'signup') {
+        UserUpdateInfo info = UserUpdateInfo();
+        info.displayName = name;
+        user.updateProfile(info);
+      }
     } catch (error) {
       throw error;
     }
@@ -119,9 +143,7 @@ class Auth with ChangeNotifier {
     String email,
     String password,
   ) async {
-    _authenticateWithEmail('signup', email, password);
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString('username', userName);
+    _authenticateWithEmail(userName, 'signup', email, password);
   }
 
   //method to sign in user with email
@@ -129,11 +151,12 @@ class Auth with ChangeNotifier {
     String email,
     String password,
   ) async {
-    _authenticateWithEmail('login', email, password);
+    _authenticateWithEmail('', 'login', email, password);
   }
 
   //method to logout user
   Future<void> logout() async {
+    _isGuestUser = true;
     _token = null;
     _expiryDate = null;
     if (_authTimer != null) {
@@ -141,6 +164,11 @@ class Auth with ChangeNotifier {
       _authTimer = null;
     }
     await _auth.signOut();
+    bool isGoogleSignIn = await _googleSignIn.isSignedIn();
+    if (isGoogleSignIn) {
+      _googleSignIn.signOut();
+    }
+    _photoUrl = '';
     notifyListeners();
   }
 

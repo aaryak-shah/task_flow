@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/providers/auth.dart';
+import 'package:task_flow/screens/profile_screen.dart';
 
 import 'screens/auth_screen.dart';
 import './screens/current_goal_screen.dart';
@@ -35,6 +36,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool isAuth = false;
+  bool isGuest = false;
 
   @override
   Widget build(BuildContext context) {
@@ -44,13 +46,15 @@ class _MyAppState extends State<MyApp> {
           create: (context) => Auth(),
         ),
         ChangeNotifierProvider(
-          create: (context) => Tasks(context), //passing context for calling Auth provider in Tasks
+          create: (context) => Tasks(
+              context), //passing context for calling Auth provider in Tasks
         ),
         ChangeNotifierProvider(
           create: (context) => Task(),
         ),
         ChangeNotifierProvider(
-          create: (context) => Goals(context), //passing context for calling Auth provider in Goals
+          create: (context) => Goals(
+              context), //passing context for calling Auth provider in Goals
         )
       ],
       child: Consumer<Auth>(builder: (context, auth, _) {
@@ -59,6 +63,13 @@ class _MyAppState extends State<MyApp> {
             isAuth = value;
           });
         });
+        if (auth.isGuestUser) {
+          Future.delayed(Duration.zero, () {
+            setState(() {
+              isGuest = true;
+            });
+          });
+        }
         return MaterialApp(
           title: 'Task Flow',
           theme: ThemeData(
@@ -89,10 +100,11 @@ class _MyAppState extends State<MyApp> {
             ),
           ),
           // setting home screen as tasks screen
-          home: isAuth ? TabsScreen(0) : LoginScreen(),
+          home: (isAuth || isGuest) ? TabsScreen(0) : LoginScreen(),
           routes: {
             SettingsScreen.routeName: (_) => SettingsScreen(),
             StatsScreen.routeName: (_) => StatsScreen(),
+            ProfileScreen.routeName: (_) => ProfileScreen(),
           },
           onGenerateRoute: (settings) {
             // passing arguments to routes
