@@ -23,7 +23,6 @@ class Auth with ChangeNotifier {
   Future<void> googleAuth() async {
     _isGuestUser = false;
     debugPrint('googleAuth called');
-    FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
     GoogleSignInAccount _googleUser;
     GoogleSignInAuthentication _googleAuthentication;
@@ -38,11 +37,11 @@ class Auth with ChangeNotifier {
         idToken: _googleAuthentication.idToken,
         accessToken: _googleAuthentication.accessToken,
       );
-      _authResult = await _firebaseAuth.signInWithCredential(_credential);
+      _authResult = await _auth.signInWithCredential(_credential);
       _user = _authResult.user;
       // assert(!_user.isAnonymous);
       // assert(await _user.getIdToken() != null);
-      _currentUser = await _firebaseAuth.currentUser();
+      _currentUser = await _auth.currentUser();
       // assert(_user.uid == _currentUser.uid);
       _token = await _currentUser.getIdToken();
       _expiryDate = _token.expirationTime;
@@ -84,6 +83,12 @@ class Auth with ChangeNotifier {
   //getter for isAuth bool flag. Utilises currentUser() method to obtain data and refresh user's token simultaneously
   Future<bool> get isAuth async {
     var res = await _auth.currentUser();
+    if (res != null) {
+      _token = await res.getIdToken();
+      _expiryDate = _token.expirationTime;
+      _photoUrl = res.photoUrl ?? '';
+      _userId = res.uid;
+    }
     notifyListeners();
     return res != null;
   }

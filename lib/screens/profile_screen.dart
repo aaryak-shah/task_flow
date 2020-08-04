@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:task_flow/providers/tasks.dart';
 
 import '../widgets/sign_in_form.dart';
 import '../widgets/sign_up_form.dart';
@@ -16,6 +17,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   bool _isAuthenticated = false;
   bool _usingGoogle = true;
+  bool _isSyncing = false;
   bool isSigningIn = true;
   String userName = 'Guest';
   String photoUrl = '';
@@ -69,6 +71,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.didChangeDependencies();
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -120,6 +123,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: ListTile(
                     leading: Icon(Icons.settings_backup_restore),
                     title: Text('Reset Password'),
+                  ),
+                ),
+                InkWell(
+                  onTap: () {
+                    setState(() {
+                      _isSyncing = true;
+                    });
+                    Provider.of<Tasks>(context, listen: false).syncWithFirebase().then((_) {
+                      setState(() {
+                        _isSyncing = false;
+                      });
+                    });
+                  },
+                  child: ListTile(
+                    leading: _isSyncing
+                        ? CircularProgressIndicator(strokeWidth: 1,)
+                        : Icon(Icons.sync),
+                    title: Text('Sync My Data'),
                   ),
                 ),
               ],
