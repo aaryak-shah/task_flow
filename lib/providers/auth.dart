@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:task_flow/exceptions/http_exception.dart';
 
 //Auth Provider
 class Auth with ChangeNotifier {
@@ -39,10 +40,7 @@ class Auth with ChangeNotifier {
       );
       _authResult = await _auth.signInWithCredential(_credential);
       _user = _authResult.user;
-      // assert(!_user.isAnonymous);
-      // assert(await _user.getIdToken() != null);
       _currentUser = await _auth.currentUser();
-      // assert(_user.uid == _currentUser.uid);
       _token = await _currentUser.getIdToken();
       _expiryDate = _token.expirationTime;
       _userId = _currentUser.uid;
@@ -82,15 +80,15 @@ class Auth with ChangeNotifier {
 
   //getter for isAuth bool flag. Utilises currentUser() method to obtain data and refresh user's token simultaneously
   Future<bool> get isAuth async {
-    var res = await _auth.currentUser();
-    if (res != null) {
-      _token = await res.getIdToken();
+    var user = await _auth.currentUser();
+    if (user != null) {
+      _token = await user.getIdToken();
       _expiryDate = _token.expirationTime;
-      _photoUrl = res.photoUrl ?? '';
-      _userId = res.uid;
+      _photoUrl = user.photoUrl ?? '';
+      _userId = user.uid;
     }
     notifyListeners();
-    return res != null;
+    return user != null && user.isEmailVerified;
   }
 
   //getter for userId. Also utilises currentUser()
@@ -104,26 +102,30 @@ class Auth with ChangeNotifier {
 
   //general method to authenticate (sign up + sign in) user using email + password
   //uses mode parameter to switch between sign in and sign up
-  Future<void> _authenticateWithEmail(
+  Future<bool> _authenticateWithEmail(
     String name,
     String mode,
     String email,
     String password,
   ) async {
     _isGuestUser = false;
+    AuthResult res;
     try {
-      AuthResult res;
       if (mode == 'signup') {
         res = (await _auth.createUserWithEmailAndPassword(
           //firebase package method
           email: email,
           password: password,
         ));
+        await res.user.sendEmailVerification();
       } else {
         res = await _auth.signInWithEmailAndPassword(
             //firebase package method
             email: email,
             password: password);
+        if (!res.user.isEmailVerified) {
+          await res.user.sendEmailVerification();
+        }
       }
       FirebaseUser user = res.user;
       _userId = user.uid;
@@ -138,8 +140,10 @@ class Auth with ChangeNotifier {
     } catch (error) {
       throw error;
     }
+
     _autoLogout(); //autologout method called to start logout timer based on token expiry date
     notifyListeners();
+    return res.user.isEmailVerified;
   }
 
   //method to sign up user with email
@@ -148,15 +152,19 @@ class Auth with ChangeNotifier {
     String email,
     String password,
   ) async {
-    _authenticateWithEmail(userName, 'signup', email, password);
+    await _authenticateWithEmail(userName, 'signup', email, password);
   }
 
   //method to sign in user with email
-  Future<void> loginWithEmail(
+  Future<bool> loginWithEmail(
     String email,
     String password,
   ) async {
-    _authenticateWithEmail('', 'login', email, password);
+    try {
+      return await _authenticateWithEmail('', 'login', email, password);
+    } catch (error) {
+      throw HttpException(error.code);
+    }
   }
 
   //method to logout user
@@ -168,10 +176,11 @@ class Auth with ChangeNotifier {
       _authTimer.cancel();
       _authTimer = null;
     }
-    await _auth.signOut();
+    await FirebaseAuth.instance.signOut();
     bool isGoogleSignIn = await _googleSignIn.isSignedIn();
     if (isGoogleSignIn) {
-      _googleSignIn.signOut();
+      await _googleSignIn.disconnect();
+      await _googleSignIn.signOut();
     }
     _photoUrl = '';
     notifyListeners();

@@ -17,12 +17,12 @@ class _SignUpFormState extends State<SignUpForm> {
     'password': '',
   };
 
-  void _showErrorDialog(String message) {
+  void _showErrorDialog(String title, String message) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Something went wrong!'),
+          title: Text(title),
           content: Text(message),
           actions: <Widget>[
             FlatButton(
@@ -45,26 +45,23 @@ class _SignUpFormState extends State<SignUpForm> {
       _isLoading = true;
     });
     try {
-      await Provider.of<Auth>(context, listen: false)
-          .signupWithEmail(_authData['name'] ,_authData['email'], _authData['password']);
-      Navigator.of(context).pop();
+      await Provider.of<Auth>(context, listen: false).signupWithEmail(
+          _authData['name'], _authData['email'], _authData['password']);
+      _showErrorDialog("Verify your email",
+          "We have just sent you a verification email. Please verify your email before continuing");
     } on HttpException catch (error) {
       var errorMessage = 'Authentication error';
-      if (error.message.contains('EMAIL_EXISTS')) {
+      if (error.message.contains('ERROR_EMAIL_ALREADY_IN_USE')) {
         errorMessage = 'That email address is already in use';
-      } else if (error.message.contains('INVALID_EMAIL')) {
+      } else if (error.message.contains('ERROR_INVALID_EMAIL') || error.message.contains('ERROR_INVALID_CREDENTIAL')) {
         errorMessage = 'This email address is invalid';
-      } else if (error.message.contains('WEAK_PASSWORD')) {
+      } else if (error.message.contains('ERROR_WEAK_PASSWORD')) {
         errorMessage = 'This password is too weak';
-      } else if (error.message.contains('EMAIL_NOT_FOUND')) {
-        errorMessage = 'Could not find a user with that email address';
-      } else if (error.message.contains('INVALID_PASSWORD')) {
-        errorMessage = 'This password is invalid';
       }
-      _showErrorDialog(errorMessage);
+      _showErrorDialog("Something went wrong", errorMessage);
     } catch (error) {
       const errorMessage = 'Could not sign you up, try again later.';
-      _showErrorDialog(errorMessage);
+      _showErrorDialog("Something went wrong", errorMessage);
     }
     setState(() {
       _isLoading = false;
