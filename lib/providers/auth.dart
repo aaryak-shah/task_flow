@@ -78,6 +78,20 @@ class Auth with ChangeNotifier {
     return user != null ? user.displayName : 'Guest';
   }
 
+  Future<String> get email async {
+    var user = await _auth.currentUser();
+    notifyListeners();
+    return user != null ? user.email : "";
+  }
+
+  Future<void> updateName(String name) async {
+    var user = await _auth.currentUser();
+    UserUpdateInfo userUpdateInfo = UserUpdateInfo();
+    userUpdateInfo.displayName = name;
+    await user.updateProfile(userUpdateInfo);
+    notifyListeners();
+  }
+
   //getter for isAuth bool flag. Utilises currentUser() method to obtain data and refresh user's token simultaneously
   Future<bool> get isAuth async {
     var user = await _auth.currentUser();
@@ -98,6 +112,10 @@ class Auth with ChangeNotifier {
       return res.uid;
     }
     return _userId;
+  }
+
+  Future<bool> get isGoogleUser async {
+    return await _googleSignIn.isSignedIn();
   }
 
   //general method to authenticate (sign up + sign in) user using email + password
@@ -195,50 +213,3 @@ class Auth with ChangeNotifier {
     _authTimer = Timer(Duration(seconds: timeToExpiry), logout);
   }
 }
-
-// class GoogleAuth with ChangeNotifier {
-//   bool isUsed = false;
-
-//   FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-//   GoogleSignIn _googleSignIn = GoogleSignIn(
-//     scopes: [
-//       'email',
-//       'https://www.googleapis.com/auth/userinfo.profile',
-//     ],
-//   );
-//   GoogleSignInAccount _googleUser;
-//   GoogleSignInAuthentication _googleAuthentication;
-//   AuthCredential _credential;
-//   AuthResult _authResult;
-//   FirebaseUser _user;
-//   FirebaseUser _currentUser;
-
-//   IdTokenResult _token;
-//   DateTime _expiryDate;
-//   String _userId;
-//   Timer _authTimer;
-
-//   Future<void> googleAuth() async {
-//     debugPrint('googleAuth called');
-//     try {
-//       _googleUser = await _googleSignIn.signIn();
-//       _googleAuthentication = await _googleUser.authentication;
-//       _credential = GoogleAuthProvider.getCredential(
-//         idToken: _googleAuthentication.idToken,
-//         accessToken: _googleAuthentication.accessToken,
-//       );
-//       _authResult = await _firebaseAuth.signInWithCredential(_credential);
-//       _user = _authResult.user;
-//       assert(!_user.isAnonymous);
-//       assert(await _user.getIdToken() != null);
-//       _currentUser = await _firebaseAuth.currentUser();
-//       assert(_user.uid == _currentUser.uid);
-
-//       _token = await _currentUser.getIdToken();
-//       _expiryDate = _token.expirationTime;
-//       _userId = _currentUser.uid;
-//     } catch (error) {
-//       print(error);
-//     }
-//   }
-// }

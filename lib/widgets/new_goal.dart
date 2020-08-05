@@ -95,7 +95,7 @@ class _NewGoalState extends State<NewGoal> {
               focusNode: _titleFocusNode,
               controller: _titleController,
               validator: (value) {
-                if (value.isEmpty) {
+                if (value.trim().isEmpty) {
                   return "Enter a title";
                 }
               },

@@ -19,8 +19,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _usingGoogle = true;
   bool _isSyncing = false;
   bool isSigningIn = true;
+  bool isEditingName = false;
   String userName = 'Guest';
   String photoUrl = '';
+  String email = '';
   Auth provider;
 
   void _showFormDialog(BuildContext context) {
@@ -64,13 +66,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _isAuthenticated = value;
       });
     });
+    provider.isGoogleUser.then((value) {
+      setState(() {
+        _usingGoogle = value;
+      });
+    });
     provider.userName.then((value) {
       if (value != null) userName = value;
-      super.didChangeDependencies();
+    });
+    provider.email.then((value) {
+      setState(() {
+        email = value;
+      });
     });
     super.didChangeDependencies();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -88,9 +98,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           )
                         : NetworkImage(photoUrl),
                   ),
-                  title: Text(
-                    userName,
+                  title: TextFormField(
+                    autofocus: !_usingGoogle,
+                    initialValue: userName,
+                    validator: (val) {
+                      if (val.trim().isEmpty) {
+                        return "Enter a name";
+                      }
+                    },
+                    textInputAction: TextInputAction.done,
+                    readOnly: !isEditingName,
+                    onFieldSubmitted: (name) async {
+                      await Provider.of<Auth>(context, listen: false)
+                          .updateName(name);
+                      setState(() {
+                        isEditingName = false;
+                      });
+                    },
                   ),
+                  subtitle: Text(email),
+                  trailing: !_usingGoogle
+                      ? IconButton(
+                          icon: Icon(Icons.edit),
+                          onPressed: () {
+                            setState(() {
+                              isEditingName = true;
+                            });
+                          },
+                        )
+                      : null,
                 ),
                 SizedBox(
                   height: 30,
@@ -109,28 +145,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     title: Text('Sign Out'),
                   ),
                 ),
-                InkWell(
-                  onTap: () {},
-                  child: ListTile(
-                    leading: Icon(
-                      Icons.edit,
+                if (!_usingGoogle)
+                  InkWell(
+                    onTap: () {},
+                    child: ListTile(
+                      leading: Icon(Icons.settings_backup_restore),
+                      title: Text('Reset Password'),
                     ),
-                    title: Text('Edit Profile'),
                   ),
-                ),
-                InkWell(
-                  onTap: () {},
-                  child: ListTile(
-                    leading: Icon(Icons.settings_backup_restore),
-                    title: Text('Reset Password'),
-                  ),
-                ),
                 InkWell(
                   onTap: () {
                     setState(() {
                       _isSyncing = true;
                     });
-                    Provider.of<Tasks>(context, listen: false).syncWithFirebase().then((_) {
+                    Provider.of<Tasks>(context, listen: false)
+                        .syncWithFirebase()
+                        .then((_) {
                       setState(() {
                         _isSyncing = false;
                       });
@@ -138,7 +168,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   },
                   child: ListTile(
                     leading: _isSyncing
-                        ? CircularProgressIndicator(strokeWidth: 1,)
+                        ? CircularProgressIndicator(
+                            strokeWidth: 1,
+                          )
                         : Icon(Icons.sync),
                     title: Text('Sync My Data'),
                   ),
