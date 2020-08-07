@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:task_flow/exceptions/http_exception.dart';
 import 'package:task_flow/providers/tasks.dart';
 
 import '../widgets/sign_in_form.dart';
@@ -53,6 +54,60 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
     );
+  }
+
+  void _showErrorDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: <Widget>[
+            FlatButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('OK'),
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showUpdatePasswordDialog() async {
+    var email = await Provider.of<Auth>(context, listen: false).email;
+    try {
+      await Provider.of<Auth>(context, listen: false).forgotPassword(email);
+
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text("Password update email sent"),
+            content: Text(
+                "Login using your new password"),
+            actions: [
+              FlatButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text("OK"),
+              )
+            ],
+          );
+        },
+      );
+      Provider.of<Auth>(context, listen: false).logout();
+    } on HttpException catch (error) {
+      Navigator.of(context).pop();
+      var errorMessage = 'An error occurred';
+      if (error.message.contains('ERROR_TOO_MANY_REQUESTS')) {
+        errorMessage = 'Please try again later';
+      }
+      _showErrorDialog("Something went wrong", errorMessage);
+    } catch (error) {
+      Navigator.of(context).pop();
+      const errorMessage = 'Could not change password.';
+      _showErrorDialog("Something went wrong", errorMessage);
+    }
   }
 
   @override
@@ -147,10 +202,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 if (!_usingGoogle)
                   InkWell(
-                    onTap: () {},
+                    onTap: _showUpdatePasswordDialog,
                     child: ListTile(
-                      leading: Icon(Icons.settings_backup_restore),
-                      title: Text('Reset Password'),
+                      leading: Icon(Icons.lock_outline),
+                      title: Text('Change Password'),
                     ),
                   ),
                 InkWell(

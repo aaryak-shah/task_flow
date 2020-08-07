@@ -34,6 +34,75 @@ class _SignInFormState extends State<SignInForm> {
     );
   }
 
+  void _showForgotPasswordDialog() {
+    final _formKey = GlobalKey<FormState>();
+    final _emailController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Forgot your password?"),
+          content: Form(
+            key: _formKey,
+            child: TextFormField(
+              controller: _emailController,
+              autofocus: true,
+              keyboardType: TextInputType.emailAddress,
+              validator: (val) {
+                if (!RegExp(
+                        r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                    .hasMatch(val)) {
+                  return "Enter a valid email address";
+                }
+              },
+              decoration: InputDecoration(
+                labelText: "Email",
+              ),
+              textInputAction: TextInputAction.done,
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              onPressed: () async {
+                if (_formKey.currentState.validate()) {
+                  try {
+                    await Provider.of<Auth>(context, listen: false)
+                        .forgotPassword(_emailController.text);
+                    Navigator.of(context).pop();
+                    _showErrorDialog(
+                      "Password reset mail sent",
+                      "We have just sent you a link to reset your password. Please check your spam folder too",
+                    );
+                  } on HttpException catch (error) {
+                    Navigator.of(context).pop();
+                    var errorMessage = 'An error occurred';
+                    if (error.message.contains('ERROR_INVALID_EMAIL')) {
+                      errorMessage = 'This email address is invalid';
+                    } else if (error.message.contains('ERROR_USER_NOT_FOUND')) {
+                      errorMessage =
+                          'Could not find a user with that email address';
+                    } else if (error.message
+                        .contains('ERROR_TOO_MANY_REQUESTS')) {
+                      errorMessage = 'Please try again later';
+                    }
+                    _showErrorDialog("Something went wrong", errorMessage);
+                  } catch (error) {
+                    Navigator.of(context).pop();
+                    const errorMessage =
+                        'Could not sign you in, please try again later.';
+                    _showErrorDialog("Something went wrong", errorMessage);
+                  }
+                }
+              },
+              child: Text("OK"),
+            )
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState.validate()) {
       // Invalid!
@@ -53,7 +122,6 @@ class _SignInFormState extends State<SignInForm> {
             "We have just sent you a verification email. Please verify your email before continuing");
       }
     } on HttpException catch (error) {
-      print(error);
       var errorMessage = 'Authentication error';
       if (error.message.contains('ERROR_INVALID_EMAIL')) {
         errorMessage = 'This email address is invalid';
@@ -88,8 +156,8 @@ class _SignInFormState extends State<SignInForm> {
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery.of(context).size;
     return Container(
-      height: 220,
-      constraints: BoxConstraints(minHeight: 220),
+      height: 250,
+      constraints: BoxConstraints(minHeight: 250),
       width: deviceSize.width * 0.85,
       padding: EdgeInsets.all(16.0),
       child: Form(
@@ -131,8 +199,10 @@ class _SignInFormState extends State<SignInForm> {
                   _authData['password'] = value;
                 },
               ),
-              SizedBox(
-                height: 20,
+              FlatButton(
+                padding: EdgeInsets.symmetric(vertical: 3),
+                child: Text("Forgot password?"),
+                onPressed: _showForgotPasswordDialog,
               ),
               if (_isLoading)
                 CircularProgressIndicator()

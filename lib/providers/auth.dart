@@ -92,6 +92,14 @@ class Auth with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> forgotPassword(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      notifyListeners();
+    } catch (error) {
+      throw HttpException(error.code);
+    }
+  }
   //getter for isAuth bool flag. Utilises currentUser() method to obtain data and refresh user's token simultaneously
   Future<bool> get isAuth async {
     var user = await _auth.currentUser();
