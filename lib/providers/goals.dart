@@ -35,6 +35,18 @@ class Goals with ChangeNotifier {
     return File('$path/tasks.csv');
   }
 
+  Future<bool> get _isConnected async {
+    try {
+      final result = await InternetAddress.lookup(
+          'https://taskflow1-4a77f.firebaseio.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return true;
+      }
+    } on SocketException catch (_) {
+      return false;
+    }
+  }
+
   Future<void> loadData() async {
     // function to load the data from the tasks.csv file into Task
     // models which are then put into the _goals list
@@ -62,6 +74,7 @@ class Goals with ChangeNotifier {
         labels: row[10].split("|"),
         superProjectName: row[11],
         goalTime: Duration(seconds: row[12]),
+        syncStatus: SyncStatus.values[row[13]]
       );
     }).toList();
     notifyListeners();
@@ -89,6 +102,7 @@ class Goals with ChangeNotifier {
               g.labels.join("|"),
               g.superProjectName == null ? "" : g.superProjectName,
               g.goalTime.inSeconds,
+              g.syncStatus.index
             ])
         .toList());
     File f = await _localFile;
@@ -142,6 +156,7 @@ class Goals with ChangeNotifier {
           labels.join("|"),
           "",
           0,
+          SyncStatus.NewTask.index
         ],
       ],
     );
@@ -175,10 +190,9 @@ class Goals with ChangeNotifier {
     _goals[index].isRunning = false;
     _goals[index].isPaused = true;
     _goals[index].end = DateTime.now();
-    await writeCsv(_goals);
 
     var authData = Provider.of<Auth>(context, listen: false);
-    if (await authData.isAuth) {
+    if (await _isConnected && await authData.isAuth) {
       String userId = await authData.userId;
       String token = authData.token.token;
       final url =
@@ -196,12 +210,14 @@ class Goals with ChangeNotifier {
             'category': _goals[index].category,
             'labels': _goals[index].labels.isNotEmpty
                 ? _goals[index].labels.join("|")
-                : "",
+                : null,
           },
         ),
       );
+    } else if (!await _isConnected) {
+      _goals[index].syncStatus = SyncStatus.NewTask;
     }
-
+    await writeCsv(_goals);
     notifyListeners();
   }
 

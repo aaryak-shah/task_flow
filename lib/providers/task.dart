@@ -4,10 +4,14 @@ import 'package:csv/csv.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:task_flow/widgets/new_task.dart';
+
+enum SyncStatus { FullySynced, NewTask, UpdatedTask }
 
 class Task with ChangeNotifier {
   // creating a model for Task objects
-  final String id;
+  SyncStatus syncStatus;
+  String id;
   final String title;
   final DateTime start;
   DateTime latestPause;
@@ -22,6 +26,7 @@ class Task with ChangeNotifier {
   final Duration goalTime;
 
   Task({
+    this.syncStatus = SyncStatus.NewTask,
     @required this.id,
     @required this.title,
     @required this.start,
@@ -105,6 +110,7 @@ class Task with ChangeNotifier {
         labels: row[10].split(" "),
         superProjectName: row[11],
         goalTime: Duration(seconds: row[12]),
+        syncStatus: SyncStatus.values[row[13]]
       );
     }).toList();
     return rows;

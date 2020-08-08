@@ -23,8 +23,6 @@ class Auth with ChangeNotifier {
 
   Future<void> googleAuth() async {
     _isGuestUser = false;
-    debugPrint('googleAuth called');
-
     GoogleSignInAccount _googleUser;
     GoogleSignInAuthentication _googleAuthentication;
     AuthCredential _credential;

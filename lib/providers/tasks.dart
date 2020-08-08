@@ -30,6 +30,18 @@ class Tasks with ChangeNotifier {
     return File('$path/tasks.csv');
   }
 
+  Future<bool> get _isConnected async {
+    try {
+      final result =
+          await InternetAddress.lookup('taskflow1-4a77f.firebaseio.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return true;
+      }
+    } on SocketException catch (_) {
+      return false;
+    }
+  }
+
   DateFormat parser = DateFormat("dd-MM-yyyy HH:mm:ss");
 
   Future<void> loadData() async {
@@ -57,6 +69,7 @@ class Tasks with ChangeNotifier {
         labels: row[10] != "" ? row[10].split("|") : [],
         superProjectName: row[11],
         goalTime: Duration(seconds: row[12]),
+        syncStatus: SyncStatus.values[row[13]],
       );
     }).toList();
     notifyListeners();
@@ -161,6 +174,7 @@ class Tasks with ChangeNotifier {
               t.labels.isNotEmpty ? t.labels.join("|") : "",
               t.superProjectName == null ? "" : t.superProjectName,
               t.goalTime.inSeconds,
+              t.syncStatus.index
             ])
         .toList());
     File f = await _localFile;
@@ -188,7 +202,7 @@ class Tasks with ChangeNotifier {
 
     var response;
     var authData = Provider.of<Auth>(context, listen: false);
-    if (await authData.isAuth) {
+    if (await _isConnected && await authData.isAuth) {
       String userId = await authData.userId;
       String token = authData.token.token;
       final url =
@@ -208,14 +222,15 @@ class Tasks with ChangeNotifier {
     }
 
     final task = Task(
-      id: response != null ? json.decode(response.body)['name'] : id,
-      title: title,
-      start: start,
-      category: category,
-      labels: labels,
-      superProjectName: superProjectName,
-    );
-
+        id: response != null ? json.decode(response.body)['name'] : id,
+        title: title,
+        start: start,
+        category: category,
+        labels: labels,
+        superProjectName: superProjectName,
+        syncStatus: (await authData.isAuth)
+            ? (await _isConnected ? SyncStatus.FullySynced : SyncStatus.NewTask)
+            : SyncStatus.FullySynced);
     final row = const ListToCsvConverter().convert(
       [
         [
@@ -232,6 +247,7 @@ class Tasks with ChangeNotifier {
           labels.join("|"),
           superProjectName == null ? "" : superProjectName,
           0,
+          task.syncStatus.index
         ],
       ],
     );
@@ -255,11 +271,11 @@ class Tasks with ChangeNotifier {
 
     _tasks[index].labels.addAll(selected);
     _tasks[index].labels = _tasks[index].labels.toSet().toList();
-    await writeCsv(_tasks);
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('AvailableLabels', labels);
     var authData = Provider.of<Auth>(context, listen: false);
-    if (await authData.isAuth) {
+    if (await _isConnected && await authData.isAuth) {
       String userId = await authData.userId;
       String token = authData.token.token;
       final url =
@@ -273,6 +289,17 @@ class Tasks with ChangeNotifier {
         ),
       );
     }
+
+    _tasks[index].syncStatus = (await authData.isAuth)
+        ? (await _isConnected
+            ? (_tasks[index].syncStatus == SyncStatus.UpdatedTask
+                ? SyncStatus.FullySynced
+                : _tasks[index].syncStatus)
+            : (_tasks[index].syncStatus != SyncStatus.NewTask
+                ? SyncStatus.UpdatedTask
+                : SyncStatus.NewTask))
+        : SyncStatus.FullySynced;
+    await writeCsv(_tasks);
     notifyListeners();
   }
 
@@ -290,9 +317,8 @@ class Tasks with ChangeNotifier {
     _tasks[index].isPaused = false;
     _tasks[index].pauseTime +=
         DateTime.now().difference(_tasks[index].latestPause);
-    await writeCsv(_tasks);
     var authData = Provider.of<Auth>(context, listen: false);
-    if (await authData.isAuth) {
+    if (await _isConnected && await authData.isAuth) {
       String userId = await authData.userId;
       String token = authData.token.token;
       final url =
@@ -308,6 +334,17 @@ class Tasks with ChangeNotifier {
         ),
       );
     }
+
+    _tasks[index].syncStatus = (await authData.isAuth)
+        ? (await _isConnected
+            ? (_tasks[index].syncStatus == SyncStatus.UpdatedTask
+                ? SyncStatus.FullySynced
+                : _tasks[index].syncStatus)
+            : (_tasks[index].syncStatus != SyncStatus.NewTask
+                ? SyncStatus.UpdatedTask
+                : SyncStatus.NewTask))
+        : SyncStatus.FullySynced;
+    await writeCsv(_tasks);
     notifyListeners();
   }
 
@@ -319,9 +356,8 @@ class Tasks with ChangeNotifier {
     _tasks[index].isPaused = true;
     _tasks[index].pauses++;
     _tasks[index].latestPause = DateTime.now();
-    await writeCsv(_tasks);
     var authData = Provider.of<Auth>(context, listen: false);
-    if (await authData.isAuth) {
+    if (await _isConnected && await authData.isAuth) {
       String userId = await authData.userId;
       String token = authData.token.token;
       final url =
@@ -335,10 +371,24 @@ class Tasks with ChangeNotifier {
             'pauses': _tasks[index].pauses,
             'latestPause': DateFormat("dd-MM-yyyy HH:mm:ss")
                 .format(_tasks[index].latestPause),
+            'labels': _tasks[index].labels.isEmpty
+                ? null
+                : _tasks[index].labels.join("|")
           },
         ),
       );
     }
+
+    _tasks[index].syncStatus = (await authData.isAuth)
+        ? (await _isConnected
+            ? (_tasks[index].syncStatus == SyncStatus.UpdatedTask
+                ? SyncStatus.FullySynced
+                : _tasks[index].syncStatus)
+            : (_tasks[index].syncStatus != SyncStatus.NewTask
+                ? SyncStatus.UpdatedTask
+                : SyncStatus.NewTask))
+        : SyncStatus.FullySynced;
+    await writeCsv(_tasks);
     notifyListeners();
   }
 
@@ -372,10 +422,9 @@ class Tasks with ChangeNotifier {
     _tasks[index].isPaused = true;
     _tasks[index].end = DateTime.now();
     _tasks[index].latestPause = _tasks[index].end;
-    await writeCsv(_tasks);
 
     var authData = Provider.of<Auth>(context, listen: false);
-    if (await authData.isAuth) {
+    if (await _isConnected && await authData.isAuth) {
       String userId = await authData.userId;
       String token = authData.token.token;
       final url =
@@ -389,51 +438,133 @@ class Tasks with ChangeNotifier {
             'latestPause': DateFormat("dd-MM-yyyy HH:mm:ss")
                 .format(_tasks[index].latestPause),
             'end': DateFormat("dd-MM-yyyy HH:mm:ss").format(_tasks[index].end),
+            'labels': _tasks[index].labels.isEmpty
+                ? null
+                : _tasks[index].labels.join("|")
           },
         ),
       );
     }
 
+    _tasks[index].syncStatus = (await authData.isAuth)
+        ? (await _isConnected
+            ? (_tasks[index].syncStatus == SyncStatus.UpdatedTask
+                ? SyncStatus.FullySynced
+                : _tasks[index].syncStatus)
+            : (_tasks[index].syncStatus != SyncStatus.NewTask
+                ? SyncStatus.UpdatedTask
+                : SyncStatus.NewTask))
+        : SyncStatus.FullySynced;
+    await writeCsv(_tasks);
     notifyListeners();
   }
 
   Future<void> syncWithFirebase() async {
-    Map<String, dynamic> syncedTasks;
+    if (await _isConnected) {
+      Map<String, dynamic> syncedTasks;
+      var authData = Provider.of<Auth>(context, listen: false);
+      if (await authData.isAuth) {
+        String userId = await authData.userId;
+        String token = authData.token.token;
+        final url =
+            "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token";
+        final res = await http.get(url);
+        syncedTasks = json.decode(res.body);
+      }
+      _tasks.clear();
+      syncedTasks.forEach((id, data) {
+        _tasks.add(Task(
+            id: id,
+            title: data['title'],
+            start: parser.parse(data['start']),
+            category: data['category'],
+            isRunning: data['isRunning'],
+            isPaused: data['isPaused'],
+            latestPause: data.containsKey('latestPause')
+                ? parser.parse(data['latestPause'])
+                : null,
+            labels: data.containsKey('labels') ? data['labels'].split('|') : [],
+            superProjectName: data.containsKey('superProjectName')
+                ? data['superProjectName']
+                : '',
+            goalTime: data.containsKey('goalTime')
+                ? Duration(seconds: data['goalTime'])
+                : Duration.zero,
+            pauses: data.containsKey('pauses') ? data['pauses'] : 0,
+            pauseTime: data.containsKey('pauseTime')
+                ? Duration(seconds: data['pauseTime'])
+                : Duration.zero,
+            end: data.containsKey('end') ? parser.parse(data['end']) : null,
+            syncStatus: SyncStatus.FullySynced));
+      });
+      await writeCsv(_tasks);
+    }
+  }
+
+  Future<void> syncEngine() async {
     var authData = Provider.of<Auth>(context, listen: false);
-    if (await authData.isAuth) {
+    await loadData();
+    if (_tasks != null && await authData.isAuth) {
       String userId = await authData.userId;
       String token = authData.token.token;
-      final url =
-          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token";
-      final res = await http.get(url);
-      syncedTasks = json.decode(res.body);
+      _tasks.asMap().forEach(
+        (i, task) async {
+          if (await _isConnected) {
+            if (task.syncStatus == SyncStatus.UpdatedTask) {
+              final url =
+                  "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${task.id}.json?auth=$token";
+              await http.patch(
+                url,
+                body: json.encode(
+                  {
+                    'isRunning': task.isRunning,
+                    'isPaused': task.isPaused,
+                    'latestPause': DateFormat("dd-MM-yyyy HH:mm:ss")
+                        .format(task.latestPause),
+                    'end': task.end != null
+                        ? DateFormat("dd-MM-yyyy HH:mm:ss").format(task.end)
+                        : null,
+                    'labels': task.labels.join("|"),
+                  },
+                ),
+              );
+            } else if (task.syncStatus == SyncStatus.NewTask) {
+              final url =
+                  "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token";
+              final res = await http.post(
+                url,
+                body: json.encode(
+                  {
+                    'title': task.title,
+                    'start':
+                        DateFormat("dd-MM-yyyy HH:mm:ss").format(task.start),
+                    'latestPause': task.latestPause != null
+                        ? DateFormat("dd-MM-yyyy HH:mm:ss")
+                            .format(task.latestPause)
+                        : null,
+                    'end': task.end != null
+                        ? DateFormat("dd-MM-yyyy HH:mm:ss").format(task.end)
+                        : null,
+                    'pauses': task.pauses,
+                    'pauseTime': task.pauseTime != null
+                        ? task.pauseTime.inSeconds
+                        : null,
+                    'isRunning': task.isRunning,
+                    'isPaused': task.isPaused,
+                    'category': task.category,
+                    'labels': task.labels.join("|"),
+                    'goalTime':
+                        task.goalTime != null ? task.goalTime.inSeconds : null
+                  },
+                ),
+              );
+              _tasks[i].id = json.decode(res.body)['name'];
+            }
+            _tasks[i].syncStatus = SyncStatus.FullySynced;
+          }
+        },
+      );
+      await writeCsv(_tasks);
     }
-    _tasks.clear();
-    syncedTasks.forEach((id, data) {
-      _tasks.add(Task(
-        id: id,
-        title: data['title'],
-        start: parser.parse(data['start']),
-        category: data['category'],
-        isRunning: data['isRunning'],
-        isPaused: data['isPaused'],
-        latestPause: data.containsKey('latestPause')
-            ? parser.parse(data['latestPause'])
-            : null,
-        labels: data.containsKey('labels') ? data['labels'].split('|') : [],
-        superProjectName: data.containsKey('superProjectName')
-            ? data['superProjectName']
-            : '',
-        goalTime: data.containsKey('goalTime')
-            ? Duration(seconds: data['goalTime'])
-            : Duration.zero,
-        pauses: data.containsKey('pauses') ? data['pauses'] : 0,
-        pauseTime: data.containsKey('pauseTime')
-            ? Duration(seconds: data['pauseTime'])
-            : Duration.zero,
-        end: data.containsKey('end') ? parser.parse(data['end']) : null,
-      ));
-    });
-    await writeCsv(_tasks);
   }
 }

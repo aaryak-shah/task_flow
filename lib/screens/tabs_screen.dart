@@ -105,6 +105,7 @@ class _TabsScreenState extends State<TabsScreen> {
       Provider.of<Goals>(context).loadData();
       Provider.of<Tasks>(context).purgeOldTasks();
       Provider.of<Goals>(context).purgeOldGoals();
+      Provider.of<Tasks>(context).syncEngine();
       _isInit = false;
     }
     super.didChangeDependencies();
