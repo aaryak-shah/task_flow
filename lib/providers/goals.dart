@@ -72,7 +72,7 @@ class Goals with ChangeNotifier {
         isPaused: row[8] == 1,
         category: row[9],
         labels: row[10].split("|"),
-        superProjectName: row[11],
+        superProjectId: row[11],
         goalTime: Duration(seconds: row[12]),
         syncStatus: SyncStatus.values[row[13]]
       );
@@ -100,7 +100,7 @@ class Goals with ChangeNotifier {
               g.isPaused ? 1 : 0,
               g.category,
               g.labels.join("|"),
-              g.superProjectName == null ? "" : g.superProjectName,
+              g.superProjectId == null ? "" : g.superProjectId,
               g.goalTime.inSeconds,
               g.syncStatus.index
             ])
@@ -136,7 +136,7 @@ class Goals with ChangeNotifier {
       start: start,
       category: category,
       labels: labels,
-      superProjectName: superProjectName,
+      superProjectId: superProjectName,
       goalTime: goalTime,
     );
 

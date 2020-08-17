@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:task_flow/widgets/app_bar.dart';
 
 // Screen to display all the projects in the past week
 
@@ -8,7 +9,7 @@ class ProjectsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
-      
+      body: ListView.builder(itemBuilder: (context, index) {}),
     );
   }
 }

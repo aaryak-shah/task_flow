@@ -22,7 +22,7 @@ class Task with ChangeNotifier {
   bool isPaused;
   final String category;
   List<String> labels;
-  final String superProjectName;
+  final String superProjectId;
   final Duration goalTime;
 
   Task({
@@ -38,7 +38,7 @@ class Task with ChangeNotifier {
     this.isPaused = false,
     @required this.category,
     @required this.labels,
-    @required this.superProjectName,
+    @required this.superProjectId,
     this.goalTime = Duration.zero,
   });
 
@@ -108,7 +108,7 @@ class Task with ChangeNotifier {
         isPaused: row[8] == 1,
         category: row[9],
         labels: row[10].split(" "),
-        superProjectName: row[11],
+        superProjectId: row[11],
         goalTime: Duration(seconds: row[12]),
         syncStatus: SyncStatus.values[row[13]]
       );

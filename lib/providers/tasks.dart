@@ -67,7 +67,7 @@ class Tasks with ChangeNotifier {
         isPaused: row[8] == 1,
         category: row[9],
         labels: row[10] != "" ? row[10].split("|") : [],
-        superProjectName: row[11],
+        superProjectId: row[11],
         goalTime: Duration(seconds: row[12]),
         syncStatus: SyncStatus.values[row[13]],
       );
@@ -172,7 +172,7 @@ class Tasks with ChangeNotifier {
               t.isPaused ? 1 : 0,
               t.category,
               t.labels.isNotEmpty ? t.labels.join("|") : "",
-              t.superProjectName == null ? "" : t.superProjectName,
+              t.superProjectId == null ? "" : t.superProjectId,
               t.goalTime.inSeconds,
               t.syncStatus.index
             ])
@@ -227,7 +227,7 @@ class Tasks with ChangeNotifier {
         start: start,
         category: category,
         labels: labels,
-        superProjectName: superProjectName,
+        superProjectId: superProjectName,
         syncStatus: (await authData.isAuth)
             ? (await _isConnected ? SyncStatus.FullySynced : SyncStatus.NewTask)
             : SyncStatus.FullySynced);
@@ -484,7 +484,7 @@ class Tasks with ChangeNotifier {
                 ? parser.parse(data['latestPause'])
                 : null,
             labels: data.containsKey('labels') ? data['labels'].split('|') : [],
-            superProjectName: data.containsKey('superProjectName')
+            superProjectId: data.containsKey('superProjectName')
                 ? data['superProjectName']
                 : '',
             goalTime: data.containsKey('goalTime')
