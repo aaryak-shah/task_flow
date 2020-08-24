@@ -4,11 +4,78 @@ import 'package:csv/csv.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:task_flow/providers/task.dart';
 
 import 'project.dart';
 
 class Projects with ChangeNotifier {
-  List<Project> _projects = [];
+  List<Project> _projects = [
+    Project(
+      id: '1',
+      name: 'Webkriti FoodEx',
+      start: DateTime(2020, 7, 5, 13, 5, 0),
+      end: null,
+      deadline: DateTime(2020, 10, 5, 0, 0, 0),
+      category: 'Edu',
+      labels: ['Webkriti', 'Competition', 'Web Dev'],
+      subTasks: [
+        Task(
+          id: 't1',
+          title: 'Yo dis is task1',
+          start: DateTime(2020, 7, 5, 13, 5, 0),
+          superProjectId: '1',
+          category: '',
+          labels: [],
+          latestPause: DateTime(2020, 7, 5, 15, 5, 0),
+          isPaused: true,
+          isRunning: false,
+        ),
+        Task(
+          id: 't2',
+          title: 'recent task',
+          start: DateTime(2020, 23, 8, 7, 5, 0),
+          superProjectId: '1',
+          category: '',
+          labels: [],
+          latestPause: DateTime(2020, 23, 8, 9, 5, 0),
+          isPaused: true,
+          isRunning: false,
+        ),
+      ],
+      paymentMode: PaymentMode.Rate,
+      rate: 100,
+      client: 'AASF',
+      lastActive: DateTime(2020, 7, 5, 15, 5, 0),
+    ),
+    Project(
+      id: '2',
+      name: 'this.project',
+      start: DateTime(2020, 7, 1, 13, 5, 0),
+      end: null,
+      deadline: DateTime(2020, 10, 5, 0, 0, 0),
+      category: 'Edu',
+      labels: ['Webkriti', 'Competition', 'Web Dev'],
+      subTasks: [],
+      paymentMode: PaymentMode.None,
+      rate: 0,
+      client: 'AASF',
+      lastActive: DateTime(2020, 8, 13, 20, 32, 0),
+    ),
+    Project(
+      id: '3',
+      name: 'Something Else',
+      start: DateTime(2020, 7, 5, 13, 5, 0),
+      end: null,
+      deadline: DateTime(2020, 10, 5, 0, 0, 0),
+      category: 'Edu',
+      labels: ['Webkriti', 'Competition', 'Web Dev'],
+      subTasks: [],
+      paymentMode: PaymentMode.Fixed,
+      rate: 100,
+      client: 'AASF',
+      lastActive: DateTime(2020, 8, 1, 20, 32, 0),
+    ),
+  ];
 
   List<Project> get projects {
     return [..._projects];
@@ -41,7 +108,8 @@ class Projects with ChangeNotifier {
               p.labels.isNotEmpty ? p.labels.join("|") : "",
               p.paymentMode.index,
               p.rate,
-              p.client
+              p.client,
+              DateFormat("dd-MM-yyyy HH:mm:ss").format(p.lastActive),
             ])
         .toList());
     File f = await _localFile;
@@ -62,26 +130,28 @@ class Projects with ChangeNotifier {
         const CsvToListConverter().convert(csvString);
     _projects = rowsAsListOfValues.map((row) {
       return Project(
-          id: row[0],
-          name: row[1],
-          start: parser.parse(row[2]),
-          end: row[3].isNotEmpty ? parser.parse(row[3]) : null,
-          deadline: parser.parse(row[4]),
-          category: row[5],
-          labels: row[6] != "" ? row[6].split("|") : [],
-          paymentMode: PaymentMode.values[row[7]],
-          rate: double.parse(row[8]),
-          client: row[9]);
+        id: row[0],
+        name: row[1],
+        start: parser.parse(row[2]),
+        end: row[3].isNotEmpty ? parser.parse(row[3]) : null,
+        deadline: parser.parse(row[4]),
+        category: row[5],
+        labels: row[6] != "" ? row[6].split("|") : [],
+        paymentMode: PaymentMode.values[row[7]],
+        rate: row[8],
+        client: row[9],
+        lastActive: parser.parse(row[10]),
+      );
     }).toList();
     notifyListeners();
   }
 
-  Future<void> addProject({
+  Future<String> addProject({
     String name,
     DateTime start,
     DateTime deadline,
     String category,
-    List<String> labels,
+    // List<String> labels,
     PaymentMode paymentMode,
     double rate,
     String client,
@@ -91,13 +161,17 @@ class Projects with ChangeNotifier {
       start: start,
       deadline: deadline,
       category: category,
-      labels: labels,
+      labels: [],
       id: DateTime.now().toString(),
       paymentMode: paymentMode,
       rate: rate,
       client: client,
+      lastActive: DateTime.now(),
+      subTasks: [],
     );
     _projects.add(newProject);
     await writeCsv(_projects);
+    notifyListeners();
+    return newProject.id;
   }
 }

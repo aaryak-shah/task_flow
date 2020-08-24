@@ -21,20 +21,21 @@ class Project with ChangeNotifier {
   PaymentMode paymentMode = PaymentMode.None;
   double rate = 0;
   String client = '';
+  DateTime lastActive;
 
-  Project({
-    @required this.id,
-    @required this.name,
-    @required this.start,
-    this.end,
-    @required this.deadline,
-    @required this.category,
-    this.labels,
-    this.subTasks,
-    this.paymentMode,
-    this.rate,
-    this.client,
-  });
+  Project(
+      {@required this.id,
+      @required this.name,
+      @required this.start,
+      this.end,
+      @required this.deadline,
+      @required this.category,
+      this.labels,
+      this.subTasks,
+      this.paymentMode,
+      this.rate,
+      this.client,
+      this.lastActive});
 
   Future<String> get _localPath async {
     // gets the AppData directory
@@ -50,16 +51,16 @@ class Project with ChangeNotifier {
 
   Duration get totalPauseTime {
     Duration total = Duration.zero;
-    subTasks.fold(total, (total, element) {
-      total += element.pauseTime;
+    total = subTasks.fold(total, (total, element) {
+      return total + element.pauseTime;
     });
     return total;
   }
 
   int get totalPauses {
     int total = 0;
-    subTasks.fold(total, (total, element) {
-      total += element.pauses;
+    total = subTasks.fold(total, (total, element) {
+      return total + element.pauses;
     });
     return total;
   }
@@ -141,5 +142,72 @@ class Project with ChangeNotifier {
 
     subTasks.add(newTask);
     await writeCsv(subTasks);
+  }
+
+  String cardTags({bool requireLabels: true}) {
+    if (paymentMode != PaymentMode.None) {
+      return 'Paid, ' +
+          category +
+          (requireLabels ? (', ' + labels.join(', ')) : '');
+    }
+    return category + ', ' + labels.join(', ');
+  }
+
+  Duration get elapsedDuration {
+    return lastActive.difference(start);
+  }
+
+  Duration get workingDuration {
+    Duration runningTime = Duration.zero;
+    runningTime = subTasks != null
+        ? subTasks.fold(
+            runningTime, (runningTime, st) => runningTime + st.getRunningTime())
+        : Duration.zero;
+
+    return runningTime;
+  }
+
+  String get deadlineString {
+    return DateTime.now().difference(start).inDays.toString() +
+        'd / ' +
+        deadline.difference(start).inDays.toString() +
+        'd';
+  }
+
+  String get earnings {
+    if (paymentMode == PaymentMode.None) {
+      return '-';
+    } else if (paymentMode == PaymentMode.Fixed) {
+      return '₹' + rate.toStringAsFixed(2);
+    } else {
+      return '₹' + (rate * workingDuration.inHours).toStringAsFixed(2);
+    }
+  }
+
+  Future<void> resume(int index) async {
+    // Arguments => index: The index of the task to be resumed
+    // Resumes the task at 'index' in the _tasks list
+
+    subTasks[index].isRunning = true;
+    subTasks[index].isPaused = false;
+    subTasks[index].pauseTime +=
+        DateTime.now().difference(subTasks[index].latestPause);
+
+    await writeCsv(subTasks);
+    notifyListeners();
+  }
+
+  Future<void> pause(int index) async {
+    // Arguments => index: The index of the task to be resumed
+    // Resumes the task at 'index' in the _tasks list
+
+    print('subtask pause');
+    subTasks[index].isRunning = false;
+    subTasks[index].isPaused = true;
+    subTasks[index].pauses++;
+    subTasks[index].latestPause = DateTime.now();
+
+    await writeCsv(subTasks);
+    notifyListeners();
   }
 }

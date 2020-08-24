@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:task_flow/providers/project.dart';
+import 'package:task_flow/providers/projects.dart';
 
 import '../screens/tabs_screen.dart';
 import '../widgets/app_bar.dart';
@@ -59,7 +61,8 @@ class CurrentTaskScreen extends StatefulWidget {
   static const routeName = '/current-task';
   final int index;
   final bool wasSuspended;
-  CurrentTaskScreen({this.index, this.wasSuspended});
+  final String superProjectName;
+  CurrentTaskScreen({this.index, this.wasSuspended, this.superProjectName});
 
   @override
   _CurrentTaskScreenState createState() => _CurrentTaskScreenState();
@@ -78,8 +81,13 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
 
   @override
   void didChangeDependencies() {
-    var _provider = Provider.of<Tasks>(context, listen: true);
-    Task _task = _provider.tasks[widget.index];
+    dynamic _provider = widget.superProjectName.isEmpty
+        ? Provider.of<Tasks>(context, listen: true)
+        : Provider.of<Projects>(context, listen: true).projects[0];
+    print('provider: $_provider');
+    Task _task = widget.superProjectName.isEmpty
+        ? _provider.tasks[widget.index]
+        : _provider.subTasks[widget.index];
     _timer = Timer(const Duration(seconds: 1), () {});
     _category = _task.category;
     _labels = _task.labels;
@@ -142,7 +150,9 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _provider = Provider.of<Tasks>(context);
+    _provider = widget.superProjectName.isEmpty
+        ? Provider.of<Tasks>(context, listen: true)
+        : Provider.of<Projects>(context, listen: true).projects[0];
     return WillPopScope(
       onWillPop: () async {
         if (!paused) await _provider.pause(widget.index);
@@ -156,98 +166,114 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
         appBar: showAppBar(context),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: widget.superProjectName.isNotEmpty
+              ? MainAxisAlignment.spaceEvenly
+              : MainAxisAlignment.start,
           children: <Widget>[
-            Expanded(
-              child: Center(
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: <Widget>[
-                    Text(
-                      _time,
-                      style: TextStyle(
-                        fontSize: 50,
-                        color: Theme.of(context).textTheme.headline6.color,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Container(
-                      width: MediaQuery.of(context).size.width / 1.65,
-                      height: MediaQuery.of(context).size.height / 1.65,
-                      child: CustomPaint(
-                        painter: DrawCircle(),
-                      ),
-                    )
-                  ],
+            Stack(
+              alignment: Alignment.center,
+              children: <Widget>[
+                Text(
+                  _time,
+                  style: TextStyle(
+                    fontSize: 50,
+                    color: Theme.of(context).textTheme.headline6.color,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
+                Container(
+                  width: MediaQuery.of(context).size.width / 1.65,
+                  height: MediaQuery.of(context).size.width / 1.45,
+                  child: CustomPaint(
+                    painter: DrawCircle(),
+                  ),
+                )
+              ],
             ),
-            Expanded(
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                    margin: const EdgeInsets.only(bottom: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        Flexible(
-                          child: Text(
-                            _title.toUpperCase(),
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 18,
-                              color:
-                                  Theme.of(context).textTheme.headline6.color,
-                              fontWeight: FontWeight.bold,
-                            ),
+            Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                  margin: EdgeInsets.only(
+                      bottom: widget.superProjectName.isEmpty ? 10 : 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Flexible(
+                        child: Text(
+                          _title.toUpperCase(),
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Theme.of(context).textTheme.headline6.color,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: <Widget>[
-                            IconButton(
-                              icon: Icon(
-                                paused ? Icons.play_arrow : Icons.pause,
-                                size: 35,
-                                color: Theme.of(context).accentColor,
-                              ),
-                              onPressed: () async {
-                                if (paused) {
-                                  watch.start();
-                                  await _provider.resume(widget.index);
-                                } else {
-                                  watch.stop();
-                                  await _provider.pause(widget.index);
-                                }
-                                paused = !paused;
-                                startTimer();
-                              },
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: <Widget>[
+                          IconButton(
+                            icon: Icon(
+                              paused ? Icons.play_arrow : Icons.pause,
+                              size: 35,
+                              color: Theme.of(context).accentColor,
                             ),
-                            // SizedBox(
-                            //   width: 6,
-                            // ),
-                            IconButton(
-                              icon: Icon(
-                                Icons.stop,
-                                size: 35,
-                                color: Theme.of(context).errorColor,
-                              ),
-                              onPressed: () async {
-                                watch.reset();
+                            onPressed: () async {
+                              if (paused) {
+                                watch.start();
+                                await _provider.resume(widget.index);
+                              } else {
                                 watch.stop();
-                                paused = true;
-                                await _provider.complete(widget.index);
-                                Navigator.pushReplacementNamed(
-                                    context, TabsScreen.routeName,
-                                    arguments: 0);
-                              },
+                                print('provider2 $_provider');
+
+                                await _provider.pause(widget.index);
+                              }
+                              paused = !paused;
+                              startTimer();
+                            },
+                          ),
+                          // SizedBox(
+                          //   width: 6,
+                          // ),
+                          IconButton(
+                            icon: Icon(
+                              Icons.stop,
+                              size: 35,
+                              color: Theme.of(context).errorColor,
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
+                            onPressed: () async {
+                              watch.reset();
+                              watch.stop();
+                              paused = true;
+                              await _provider.complete(widget.index);
+                              Navigator.pushReplacementNamed(
+                                  context, TabsScreen.routeName,
+                                  arguments: 0);
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
+                ),
+                if (widget.superProjectName.isNotEmpty)
+                  Row(children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(15, 0, 0, 15),
+                      child: Text(
+                        'from project ${widget.superProjectName}',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Theme.of(context).textTheme.headline6.color,
+                          // fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ]),
+                if (widget.superProjectName.isEmpty)
                   Card(
                     margin: EdgeInsets.only(left: 15, right: 15, bottom: 15),
                     color: Color.fromRGBO(37, 37, 37, 1),
@@ -278,6 +304,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                       ),
                     ),
                   ),
+                if (widget.superProjectName.isEmpty)
                   Card(
                     margin: EdgeInsets.symmetric(horizontal: 15),
                     color: Color.fromRGBO(37, 37, 37, 1),
@@ -320,9 +347,8 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                       ),
                     ),
                   ),
-                ],
-              ),
-            )
+              ],
+            ),
           ],
         ),
       ),

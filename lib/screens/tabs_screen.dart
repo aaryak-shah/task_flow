@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:task_flow/providers/projects.dart';
 
 import '../providers/goals.dart';
 import './goals_screen.dart';
@@ -103,6 +104,7 @@ class _TabsScreenState extends State<TabsScreen> {
     if (_isInit) {
       Provider.of<Tasks>(context).loadData();
       Provider.of<Goals>(context).loadData();
+      Provider.of<Projects>(context).loadData();
       Provider.of<Tasks>(context).purgeOldTasks();
       Provider.of<Goals>(context).purgeOldGoals();
       Provider.of<Tasks>(context).syncEngine();

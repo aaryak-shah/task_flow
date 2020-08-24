@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/providers/auth.dart';
+import 'package:task_flow/providers/project.dart';
+import 'package:task_flow/providers/projects.dart';
+import 'package:task_flow/screens/current_project_screen.dart';
 import 'package:task_flow/screens/profile_screen.dart';
 
 import 'screens/auth_screen.dart';
@@ -24,6 +27,14 @@ void main() async {
   File f = File('${path.path}/tasks.csv');
   if (!f.existsSync()) {
     f.writeAsStringSync('');
+  }
+  File f2 = File('${path.path}/subtasks.csv');
+  if (!f2.existsSync()) {
+    f2.writeAsStringSync('');
+  }
+  File f3 = File('${path.path}/projects.csv');
+  if (!f3.existsSync()) {
+    f3.writeAsStringSync('');
   }
   runApp(MyApp());
 }
@@ -55,7 +66,13 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(
           create: (context) => Goals(
               context), //passing context for calling Auth provider in Goals
-        )
+        ),
+        ChangeNotifierProvider(
+          create: (context) => Projects(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => Project(),
+        ),
       ],
       child: Consumer<Auth>(builder: (context, auth, _) {
         auth.isAuth.then((value) {
@@ -112,10 +129,13 @@ class _MyAppState extends State<MyApp> {
               final int index = (settings.arguments as Map)['index'];
               final bool wasSuspended =
                   (settings.arguments as Map)['wasSuspended'];
+              final String superProjectName =
+                  (settings.arguments as Map)['superProjectName'];
               return MaterialPageRoute(builder: (context) {
                 return CurrentTaskScreen(
                   index: index,
                   wasSuspended: wasSuspended,
+                  superProjectName: superProjectName,
                 );
               });
             } else if (settings.name == CurrentGoalScreen.routeName) {
@@ -129,6 +149,11 @@ class _MyAppState extends State<MyApp> {
               final int selected = settings.arguments;
               return MaterialPageRoute(builder: (context) {
                 return TabsScreen(selected);
+              });
+            } else if (settings.name == CurrentProjectScreen.routeName) {
+              final String id = settings.arguments;
+              return MaterialPageRoute(builder: (context) {
+                return CurrentProjectScreen(id);
               });
             }
           },

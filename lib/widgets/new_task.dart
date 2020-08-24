@@ -138,7 +138,8 @@ class _NewTaskState extends State<NewTask> {
                             CurrentTaskScreen.routeName,
                             arguments: {
                               'index': tasks.tasks.length - 1,
-                              'wasSuspended': false
+                              'wasSuspended': false,
+                              'superProjectName': '',
                             });
                       }
                     }
