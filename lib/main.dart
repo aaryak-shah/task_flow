@@ -28,13 +28,10 @@ void main() async {
   if (!f.existsSync()) {
     f.writeAsStringSync('');
   }
-  File f2 = File('${path.path}/subtasks.csv');
+
+  File f2 = File('${path.path}/projects.csv');
   if (!f2.existsSync()) {
     f2.writeAsStringSync('');
-  }
-  File f3 = File('${path.path}/projects.csv');
-  if (!f3.existsSync()) {
-    f3.writeAsStringSync('');
   }
   runApp(MyApp());
 }
@@ -131,11 +128,14 @@ class _MyAppState extends State<MyApp> {
                   (settings.arguments as Map)['wasSuspended'];
               final String superProjectName =
                   (settings.arguments as Map)['superProjectName'];
+              final String superProjectId =
+                  (settings.arguments as Map)['superProjectId'];
               return MaterialPageRoute(builder: (context) {
                 return CurrentTaskScreen(
                   index: index,
                   wasSuspended: wasSuspended,
                   superProjectName: superProjectName,
+                  superProjectId: superProjectId,
                 );
               });
             } else if (settings.name == CurrentGoalScreen.routeName) {

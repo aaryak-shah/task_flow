@@ -21,21 +21,20 @@ class Project with ChangeNotifier {
   PaymentMode paymentMode = PaymentMode.None;
   double rate = 0;
   String client = '';
-  DateTime lastActive;
 
-  Project(
-      {@required this.id,
-      @required this.name,
-      @required this.start,
-      this.end,
-      @required this.deadline,
-      @required this.category,
-      this.labels,
-      this.subTasks,
-      this.paymentMode,
-      this.rate,
-      this.client,
-      this.lastActive});
+  Project({
+    @required this.id,
+    @required this.name,
+    @required this.start,
+    this.end,
+    @required this.deadline,
+    @required this.category,
+    this.labels,
+    this.subTasks,
+    this.paymentMode,
+    this.rate,
+    this.client,
+  });
 
   Future<String> get _localPath async {
     // gets the AppData directory
@@ -44,9 +43,9 @@ class Project with ChangeNotifier {
   }
 
   Future<File> get _localFile async {
-    // gets the subtasks.csv file from the AppData directory
+    // gets the st_projectid.csv file from the AppData directory
     final path = await _localPath;
-    return File('$path/subtasks.csv');
+    return File('$path/st_${id.replaceAll(new RegExp(r'[:. \-]'), "")}.csv');
   }
 
   Duration get totalPauseTime {
@@ -99,11 +98,14 @@ class Project with ChangeNotifier {
     // models which are then put into the _tasks list
 
     String csvPath = await _localPath;
-    String csvString = await File('$csvPath/subtasks.csv').readAsString();
+    String csvString = await File(
+            '$csvPath/st_${id.replaceAll(new RegExp(r'[:. \-]'), "")}.csv')
+        .readAsString();
     // String csvString = await rootBundle.loadString('assets/data/tasks.csv');
     List<List<dynamic>> rowsAsListOfValues =
         const CsvToListConverter().convert(csvString);
 
+    subTasks = [];
     rowsAsListOfValues.forEach((row) {
       if (id == row[11]) {
         subTasks.add(Task(
@@ -142,6 +144,7 @@ class Project with ChangeNotifier {
 
     subTasks.add(newTask);
     await writeCsv(subTasks);
+    notifyListeners();
   }
 
   String cardTags({bool requireLabels: true}) {
@@ -151,6 +154,15 @@ class Project with ChangeNotifier {
           (requireLabels ? (', ' + labels.join(', ')) : '');
     }
     return category + ', ' + labels.join(', ');
+  }
+
+  DateTime get lastActive {
+    DateTime last = subTasks.isNotEmpty ? subTasks.first.latestPause : start;
+
+    subTasks.forEach((subTask) {
+      if (subTask.latestPause.isAfter(last)) last = subTask.latestPause;
+    });
+    return last;
   }
 
   Duration get elapsedDuration {
@@ -206,6 +218,18 @@ class Project with ChangeNotifier {
     subTasks[index].isPaused = true;
     subTasks[index].pauses++;
     subTasks[index].latestPause = DateTime.now();
+
+    await writeCsv(subTasks);
+    notifyListeners();
+  }
+
+  Future<void> complete(int index) async {
+    print('subtask complete');
+    print(index);
+    subTasks[index].isRunning = false;
+    subTasks[index].isPaused = true;
+    subTasks[index].end = DateTime.now();
+    subTasks[index].latestPause = subTasks[index].end;
 
     await writeCsv(subTasks);
     notifyListeners();

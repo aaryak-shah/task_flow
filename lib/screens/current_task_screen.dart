@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:task_flow/providers/project.dart';
 import 'package:task_flow/providers/projects.dart';
 
 import '../screens/tabs_screen.dart';
@@ -62,7 +61,12 @@ class CurrentTaskScreen extends StatefulWidget {
   final int index;
   final bool wasSuspended;
   final String superProjectName;
-  CurrentTaskScreen({this.index, this.wasSuspended, this.superProjectName});
+  final String superProjectId;
+  CurrentTaskScreen(
+      {this.index,
+      this.wasSuspended,
+      this.superProjectName,
+      this.superProjectId});
 
   @override
   _CurrentTaskScreenState createState() => _CurrentTaskScreenState();
@@ -83,7 +87,9 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
   void didChangeDependencies() {
     dynamic _provider = widget.superProjectName.isEmpty
         ? Provider.of<Tasks>(context, listen: true)
-        : Provider.of<Projects>(context, listen: true).projects[0];
+        : Provider.of<Projects>(context, listen: true)
+            .projects
+            .firstWhere((project) => project.id == widget.superProjectId);
     print('provider: $_provider');
     Task _task = widget.superProjectName.isEmpty
         ? _provider.tasks[widget.index]
@@ -152,12 +158,18 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
   Widget build(BuildContext context) {
     _provider = widget.superProjectName.isEmpty
         ? Provider.of<Tasks>(context, listen: true)
-        : Provider.of<Projects>(context, listen: true).projects[0];
+        : Provider.of<Projects>(context, listen: true)
+            .projects
+            .firstWhere((project) => project.id == widget.superProjectId);
     return WillPopScope(
       onWillPop: () async {
         if (!paused) await _provider.pause(widget.index);
-        Navigator.pushReplacementNamed(context, TabsScreen.routeName,
-            arguments: 0);
+        if (widget.superProjectName.isEmpty) {
+          Navigator.pushReplacementNamed(context, TabsScreen.routeName,
+              arguments: 0);
+        } else {
+          Navigator.of(context).pop();
+        }
         return true;
       },
       child: Scaffold(
@@ -248,9 +260,13 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                               watch.stop();
                               paused = true;
                               await _provider.complete(widget.index);
-                              Navigator.pushReplacementNamed(
-                                  context, TabsScreen.routeName,
-                                  arguments: 0);
+                              if (widget.superProjectName.isEmpty) {
+                                Navigator.pushReplacementNamed(
+                                    context, TabsScreen.routeName,
+                                    arguments: 0);
+                              } else {
+                                Navigator.of(context).pop();
+                              }
                             },
                           ),
                         ],

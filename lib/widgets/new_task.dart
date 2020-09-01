@@ -140,6 +140,7 @@ class _NewTaskState extends State<NewTask> {
                               'index': tasks.tasks.length - 1,
                               'wasSuspended': false,
                               'superProjectName': '',
+                              'superProjectId': '',
                             });
                       }
                     }

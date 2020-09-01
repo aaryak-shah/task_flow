@@ -139,6 +139,7 @@ class _TasksScreenState extends State<TasksScreen> {
                                           'index': await t.getIndex,
                                           'wasSuspended': false,
                                           'superProjectName': '',
+                                          'superProjectId': '',
                                         });
                                   },
                                   icon: Icon(
