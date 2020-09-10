@@ -33,7 +33,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                       Text(
                         'YOUR GOALS',
                         style: TextStyle(
-                          color: Colors.white38,
+                          color: Theme.of(context).unselectedWidgetColor,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1,
                         ),
@@ -41,7 +41,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                       Text(
                         '',
                         style: TextStyle(
-                          color: Colors.white38,
+                          color: Theme.of(context).unselectedWidgetColor,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1,
                         ),
@@ -61,7 +61,8 @@ class _GoalsScreenState extends State<GoalsScreen> {
                           leading: IconButton(
                             icon: Icon(
                               Icons.refresh,
-                              color: Colors.white,
+                              color:
+                                  Theme.of(context).textTheme.bodyText1.color,
                             ),
                             onPressed: () {
                               // opens the modal sheet to restart this goal
@@ -71,9 +72,10 @@ class _GoalsScreenState extends State<GoalsScreen> {
                           ),
                           title: Text(
                             g.title,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyText1
+                                .copyWith(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Text(
                             goals.categoryString(g.id),

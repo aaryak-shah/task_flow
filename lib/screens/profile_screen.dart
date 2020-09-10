@@ -84,8 +84,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         builder: (context) {
           return AlertDialog(
             title: Text("Password update email sent"),
-            content: Text(
-                "Login using your new password"),
+            content: Text("Login using your new password"),
             actions: [
               FlatButton(
                 onPressed: () => Navigator.of(context).pop(),
@@ -153,23 +152,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           )
                         : NetworkImage(photoUrl),
                   ),
-                  title: TextFormField(
-                    autofocus: !_usingGoogle,
-                    initialValue: userName,
-                    validator: (val) {
-                      if (val.trim().isEmpty) {
-                        return "Enter a name";
-                      }
-                    },
-                    textInputAction: TextInputAction.done,
-                    readOnly: !isEditingName,
-                    onFieldSubmitted: (name) async {
-                      await Provider.of<Auth>(context, listen: false)
-                          .updateName(name);
-                      setState(() {
-                        isEditingName = false;
-                      });
-                    },
+                  title: Theme(
+                    data: Theme.of(context)
+                        .copyWith(primaryColor: Theme.of(context).accentColor),
+                    child: TextFormField(
+                      autofocus: !_usingGoogle,
+                      initialValue: userName,
+                      validator: (val) {
+                        if (val.trim().isEmpty) {
+                          return "Enter a name";
+                        }
+                      },
+                      textInputAction: TextInputAction.done,
+                      readOnly: !isEditingName,
+                      onFieldSubmitted: (name) async {
+                        await Provider.of<Auth>(context, listen: false)
+                            .updateName(name);
+                        setState(() {
+                          isEditingName = false;
+                        });
+                      },
+                    ),
                   ),
                   subtitle: Text(email),
                   trailing: !_usingGoogle

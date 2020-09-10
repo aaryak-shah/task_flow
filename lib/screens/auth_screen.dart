@@ -70,6 +70,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     fontSize: 45,
                     fontFamily: 'Montserrat',
                     fontWeight: FontWeight.w300,
+                    color: Theme.of(context).textTheme.bodyText1.color
                   ),
                 ),
                 new TextSpan(
@@ -242,9 +243,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         arguments: 0);
                   },
                   child: Text(
-                    'Use this app without an account',
+                    'Use this app as a guest',
                     style: TextStyle(
-                      color: Colors.grey,
+                      color: Theme.of(context).unselectedWidgetColor,
                       fontSize: 16,
                       decoration: TextDecoration.underline,
                     ),

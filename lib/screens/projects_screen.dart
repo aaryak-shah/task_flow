@@ -126,7 +126,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                     return Container(
                       height: 120,
                       decoration: BoxDecoration(
-                        color: Color(0xFF262525),
+                        color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),

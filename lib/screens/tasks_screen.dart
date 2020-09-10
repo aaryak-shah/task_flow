@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:task_flow/providers/theme_switcher.dart';
 import 'package:task_flow/widgets/plus_btn_controllers.dart';
 
 import '../widgets/chart.dart';
@@ -49,11 +50,8 @@ class _TasksScreenState extends State<TasksScreen> {
                         decoration: BoxDecoration(
                           color: Theme.of(context).primaryColor,
                           boxShadow: [
-                            BoxShadow(
-                                color: Colors.black26,
-                                blurRadius: 60,
-                                spreadRadius: 60,
-                                offset: Offset(0, 60))
+                            Provider.of<ThemeModel>(context)
+                                .bottomFallingShadow,
                           ],
                         ),
                         padding: const EdgeInsets.only(top: 10),
@@ -85,7 +83,7 @@ class _TasksScreenState extends State<TasksScreen> {
                       Text(
                         'YOUR TASKS  - ',
                         style: TextStyle(
-                          color: Colors.white38,
+                          color: Theme.of(context).unselectedWidgetColor,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1,
                         ),
@@ -93,7 +91,7 @@ class _TasksScreenState extends State<TasksScreen> {
                       Text(
                         ' ${(tasks.weekTasks[selectedDay]['time'] as Duration).inHours}h ${(tasks.weekTasks[selectedDay]['time'] as Duration).inMinutes.remainder(60)}min',
                         style: TextStyle(
-                          color: Colors.white38,
+                          color: Theme.of(context).unselectedWidgetColor,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1,
                         ),
@@ -129,6 +127,7 @@ class _TasksScreenState extends State<TasksScreen> {
                                   },
                                   icon: Icon(
                                     Icons.refresh,
+                                    color: Theme.of(context).textTheme.bodyText1.color,
                                   ),
                                 )
                               : IconButton(
@@ -144,9 +143,7 @@ class _TasksScreenState extends State<TasksScreen> {
                                   },
                                   icon: Icon(
                                     Icons.play_arrow,
-                                    color: (t.end != null)
-                                        ? Colors.grey
-                                        : Colors.white,
+                                    color: Theme.of(context).textTheme.bodyText1.color,
                                   ),
                                 ),
                           title: Text(
@@ -159,8 +156,8 @@ class _TasksScreenState extends State<TasksScreen> {
                                           ? FontWeight.bold
                                           : FontWeight.normal,
                                       color: (t.end != null)
-                                          ? Colors.grey
-                                          : Colors.white,
+                                          ? Theme.of(context).unselectedWidgetColor
+                                          : Theme.of(context).textTheme.bodyText1.color,
                                     ),
                           ),
                           subtitle: Text(

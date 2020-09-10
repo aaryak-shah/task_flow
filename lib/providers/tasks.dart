@@ -49,7 +49,9 @@ class Tasks with ChangeNotifier {
     // models which are then put into the _tasks list
 
     String csvPath = await _localPath;
+    debugPrint("localPath = "+csvPath);
     String csvString = await File('$csvPath/tasks.csv').readAsString();
+    debugPrint('>>TASKS.CSV<<' + csvString);
     // String csvString = await rootBundle.loadString('assets/data/tasks.csv');
     List<List<dynamic>> rowsAsListOfValues =
         const CsvToListConverter().convert(csvString);

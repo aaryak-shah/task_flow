@@ -68,15 +68,19 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
           title: Text('New Subtask'),
           content: Form(
             key: key,
-            child: TextFormField(
-              controller: titleController,
-              autofocus: true,
-              validator: (value) {
-                if (value.trim().isEmpty) {
-                  return 'Enter a Title';
-                }
-              },
-              decoration: InputDecoration(labelText: 'Title'),
+            child: Theme(
+              data: Theme.of(context)
+                  .copyWith(primaryColor: Theme.of(context).accentColor),
+              child: TextFormField(
+                controller: titleController,
+                autofocus: true,
+                validator: (value) {
+                  if (value.trim().isEmpty) {
+                    return 'Enter a Title';
+                  }
+                },
+                decoration: InputDecoration(labelText: 'Title'),
+              ),
             ),
           ),
           actions: [
@@ -125,7 +129,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
               Icons.add,
               size: 35,
             ),
-            backgroundColor: Color(0xFF252525),
+            backgroundColor: Theme.of(context).cardColor,
             foregroundColor: Theme.of(context).accentColor,
             onPressed: () {
               newSubTask('');
@@ -140,7 +144,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                 height: 140,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(5),
-                  color: Color(0xFF252525),
+                  color: Theme.of(context).cardColor,
                   image: DecorationImage(
                     image: AssetImage('assets/images/card_bg.png'),
                     fit: BoxFit.cover,
@@ -190,7 +194,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                     height: 100,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(5),
-                      color: Color(0xFF252525),
+                      color: Theme.of(context).cardColor,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,7 +223,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                     height: 100,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(5),
-                      color: Color(0xFF252525),
+                      color: Theme.of(context).cardColor,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

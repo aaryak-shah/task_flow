@@ -12,7 +12,7 @@ class NewGoal extends StatefulWidget {
   //                    in case an existing goal is restarted instead of creating a new goal
   //
   // Form to add a new goal
-  
+
   final List<dynamic> data;
   NewGoal(this.data);
 
@@ -91,16 +91,20 @@ class _NewGoalState extends State<NewGoal> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
-            TextFormField(
-              focusNode: _titleFocusNode,
-              controller: _titleController,
-              validator: (value) {
-                if (value.trim().isEmpty) {
-                  return "Enter a title";
-                }
-              },
-              decoration: InputDecoration(
-                labelText: 'Title',
+            Theme(
+              data: Theme.of(context)
+                  .copyWith(primaryColor: Theme.of(context).accentColor),
+              child: TextFormField(
+                focusNode: _titleFocusNode,
+                controller: _titleController,
+                validator: (value) {
+                  if (value.trim().isEmpty) {
+                    return "Enter a title";
+                  }
+                },
+                decoration: InputDecoration(
+                  labelText: 'Title',
+                ),
               ),
             ),
             SizedBox(

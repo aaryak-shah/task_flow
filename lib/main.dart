@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:task_flow/providers/auth.dart';
 import 'package:task_flow/providers/project.dart';
 import 'package:task_flow/providers/projects.dart';
+import 'package:task_flow/providers/theme_switcher.dart';
 import 'package:task_flow/screens/current_project_screen.dart';
 import 'package:task_flow/screens/profile_screen.dart';
 
@@ -45,6 +46,16 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   bool isAuth = false;
   bool isGuest = false;
+  ThemeData theme = ThemeData(
+    brightness: Brightness.dark,
+    primaryColor: Color(0xFF121212),
+    accentColor: Colors.lightGreenAccent,
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +81,9 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(
           create: (context) => Project(),
         ),
+        ChangeNotifierProvider(
+          create: (context) => ThemeModel(),
+        ),
       ],
       child: Consumer<Auth>(builder: (context, auth, _) {
         auth.isAuth.then((value) {
@@ -84,35 +98,13 @@ class _MyAppState extends State<MyApp> {
             });
           });
         }
+        Provider.of<ThemeModel>(context, listen: false)
+            .currentTheme
+            .then((value) => theme = value);
+
         return MaterialApp(
           title: 'Task Flow',
-          theme: ThemeData(
-            // dark theme
-            brightness: Brightness.dark,
-            primaryColor: Color(0xFF121212),
-            errorColor: Colors.redAccent,
-            accentColor: Colors.lightGreenAccent,
-            appBarTheme: AppBarTheme(
-              textTheme: TextTheme(
-                headline6: TextStyle(
-                    fontFamily: 'Montserrat',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 20),
-                overline: TextStyle(fontFamily: 'Montserrat'),
-              ),
-            ),
-            textTheme: TextTheme(
-              bodyText1: TextStyle(
-                color: Colors.white,
-              ),
-              bodyText2: TextStyle(
-                color: Colors.white38,
-              ),
-              headline6: TextStyle(
-                color: Colors.white,
-              ),
-            ),
-          ),
+          theme: theme,
           // setting home screen as tasks screen
           home: (isAuth || isGuest) ? TabsScreen(0) : LoginScreen(),
           routes: {

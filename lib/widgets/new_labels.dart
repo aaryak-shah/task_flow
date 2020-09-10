@@ -125,19 +125,23 @@ class _NewLabelsState extends State<NewLabels> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
-            TextFormField(
-              onFieldSubmitted: (val) {
-                setState(() {
-                  if (val.trim() != '') {
-                    _labels.add(val.trim());
-                    _selectedLabels.add(val.trim());
-                  }
-                  _titleController.clear();
-                });
-              },
-              controller: _titleController,
-              decoration: InputDecoration(
-                labelText: 'Add a New Label',
+            Theme(
+              data: Theme.of(context)
+                  .copyWith(primaryColor: Theme.of(context).accentColor),
+              child: TextFormField(
+                onFieldSubmitted: (val) {
+                  setState(() {
+                    if (val.trim() != '') {
+                      _labels.add(val.trim());
+                      _selectedLabels.add(val.trim());
+                    }
+                    _titleController.clear();
+                  });
+                },
+                controller: _titleController,
+                decoration: InputDecoration(
+                  labelText: 'Add a New Label',
+                ),
               ),
             ),
             SizedBox(

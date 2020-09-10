@@ -49,7 +49,7 @@ class ChartState extends State<Chart> {
                     showTitles: true,
                     textStyle: TextStyle(
                         // color: const Color(0xff7589a2),
-                        color: Colors.grey,
+                        color: Theme.of(context).unselectedWidgetColor,
                         fontWeight: FontWeight.bold,
                         fontSize: 14),
                     margin: 20,
@@ -78,7 +78,7 @@ class ChartState extends State<Chart> {
                                 totalTime.inSeconds
                             : 0,
                         color: t['day'] != 6 - widget.selectedDay
-                            ? Colors.white
+                            ? Theme.of(context).unselectedWidgetColor
                             : Theme.of(context).accentColor,
                       )
                     ],

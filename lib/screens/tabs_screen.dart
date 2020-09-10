@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/providers/projects.dart';
+import 'package:task_flow/providers/theme_switcher.dart';
 
 import '../providers/goals.dart';
 import './goals_screen.dart';
@@ -28,12 +29,14 @@ class _TabsScreenState extends State<TabsScreen> {
 
   List<dynamic> _tabColors;
 
-  void setGreen() {
+  void setSelectedColor(BuildContext context) {
     // function that sets the tab of index 'selected' as the accent colour
-    _tabColors[_selectedIndex] = Colors.lightGreenAccent;
+    _tabColors[_selectedIndex] = Theme.of(context).brightness == Brightness.dark
+        ? Theme.of(context).accentColor
+        : Colors.white;
     for (int i = 0; i < 3; i++) {
       if (i != _selectedIndex) {
-        _tabColors[i] = Colors.grey;
+        _tabColors[i] = Colors.white60;
       }
     }
   }
@@ -65,11 +68,15 @@ class _TabsScreenState extends State<TabsScreen> {
               Icon(
                 icon,
                 color: _tabColors[selfIndex],
+                size: selfIndex == _selectedIndex ? 28 : 24,
               ),
               Text(
                 title,
                 style: TextStyle(
                   color: _tabColors[selfIndex],
+                  fontWeight: selfIndex == _selectedIndex
+                      ? FontWeight.bold
+                      : FontWeight.normal,
                 ),
               ),
             ],
@@ -88,20 +95,24 @@ class _TabsScreenState extends State<TabsScreen> {
       GoalsScreen(),
       ProjectsScreen(),
     ];
-    _tabColors = [];
-    for (int i = 0; i < 3; i++) {
-      if (i == _selectedIndex) {
-        _tabColors.add(Colors.lightGreenAccent);
-      } else {
-        _tabColors.add(Colors.grey);
-      }
-    }
+
     super.initState();
   }
 
   @override
   void didChangeDependencies() {
     if (_isInit) {
+      _tabColors = [];
+      for (int i = 0; i < 3; i++) {
+        if (i == _selectedIndex) {
+          _tabColors.add(Theme.of(context).brightness == Brightness.dark
+              ? Theme.of(context).accentColor
+              : Colors.white);
+        } else {
+          _tabColors.add(Colors.white60);
+        }
+      }
+
       Provider.of<Tasks>(context).loadData();
       Provider.of<Goals>(context).loadData();
       Provider.of<Projects>(context).loadData();
@@ -130,6 +141,7 @@ class _TabsScreenState extends State<TabsScreen> {
                 fontSize: 20,
                 fontFamily: 'Montserrat',
                 fontWeight: FontWeight.w300,
+                color: Theme.of(context).textTheme.bodyText1.color,
               ),
             ),
             new TextSpan(
@@ -157,18 +169,16 @@ class _TabsScreenState extends State<TabsScreen> {
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [
-            const BoxShadow(
-              blurRadius: 30,
-              spreadRadius: 30,
-              color: Colors.black26,
-            )
+            Provider.of<ThemeModel>(context).topFallingShadow,
           ],
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.only(
               topLeft: Radius.circular(0), topRight: Radius.circular(0)),
           child: BottomAppBar(
-            color: Color(0xFF252525),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Theme.of(context).cardColor
+                : Theme.of(context).accentColor,
             notchMargin: -22,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -178,19 +188,19 @@ class _TabsScreenState extends State<TabsScreen> {
                 navBtn(0, Icons.timer, 'Tasks', () {
                   setState(() {
                     _selectedIndex = 0;
-                    setGreen();
+                    setSelectedColor(context);
                   });
                 }),
                 navBtn(1, Icons.flag, 'Goals', () {
                   setState(() {
                     _selectedIndex = 1;
-                    setGreen();
+                    setSelectedColor(context);
                   });
                 }),
                 navBtn(2, Icons.category, 'Projects', () {
                   setState(() {
                     _selectedIndex = 2;
-                    setGreen();
+                    setSelectedColor(context);
                   });
                 }),
                 SizedBox(
@@ -211,8 +221,12 @@ class _TabsScreenState extends State<TabsScreen> {
             Icons.add,
             size: 35,
           ),
-          backgroundColor: Color(0xFF252525),
-          foregroundColor: Theme.of(context).accentColor,
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? Theme.of(context).cardColor
+              : Theme.of(context).accentColor,
+          foregroundColor: Theme.of(context).brightness == Brightness.dark
+              ? Theme.of(context).accentColor
+              : Theme.of(context).cardColor,
           onPressed: () => _selectedIndex == 0
               ? showNewTaskForm(context)
               : _selectedIndex == 1

@@ -58,6 +58,7 @@ class Projects with ChangeNotifier {
 
     String csvPath = await _localPath;
     String csvString = await File('$csvPath/projects.csv').readAsString();
+    debugPrint('>>PROJECTS.CSV<<' + csvString);
     // String csvString = await rootBundle.loadString('assets/data/tasks.csv');
     List<List<dynamic>> rowsAsListOfValues =
         const CsvToListConverter().convert(csvString);

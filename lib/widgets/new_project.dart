@@ -65,15 +65,19 @@ class _NewProjectState extends State<NewProject> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: <Widget>[
-              TextFormField(
-                controller: _titleController,
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return "Enter a title";
-                  }
-                },
-                decoration: InputDecoration(
-                  labelText: 'Title',
+              Theme(
+                data: Theme.of(context)
+                    .copyWith(primaryColor: Theme.of(context).accentColor),
+                child: TextFormField(
+                  controller: _titleController,
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return "Enter a title";
+                    }
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'Title',
+                  ),
                 ),
               ),
               SizedBox(
@@ -246,37 +250,45 @@ class _NewProjectState extends State<NewProject> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: <Widget>[
-              TextFormField(
-                controller: _amountController,
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return "Enter a" +
+              Theme(
+                data: Theme.of(context)
+                    .copyWith(primaryColor: Theme.of(context).accentColor),
+                child: TextFormField(
+                  controller: _amountController,
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return "Enter a" +
+                          (_selectedMode == PaymentMode.Fixed
+                              ? 'n amount'
+                              : ' rate');
+                    }
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'Payment ' +
                         (_selectedMode == PaymentMode.Fixed
-                            ? 'n amount'
-                            : ' rate');
-                  }
-                },
-                decoration: InputDecoration(
-                  labelText: 'Payment ' +
-                      (_selectedMode == PaymentMode.Fixed
-                          ? 'Amount in ₹'
-                          : 'Rate in ₹/hr'),
+                            ? 'Amount in ₹'
+                            : 'Rate in ₹/hr'),
+                  ),
+                  textInputAction: TextInputAction.next,
                 ),
-                textInputAction: TextInputAction.next,
               ),
               SizedBox(
                 height: 50,
               ),
-              TextFormField(
-                controller: _clientController,
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return "Enter a client name";
-                  }
-                },
-                decoration: InputDecoration(
-                  labelText: 'Client Name',
+              Theme(
+                data: Theme.of(context)
+                    .copyWith(primaryColor: Theme.of(context).accentColor),
+                child: TextFormField(
+                  controller: _clientController,
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return "Enter a client name";
+                    }
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'Client Name',
+                  ),
                 ),
               ),
               Spacer(),
@@ -298,7 +310,8 @@ class _NewProjectState extends State<NewProject> {
                                 client: _clientController.text,
                               )
                               .then(
-                                (id) => Navigator.of(context).pushReplacementNamed(
+                                (id) =>
+                                    Navigator.of(context).pushReplacementNamed(
                                   CurrentProjectScreen.routeName,
                                   arguments: id,
                                 ),

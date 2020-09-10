@@ -45,21 +45,25 @@ class _SignInFormState extends State<SignInForm> {
           title: Text("Forgot your password?"),
           content: Form(
             key: _formKey,
-            child: TextFormField(
-              controller: _emailController,
-              autofocus: true,
-              keyboardType: TextInputType.emailAddress,
-              validator: (val) {
-                if (!RegExp(
-                        r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                    .hasMatch(val)) {
-                  return "Enter a valid email address";
-                }
-              },
-              decoration: InputDecoration(
-                labelText: "Email",
+            child: Theme(
+              data: Theme.of(context)
+                  .copyWith(primaryColor: Theme.of(context).accentColor),
+              child: TextFormField(
+                controller: _emailController,
+                autofocus: true,
+                keyboardType: TextInputType.emailAddress,
+                validator: (val) {
+                  if (!RegExp(
+                          r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                      .hasMatch(val)) {
+                    return "Enter a valid email address";
+                  }
+                },
+                decoration: InputDecoration(
+                  labelText: "Email",
+                ),
+                textInputAction: TextInputAction.done,
               ),
-              textInputAction: TextInputAction.done,
             ),
           ),
           actions: <Widget>[
@@ -166,38 +170,46 @@ class _SignInFormState extends State<SignInForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: <Widget>[
-              TextFormField(
-                decoration: InputDecoration(labelText: 'E-Mail'),
-                keyboardType: TextInputType.emailAddress,
-                autofocus: true,
-                textInputAction: TextInputAction.next,
-                onFieldSubmitted: (value) {
-                  _passwordFocusNode.requestFocus();
-                },
-                validator: (value) {
-                  if (value.isEmpty || !value.contains('@')) {
-                    return 'Invalid email';
-                  }
-                },
-                onSaved: (value) {
-                  _authData['email'] = value;
-                },
+              Theme(
+                data: Theme.of(context)
+                    .copyWith(primaryColor: Theme.of(context).accentColor),
+                child: TextFormField(
+                  decoration: InputDecoration(labelText: 'E-Mail'),
+                  keyboardType: TextInputType.emailAddress,
+                  autofocus: true,
+                  textInputAction: TextInputAction.next,
+                  onFieldSubmitted: (value) {
+                    _passwordFocusNode.requestFocus();
+                  },
+                  validator: (value) {
+                    if (value.isEmpty || !value.contains('@')) {
+                      return 'Invalid email';
+                    }
+                  },
+                  onSaved: (value) {
+                    _authData['email'] = value;
+                  },
+                ),
               ),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Password'),
-                obscureText: true,
-                focusNode: _passwordFocusNode,
-                textInputAction: TextInputAction.done,
-                onFieldSubmitted: (_) => _submit(),
-                controller: _passwordController,
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return 'Enter a password';
-                  }
-                },
-                onSaved: (value) {
-                  _authData['password'] = value;
-                },
+              Theme(
+                data: Theme.of(context)
+                    .copyWith(primaryColor: Theme.of(context).accentColor),
+                child: TextFormField(
+                  decoration: InputDecoration(labelText: 'Password'),
+                  obscureText: true,
+                  focusNode: _passwordFocusNode,
+                  textInputAction: TextInputAction.done,
+                  onFieldSubmitted: (_) => _submit(),
+                  controller: _passwordController,
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return 'Enter a password';
+                    }
+                  },
+                  onSaved: (value) {
+                    _authData['password'] = value;
+                  },
+                ),
               ),
               FlatButton(
                 padding: EdgeInsets.symmetric(vertical: 3),

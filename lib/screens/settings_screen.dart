@@ -1,32 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:task_flow/providers/theme_switcher.dart';
 
 // Screen to display available settings with their values as stored in SharedPreferences
 
 class SettingsScreen extends StatefulWidget {
   static const routeName = '/settings';
 
-  Future<void> _saveSettings(Map<String, bool> settings) async {
+  Future<void> _saveSettings(Map<String, dynamic> settings) async {
     // Arguments => settings: A map having the name of the setting as its key mapped to its value
     //
     // Stores the list of settings to SharedPreferences
 
     final prefs = await SharedPreferences.getInstance();
     settings.forEach((key, value) {
-      prefs.setBool(key, value);
+      key != 'accentIndex'
+          ? prefs.setBool(key, value)
+          : prefs.setInt(key, value);
     });
   }
 
-  Future<Map<String, bool>> _loadSettings() async {
-    // function to load the settings stored in SharedPreferences 
+  Future<Map<String, dynamic>> _loadSettings() async {
+    // function to load the settings stored in SharedPreferences
     // as a map having the name of the setting as its key mapped to its value
 
     final prefs = await SharedPreferences.getInstance();
     return {
-      'showTaskChart': prefs.getBool('showTaskChart') ?? false ,
-      'isDarkTheme': prefs.getBool('isDarkTheme') ?? true ,
-      'showSeconds': prefs.getBool('showSeconds') ?? false ,
-      'setting4': prefs.getBool('setting4') ?? false ,
+      'showTaskChart': prefs.getBool('showTaskChart') ?? false,
+      'isDarkTheme': prefs.getBool('isDarkTheme') ?? true,
+      'showSeconds': prefs.getBool('showSeconds') ?? false,
+      'accentIndex': prefs.getInt('accentIndex') ?? 0,
     };
   }
 
@@ -39,7 +44,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _showTaskChart = false;
   bool _isDarkTheme = true;
   bool _showSeconds = false;
-  bool _setting4 = false;
+  int _accentIndex = 0;
 
   @override
   void initState() {
@@ -51,18 +56,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _showTaskChart = settings['showTaskChart'];
           _isDarkTheme = settings['isDarkTheme'];
           _showSeconds = settings['showSeconds'];
-          _setting4 = settings['setting4'];
+          _accentIndex = settings['accentIndex'];
         });
       });
     });
   }
 
+  void showColorPicker() {
+    ThemeModel theme = Provider.of<ThemeModel>(context, listen: false);
+    showDialog(
+      context: context,
+      child: AlertDialog(
+        content: BlockPicker(
+          pickerColor: Theme.of(context).accentColor,
+          availableColors: theme.availableAccents(),
+          onColorChanged: (selectedColor) {
+            setState(() {
+              int index = theme.availableAccents().indexOf(selectedColor);
+              theme.setAccent(index);
+              _accentIndex = index;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
   Widget switchTile(
-      bool flag, 
-      String title, 
-      String description, 
-      Function changeHandler,
-    ) {
+    bool flag,
+    String title,
+    String description,
+    Function changeHandler,
+  ) {
     // Arguments => flag: Value of the setting,
     //              title: Title of the setting,
     //              description: Descrtiption of the setting
@@ -107,7 +132,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Text(
               'APPEARANCE',
               style: TextStyle(
-                color: Colors.white38,
+                color: Theme.of(context).unselectedWidgetColor,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),
@@ -116,19 +141,44 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           Column(
             children: <Widget>[
-              switchTile(_isDarkTheme, 'Dark Theme', 'Set a dark theme for the app',
+              switchTile(
+                  _isDarkTheme, 'Dark Theme', 'Set a dark theme for the app',
                   (val) async {
                 setState(() {
                   _isDarkTheme = val;
                 });
-                Map<String, bool> _settings = {
+                Map<String, dynamic> _settings = {
                   'showTaskChart': _showTaskChart,
                   'isDarkTheme': _isDarkTheme,
                   'showSeconds': _showSeconds,
-                  'setting4': _setting4,
+                  'accentIndex': _accentIndex,
                 };
                 await widget._saveSettings(_settings);
               }),
+              ListTile(
+                title: Text(
+                  'Accent Color',
+                ),
+                subtitle: Text(
+                  'Select an accent color for the app',
+                  style: Theme.of(context).textTheme.bodyText1,
+                ),
+                trailing: RaisedButton(
+                  child: Text(
+                    'CHANGE',
+                  ),
+                  onPressed: () {
+                    showColorPicker();
+                    Map<String, dynamic> _settings = {
+                      'showTaskChart': _showTaskChart,
+                      'isDarkTheme': _isDarkTheme,
+                      'showSeconds': _showSeconds,
+                      'accentIndex': _accentIndex,
+                    };
+                    widget._saveSettings(_settings);
+                  },
+                ),
+              )
             ],
           ),
           Padding(
@@ -137,7 +187,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Text(
               'GENERAL',
               style: TextStyle(
-                color: Colors.white38,
+                color: Theme.of(context).unselectedWidgetColor,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),
@@ -146,42 +196,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           Column(
             children: <Widget>[
-              switchTile(_showTaskChart, 'Show Chart on Tasks Tab', 'Toggle the chart on the Tasks tab',
-                  (val) async {
+              switchTile(_showTaskChart, 'Show Chart on Tasks Tab',
+                  'Toggle the chart on the Tasks tab', (val) async {
                 setState(() {
                   _showTaskChart = val;
                 });
-                Map<String, bool> _settings = {
+                Map<String, dynamic> _settings = {
                   'showTaskChart': _showTaskChart,
                   'isDarkTheme': _isDarkTheme,
                   'showSeconds': _showSeconds,
-                  'setting4': _setting4,
+                  'accentIndex': _accentIndex,
                 };
                 await widget._saveSettings(_settings);
               }),
-              switchTile(_showSeconds, 'Show Seconds', 'Include seconds in elapsed time',
-                  (val) async {
+              switchTile(_showSeconds, 'Show Seconds',
+                  'Include seconds in elapsed time', (val) async {
                 setState(() {
                   _showSeconds = val;
                 });
-                Map<String, bool> _settings = {
+                Map<String, dynamic> _settings = {
                   'showTaskChart': _showTaskChart,
                   'isDarkTheme': _isDarkTheme,
                   'showSeconds': _showSeconds,
-                  'setting4': _setting4,
-                };
-                await widget._saveSettings(_settings);
-              }),
-              switchTile(_setting4, 'Setting 4', 'Description 4',
-                  (val) async {
-                setState(() {
-                  _setting4 = val;
-                });
-                Map<String, bool> _settings = {
-                  'showTaskChart': _showTaskChart,
-                  'isDarkTheme': _isDarkTheme,
-                  'showSeconds': _showSeconds,
-                  'setting4': _setting4,
+                  'accentIndex': _accentIndex,
                 };
                 await widget._saveSettings(_settings);
               }),

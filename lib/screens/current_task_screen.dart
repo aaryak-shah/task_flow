@@ -34,12 +34,15 @@ void showLabelForm(BuildContext context, int i) {
 
 class DrawCircle extends CustomPainter {
   // Circle widget that surrounds the stopwatch
+  BuildContext context;
   Paint _paint;
+
+  DrawCircle(this.context);
 
   @override
   void paint(Canvas canvas, Size size) {
     _paint = Paint()
-      ..color = Colors.lightGreenAccent
+      ..color = Theme.of(context).accentColor
       ..strokeWidth = 7.0
       ..strokeCap = StrokeCap.butt
       ..style = PaintingStyle.stroke;
@@ -197,7 +200,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                   width: MediaQuery.of(context).size.width / 1.65,
                   height: MediaQuery.of(context).size.width / 1.45,
                   child: CustomPaint(
-                    painter: DrawCircle(),
+                    painter: DrawCircle(context),
                   ),
                 )
               ],
@@ -230,7 +233,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                             icon: Icon(
                               paused ? Icons.play_arrow : Icons.pause,
                               size: 35,
-                              color: Theme.of(context).accentColor,
+                              color: Theme.of(context).textTheme.bodyText1.color
                             ),
                             onPressed: () async {
                               if (paused) {
@@ -253,7 +256,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                             icon: Icon(
                               Icons.stop,
                               size: 35,
-                              color: Theme.of(context).errorColor,
+                              color: Theme.of(context).textTheme.bodyText1.color,
                             ),
                             onPressed: () async {
                               watch.reset();
@@ -292,7 +295,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                 if (widget.superProjectName.isEmpty)
                   Card(
                     margin: EdgeInsets.only(left: 15, right: 15, bottom: 15),
-                    color: Color.fromRGBO(37, 37, 37, 1),
+                    color: Theme.of(context).cardColor,
                     child: Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(15.0),
@@ -302,7 +305,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                           Text(
                             'CATEGORY',
                             style: TextStyle(
-                              color: Color.fromRGBO(120, 120, 120, 1),
+                              color: Theme.of(context).unselectedWidgetColor,
                             ),
                           ),
                           SizedBox(
@@ -311,7 +314,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                           Text(
                             _category,
                             style: TextStyle(
-                              color: Color.fromRGBO(227, 227, 227, 1),
+                              color: Theme.of(context).textTheme.bodyText2.color,
                               fontSize: 26,
                               fontWeight: FontWeight.bold,
                             ),
@@ -323,7 +326,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                 if (widget.superProjectName.isEmpty)
                   Card(
                     margin: EdgeInsets.symmetric(horizontal: 15),
-                    color: Color.fromRGBO(37, 37, 37, 1),
+                    color: Theme.of(context).cardColor,
                     child: Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(15.0),
@@ -337,7 +340,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                               Text(
                                 'LABELS',
                                 style: TextStyle(
-                                  color: Color.fromRGBO(120, 120, 120, 1),
+                                  color: Theme.of(context).unselectedWidgetColor,
                                 ),
                               ),
                               IconButton(
@@ -354,7 +357,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                           Text(
                             _labels.join(", ").replaceAll(new RegExp(r"'"), ""),
                             style: TextStyle(
-                              color: Color.fromRGBO(227, 227, 227, 1),
+                              color: Theme.of(context).textTheme.bodyText2.color,
                               fontSize: 26,
                               fontWeight: FontWeight.bold,
                             ),

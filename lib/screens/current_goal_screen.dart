@@ -81,7 +81,7 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
           children: <Widget>[
             Expanded(
               child: CircularCountDownTimer(
-                color: Color(0xFF252525),
+                color: Theme.of(context).cardColor,
                 fillColor: Theme.of(context).accentColor,
                 isReverse: true,
                 textStyle: Theme.of(context).textTheme.headline6.copyWith(
@@ -120,7 +120,7 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
                           icon: Icon(
                             Icons.stop,
                             size: 35,
-                            color: Theme.of(context).errorColor,
+                            color: Theme.of(context).textTheme.bodyText1.color,
                           ),
                           onPressed: () async {
                             await _provider.complete(widget.index);
@@ -136,7 +136,7 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
                   ),
                   Card(
                     margin: EdgeInsets.only(left: 15, right: 15, bottom: 15),
-                    color: Color.fromRGBO(37, 37, 37, 1),
+                    color: Theme.of(context).cardColor,
                     child: Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(15.0),
@@ -146,7 +146,7 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
                           Text(
                             'CATEGORY',
                             style: TextStyle(
-                              color: Color.fromRGBO(120, 120, 120, 1),
+                              color: Theme.of(context).unselectedWidgetColor,
                             ),
                           ),
                           SizedBox(
@@ -155,7 +155,7 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
                           Text(
                             _category,
                             style: TextStyle(
-                              color: Color.fromRGBO(227, 227, 227, 1),
+                              color: Theme.of(context).textTheme.bodyText2.color,
                               fontSize: 26,
                               fontWeight: FontWeight.bold,
                             ),
@@ -166,7 +166,7 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
                   ),
                   Card(
                     margin: EdgeInsets.symmetric(horizontal: 15),
-                    color: Color.fromRGBO(37, 37, 37, 1),
+                    color: Theme.of(context).cardColor,
                     child: Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(15.0),
@@ -180,7 +180,7 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
                               Text(
                                 'LABELS',
                                 style: TextStyle(
-                                  color: Color.fromRGBO(120, 120, 120, 1),
+                                  color: Theme.of(context).unselectedWidgetColor,
                                 ),
                               ),
                               IconButton(
@@ -197,7 +197,7 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
                           Text(
                             _labels.join(", ").replaceAll(new RegExp(r"'"), ""),
                             style: TextStyle(
-                              color: Color.fromRGBO(227, 227, 227, 1),
+                              color: Theme.of(context).textTheme.bodyText2.color,
                               fontSize: 26,
                               fontWeight: FontWeight.bold,
                             ),

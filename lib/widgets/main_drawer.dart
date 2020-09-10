@@ -29,7 +29,7 @@ class _MainDrawerState extends State<MainDrawer> {
       child: ListTile(
         leading: Icon(
           icon,
-          color: Colors.white,
+          color: Theme.of(context).textTheme.bodyText1.color,
         ),
         title: Text(title),
       ),
@@ -83,6 +83,9 @@ class _MainDrawerState extends State<MainDrawer> {
                     ),
                     title: Text(
                       userName,
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
                     ),
                     subtitle: Text(
                       'profile',

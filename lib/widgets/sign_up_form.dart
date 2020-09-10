@@ -53,7 +53,8 @@ class _SignUpFormState extends State<SignUpForm> {
       var errorMessage = 'Authentication error';
       if (error.message.contains('ERROR_EMAIL_ALREADY_IN_USE')) {
         errorMessage = 'That email address is already in use';
-      } else if (error.message.contains('ERROR_INVALID_EMAIL') || error.message.contains('ERROR_INVALID_CREDENTIAL')) {
+      } else if (error.message.contains('ERROR_INVALID_EMAIL') ||
+          error.message.contains('ERROR_INVALID_CREDENTIAL')) {
         errorMessage = 'This email address is invalid';
       } else if (error.message.contains('ERROR_WEAK_PASSWORD')) {
         errorMessage = 'This password is too weak';
@@ -96,67 +97,83 @@ class _SignUpFormState extends State<SignUpForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: <Widget>[
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Name'),
-                autofocus: true,
-                keyboardType: TextInputType.text,
-                textInputAction: TextInputAction.next,
-                onFieldSubmitted: (value) {
-                  _emailFocusNode.requestFocus();
-                },
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return 'Enter a name';
-                  }
-                },
-                onSaved: (value) {
-                  _authData['name'] = value;
-                },
-              ),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'E-Mail'),
-                keyboardType: TextInputType.emailAddress,
-                focusNode: _emailFocusNode,
-                textInputAction: TextInputAction.next,
-                onFieldSubmitted: (value) {
-                  _passwordFocusNode.requestFocus();
-                },
-                validator: (value) {
-                  if (value.isEmpty || !value.contains('@')) {
-                    return 'Invalid email!';
-                  }
-                },
-                onSaved: (value) {
-                  _authData['email'] = value;
-                },
-              ),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Password'),
-                obscureText: true,
-                focusNode: _passwordFocusNode,
-                textInputAction: TextInputAction.next,
-                onFieldSubmitted: (value) {
-                  _confirmPasswordFocusNode.requestFocus();
-                },
-                controller: _passwordController,
-                validator: (value) {
-                  if (value.isEmpty || value.length < 5) {
-                    return 'Password is too short!';
-                  }
-                },
-                onSaved: (value) {
-                  _authData['password'] = value;
-                },
-              ),
-              TextFormField(
-                  focusNode: _confirmPasswordFocusNode,
-                  decoration: InputDecoration(labelText: 'Confirm Password'),
-                  obscureText: true,
+              Theme(
+                data: Theme.of(context)
+                    .copyWith(primaryColor: Theme.of(context).accentColor),
+                child: TextFormField(
+                  decoration: InputDecoration(labelText: 'Name'),
+                  autofocus: true,
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.next,
+                  onFieldSubmitted: (value) {
+                    _emailFocusNode.requestFocus();
+                  },
                   validator: (value) {
-                    if (value != _passwordController.text) {
-                      return 'Passwords do not match!';
+                    if (value.isEmpty) {
+                      return 'Enter a name';
                     }
-                  }),
+                  },
+                  onSaved: (value) {
+                    _authData['name'] = value;
+                  },
+                ),
+              ),
+              Theme(
+                data: Theme.of(context)
+                    .copyWith(primaryColor: Theme.of(context).accentColor),
+                child: TextFormField(
+                  decoration: InputDecoration(labelText: 'E-Mail'),
+                  keyboardType: TextInputType.emailAddress,
+                  focusNode: _emailFocusNode,
+                  textInputAction: TextInputAction.next,
+                  onFieldSubmitted: (value) {
+                    _passwordFocusNode.requestFocus();
+                  },
+                  validator: (value) {
+                    if (value.isEmpty || !value.contains('@')) {
+                      return 'Invalid email!';
+                    }
+                  },
+                  onSaved: (value) {
+                    _authData['email'] = value;
+                  },
+                ),
+              ),
+              Theme(
+                data: Theme.of(context)
+                    .copyWith(primaryColor: Theme.of(context).accentColor),
+                child: TextFormField(
+                  decoration: InputDecoration(labelText: 'Password'),
+                  obscureText: true,
+                  focusNode: _passwordFocusNode,
+                  textInputAction: TextInputAction.next,
+                  onFieldSubmitted: (value) {
+                    _confirmPasswordFocusNode.requestFocus();
+                  },
+                  controller: _passwordController,
+                  validator: (value) {
+                    if (value.isEmpty || value.length < 5) {
+                      return 'Password is too short!';
+                    }
+                  },
+                  onSaved: (value) {
+                    _authData['password'] = value;
+                  },
+                ),
+              ),
+              Theme(
+                data: Theme.of(context)
+                    .copyWith(primaryColor: Theme.of(context).accentColor),
+                child: TextFormField(
+                    focusNode: _confirmPasswordFocusNode,
+                    decoration: InputDecoration(labelText: 'Confirm Password'),
+                    obscureText: true,
+                    validator: (value) {
+                      if (value != _passwordController.text) {
+                        return 'Passwords do not match!';
+                      }
+                    }),
+              ),
               SizedBox(
                 height: 20,
               ),
