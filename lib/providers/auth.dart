@@ -31,18 +31,20 @@ class Auth with ChangeNotifier {
     FirebaseUser _currentUser;
     try {
       _googleUser = await _googleSignIn.signIn();
-      _googleAuthentication = await _googleUser.authentication;
-      _credential = GoogleAuthProvider.getCredential(
-        idToken: _googleAuthentication.idToken,
-        accessToken: _googleAuthentication.accessToken,
-      );
-      _authResult = await _auth.signInWithCredential(_credential);
-      _user = _authResult.user;
-      _currentUser = await _auth.currentUser();
-      _token = await _currentUser.getIdToken();
-      _expiryDate = _token.expirationTime;
-      _userId = _currentUser.uid;
-      _photoUrl = _currentUser.photoUrl;
+      if(_googleUser != null) {
+        _googleAuthentication = await _googleUser.authentication;
+        _credential = GoogleAuthProvider.getCredential(
+          idToken: _googleAuthentication.idToken,
+          accessToken: _googleAuthentication.accessToken,
+        );
+        _authResult = await _auth.signInWithCredential(_credential);
+        _user = _authResult.user;
+        _currentUser = await _auth.currentUser();
+        _token = await _currentUser.getIdToken();
+        _expiryDate = _token.expirationTime;
+        _userId = _currentUser.uid;
+        _photoUrl = _currentUser.photoUrl;
+      }
     } catch (error) {
       throw error;
     }

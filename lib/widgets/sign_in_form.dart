@@ -143,6 +143,7 @@ class _SignInFormState extends State<SignInForm> {
     } catch (error) {
       const errorMessage = 'Could not sign you in, please try again later.';
       _showErrorDialog("Something went wrong", errorMessage);
+      throw error;
     }
     setState(() {
       _isLoading = false;

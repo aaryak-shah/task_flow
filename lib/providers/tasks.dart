@@ -473,33 +473,38 @@ class Tasks with ChangeNotifier {
         final res = await http.get(url);
         syncedTasks = json.decode(res.body);
       }
-      _tasks.clear();
-      syncedTasks.forEach((id, data) {
-        _tasks.add(Task(
-            id: id,
-            title: data['title'],
-            start: parser.parse(data['start']),
-            category: data['category'],
-            isRunning: data['isRunning'],
-            isPaused: data['isPaused'],
-            latestPause: data.containsKey('latestPause')
-                ? parser.parse(data['latestPause'])
-                : null,
-            labels: data.containsKey('labels') ? data['labels'].split('|') : [],
-            superProjectId: data.containsKey('superProjectName')
-                ? data['superProjectName']
-                : '',
-            goalTime: data.containsKey('goalTime')
-                ? Duration(seconds: data['goalTime'])
-                : Duration.zero,
-            pauses: data.containsKey('pauses') ? data['pauses'] : 0,
-            pauseTime: data.containsKey('pauseTime')
-                ? Duration(seconds: data['pauseTime'])
-                : Duration.zero,
-            end: data.containsKey('end') ? parser.parse(data['end']) : null,
-            syncStatus: SyncStatus.FullySynced));
-      });
-      await writeCsv(_tasks);
+      if (_tasks != null) {
+        _tasks.clear();
+      }
+      if (syncedTasks != null) {
+        syncedTasks.forEach((id, data) {
+          _tasks.add(Task(
+              id: id,
+              title: data['title'],
+              start: parser.parse(data['start']),
+              category: data['category'],
+              isRunning: data['isRunning'],
+              isPaused: data['isPaused'],
+              latestPause: data.containsKey('latestPause')
+                  ? parser.parse(data['latestPause'])
+                  : null,
+              labels:
+                  data.containsKey('labels') ? data['labels'].split('|') : [],
+              superProjectId: data.containsKey('superProjectName')
+                  ? data['superProjectName']
+                  : '',
+              goalTime: data.containsKey('goalTime')
+                  ? Duration(seconds: data['goalTime'])
+                  : Duration.zero,
+              pauses: data.containsKey('pauses') ? data['pauses'] : 0,
+              pauseTime: data.containsKey('pauseTime')
+                  ? Duration(seconds: data['pauseTime'])
+                  : Duration.zero,
+              end: data.containsKey('end') ? parser.parse(data['end']) : null,
+              syncStatus: SyncStatus.FullySynced));
+        });
+        await writeCsv(_tasks);
+      }
     }
   }
 

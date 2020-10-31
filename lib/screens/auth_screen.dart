@@ -120,7 +120,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       try {
                         await Provider.of<Auth>(context, listen: false)
                             .googleAuth();
-                        await Provider.of<Tasks>(context, listen: false).pullFromFireBase();
+                        await Provider.of<Tasks>(context, listen: false)
+                            .pullFromFireBase();
                       } on PlatformException catch (error) {
                         var errorMessage = 'Authentication error';
                         if (error.message.contains('sign_in_canceled') ||
@@ -131,10 +132,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         }
                         _showErrorDialog("Something went wrong", errorMessage);
                       } catch (error) {
-                        Navigator.of(context).pop();
+                        // Navigator.of(context).pop();
                         const errorMessage =
                             'Could not sign you in, please try again later.';
                         _showErrorDialog("Something went wrong", errorMessage);
+                        throw error;
                       }
                     },
                     color: Color(0xDEFFFFFF),
