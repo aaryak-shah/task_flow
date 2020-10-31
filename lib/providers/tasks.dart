@@ -49,9 +49,9 @@ class Tasks with ChangeNotifier {
     // models which are then put into the _tasks list
 
     String csvPath = await _localPath;
-    debugPrint("localPath = "+csvPath);
+
     String csvString = await File('$csvPath/tasks.csv').readAsString();
-    debugPrint('>>TASKS.CSV<<' + csvString);
+
     // String csvString = await rootBundle.loadString('assets/data/tasks.csv');
     List<List<dynamic>> rowsAsListOfValues =
         const CsvToListConverter().convert(csvString);
@@ -461,7 +461,7 @@ class Tasks with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> syncWithFirebase() async {
+  Future<void> pullFromFireBase() async {
     if (await _isConnected) {
       Map<String, dynamic> syncedTasks;
       var authData = Provider.of<Auth>(context, listen: false);

@@ -94,7 +94,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           );
         },
       );
-      Provider.of<Auth>(context, listen: false).logout();
+      await Provider.of<Tasks>(context).syncEngine();
+      await Provider.of<Auth>(context, listen: false).logout();
     } on HttpException catch (error) {
       Navigator.of(context).pop();
       var errorMessage = 'An error occurred';
@@ -190,11 +191,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   height: 30,
                 ),
                 InkWell(
-                  onTap: () {
+                  onTap: () async {
                     setState(() {
                       photoUrl = '';
                     });
-                    provider.logout();
+                    await Provider.of<Tasks>(context, listen: false)
+                        .syncEngine();
+                    await Provider.of<Tasks>(context, listen: false)
+                        .writeCsv([]);
+                    await provider.logout();
                   },
                   child: ListTile(
                     leading: Icon(
@@ -217,7 +222,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _isSyncing = true;
                     });
                     Provider.of<Tasks>(context, listen: false)
-                        .syncWithFirebase()
+                        .pullFromFireBase()
                         .then((_) {
                       setState(() {
                         _isSyncing = false;

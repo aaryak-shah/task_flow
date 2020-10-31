@@ -53,11 +53,6 @@ class _MyAppState extends State<MyApp> {
   );
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [

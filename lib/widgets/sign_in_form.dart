@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/exceptions/http_exception.dart';
 import 'package:task_flow/providers/auth.dart';
+import 'package:task_flow/providers/tasks.dart';
 
 class SignInForm extends StatefulWidget {
   @override
@@ -119,7 +120,9 @@ class _SignInFormState extends State<SignInForm> {
     try {
       bool isVerified = await Provider.of<Auth>(context, listen: false)
           .loginWithEmail(_authData['email'], _authData['password']);
+
       if (isVerified) {
+        await Provider.of<Tasks>(context, listen: false).pullFromFireBase();
         Navigator.of(context).pop();
       } else {
         _showErrorDialog("Email not verified",

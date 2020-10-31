@@ -101,7 +101,7 @@ class Project with ChangeNotifier {
     String csvString = await File(
             '$csvPath/st_${id.replaceAll(new RegExp(r'[:. \-]'), "")}.csv')
         .readAsString();
-    debugPrint('>>st_${id.replaceAll(new RegExp(r'[:. \-]'), "")}.CSV<<' + csvString);
+
     // String csvString = await rootBundle.loadString('assets/data/tasks.csv');
     List<List<dynamic>> rowsAsListOfValues =
         const CsvToListConverter().convert(csvString);

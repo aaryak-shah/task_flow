@@ -44,7 +44,7 @@ class Auth with ChangeNotifier {
       _userId = _currentUser.uid;
       _photoUrl = _currentUser.photoUrl;
     } catch (error) {
-      print(error);
+      throw error;
     }
   }
 

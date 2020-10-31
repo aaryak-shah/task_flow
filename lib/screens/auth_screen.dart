@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:task_flow/exceptions/http_exception.dart';
 import 'package:task_flow/providers/auth.dart';
+import 'package:task_flow/providers/tasks.dart';
 import 'package:task_flow/screens/tabs_screen.dart';
 import 'package:task_flow/widgets/sign_in_form.dart';
 import 'package:task_flow/widgets/sign_up_form.dart';
@@ -42,6 +45,24 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  void _showErrorDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: <Widget>[
+            FlatButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('OK'),
+            )
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,11 +88,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 new TextSpan(
                   text: 'TASK',
                   style: TextStyle(
-                    fontSize: 45,
-                    fontFamily: 'Montserrat',
-                    fontWeight: FontWeight.w300,
-                    color: Theme.of(context).textTheme.bodyText1.color
-                  ),
+                      fontSize: 45,
+                      fontFamily: 'Montserrat',
+                      fontWeight: FontWeight.w300,
+                      color: Theme.of(context).textTheme.bodyText1.color),
                 ),
                 new TextSpan(
                   text: 'FLOW',
@@ -96,8 +116,26 @@ class _LoginScreenState extends State<LoginScreen> {
                     padding: EdgeInsets.symmetric(vertical: 8, horizontal: 15),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30)),
-                    onPressed: () {
-                      Provider.of<Auth>(context, listen: false).googleAuth();
+                    onPressed: () async {
+                      try {
+                        await Provider.of<Auth>(context, listen: false)
+                            .googleAuth();
+                        await Provider.of<Tasks>(context, listen: false).pullFromFireBase();
+                      } on PlatformException catch (error) {
+                        var errorMessage = 'Authentication error';
+                        if (error.message.contains('sign_in_canceled') ||
+                            error.message.contains('sign_in_failed')) {
+                          errorMessage = 'Sign in failed, try again later';
+                        } else if (error.message.contains('network_error')) {
+                          errorMessage = 'Sign in failed due to network issue';
+                        }
+                        _showErrorDialog("Something went wrong", errorMessage);
+                      } catch (error) {
+                        Navigator.of(context).pop();
+                        const errorMessage =
+                            'Could not sign you in, please try again later.';
+                        _showErrorDialog("Something went wrong", errorMessage);
+                      }
                     },
                     color: Color(0xDEFFFFFF),
                     textColor: Colors.black,
