@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:task_flow/exceptions/http_exception.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 //Auth Provider
 class Auth with ChangeNotifier {
@@ -31,7 +33,7 @@ class Auth with ChangeNotifier {
     FirebaseUser _currentUser;
     try {
       _googleUser = await _googleSignIn.signIn();
-      if(_googleUser != null) {
+      if (_googleUser != null) {
         _googleAuthentication = await _googleUser.authentication;
         _credential = GoogleAuthProvider.getCredential(
           idToken: _googleAuthentication.idToken,
@@ -44,18 +46,27 @@ class Auth with ChangeNotifier {
         _expiryDate = _token.expirationTime;
         _userId = _currentUser.uid;
         _photoUrl = _currentUser.photoUrl;
+
+        final prefs = await SharedPreferences.getInstance();
+        prefs.setBool('isGuestUser', false);
       }
     } catch (error) {
       throw error;
     }
   }
 
-  bool get isGuestUser {
+  Future<bool> get isGuestUser async {
+    final prefs = await SharedPreferences.getInstance();
+    var isGuest = prefs.getBool('isGuestUser');
+    _isGuestUser = isGuest == null ? false : isGuest;
+    notifyListeners();
     return _isGuestUser;
   }
 
-  void setGuest() {
+  Future<void> setGuest() async {
     _isGuestUser = true;
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isGuestUser', true);
     notifyListeners();
   }
 
@@ -100,6 +111,7 @@ class Auth with ChangeNotifier {
       throw HttpException(error.code);
     }
   }
+
   //getter for isAuth bool flag. Utilises currentUser() method to obtain data and refresh user's token simultaneously
   Future<bool> get isAuth async {
     var user = await _auth.currentUser();
@@ -149,6 +161,8 @@ class Auth with ChangeNotifier {
             //firebase package method
             email: email,
             password: password);
+        final prefs = await SharedPreferences.getInstance();
+        prefs.setBool('isGuestUser', false);
         if (!res.user.isEmailVerified) {
           await res.user.sendEmailVerification();
         }

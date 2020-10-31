@@ -86,13 +86,18 @@ class _MyAppState extends State<MyApp> {
             isAuth = value;
           });
         });
-        if (auth.isGuestUser) {
-          Future.delayed(Duration.zero, () {
-            setState(() {
-              isGuest = true;
-            });
+        auth.isGuestUser.then((value) {
+          setState(() {
+            isGuest = value;
           });
-        }
+        });
+        // if (auth.isGuestUser) {
+        // Future.delayed(Duration.zero, () {
+        //   setState(() {
+        //     isGuest = true;
+        //   });
+        // });
+        // }
         Provider.of<ThemeModel>(context, listen: false)
             .currentTheme
             .then((value) => theme = value);
