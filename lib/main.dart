@@ -71,10 +71,14 @@ class _MyAppState extends State<MyApp> {
               context), //passing context for calling Auth provider in Goals
         ),
         ChangeNotifierProvider(
-          create: (context) => Projects(),
+          create: (context) => Projects(
+            context,
+          ),
         ),
         ChangeNotifierProvider(
-          create: (context) => Project(),
+          create: (context) => Project(
+            context,
+          ),
         ),
         ChangeNotifierProvider(
           create: (context) => ThemeModel(),

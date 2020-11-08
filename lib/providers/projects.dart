@@ -1,14 +1,23 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:csv/csv.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:task_flow/providers/task.dart';
+import 'package:http/http.dart' as http;
 
+import 'auth.dart';
 import 'project.dart';
 
 class Projects with ChangeNotifier {
+  BuildContext context;
+  Projects(this.context);
+
   List<Project> _projects = [];
 
   List<Project> get projects {
@@ -43,6 +52,7 @@ class Projects with ChangeNotifier {
               p.paymentMode.index,
               p.rate,
               p.client,
+              p.syncStatus.index,
             ])
         .toList());
     File f = await _localFile;
@@ -54,7 +64,7 @@ class Projects with ChangeNotifier {
 
   Future<void> loadData() async {
     // function to load the data from the tasks.csv file into Task
-    // models which are then put into the _tasks list
+    // models which are then put into the _projects list
 
     String csvPath = await _localPath;
     String csvString = await File('$csvPath/projects.csv').readAsString();
@@ -77,22 +87,23 @@ class Projects with ChangeNotifier {
       subTasksAsListOfValues.forEach((stRow) {
         if (row[0] == stRow[11]) {
           subTasks.add(Task(
-            id: stRow[0],
-            title: stRow[1],
-            start: parser.parse(stRow[2]),
-            latestPause: stRow[3].isNotEmpty ? parser.parse(stRow[3]) : null,
-            end: stRow[4].isNotEmpty ? parser.parse(stRow[4]) : null,
-            pauses: stRow[5],
-            pauseTime: Duration(seconds: stRow[6]),
-            isRunning: stRow[7] == 1,
-            isPaused: stRow[8] == 1,
-            category: stRow[9],
-            labels: stRow[10] != "" ? stRow[10].split("|") : [],
-            superProjectId: stRow[11],
-          ));
+              id: stRow[0],
+              title: stRow[1],
+              start: parser.parse(stRow[2]),
+              latestPause: stRow[3].isNotEmpty ? parser.parse(stRow[3]) : null,
+              end: stRow[4].isNotEmpty ? parser.parse(stRow[4]) : null,
+              pauses: stRow[5],
+              pauseTime: Duration(seconds: stRow[6]),
+              isRunning: stRow[7] == 1,
+              isPaused: stRow[8] == 1,
+              category: stRow[9],
+              labels: stRow[10] != "" ? stRow[10].split("|") : [],
+              superProjectId: stRow[11],
+              syncStatus: SyncStatus.values[stRow[12]]));
         }
       });
       Project project = Project(
+        context,
         id: row[0],
         name: row[1],
         start: parser.parse(row[2]),
@@ -104,6 +115,7 @@ class Projects with ChangeNotifier {
         rate: row[8],
         client: row[9],
         subTasks: subTasks,
+        syncStatus: SyncStatus.values[row[10]],
       );
       _projects.add(project);
     }
@@ -111,6 +123,7 @@ class Projects with ChangeNotifier {
   }
 
   Future<String> addProject({
+    String id,
     String name,
     DateTime start,
     DateTime deadline,
@@ -120,13 +133,38 @@ class Projects with ChangeNotifier {
     double rate,
     String client,
   }) async {
+    var response;
+    var authData = Provider.of<Auth>(context, listen: false);
+    if (await _isConnected && await authData.isAuth) {
+      String userId = await authData.userId;
+      String token = authData.token.token;
+      final url =
+          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects.json?auth=$token";
+      response = await http.post(
+        url,
+        body: json.encode(
+          {
+            'name': name,
+            'start': DateFormat("dd-MM-yyyy HH:mm:ss").format(start),
+            'deadline': DateFormat("dd-MM-yyyy HH:mm:ss").format(deadline),
+            'category': category,
+            'paymentMode': paymentMode.index,
+            'rate': rate,
+            'client': client,
+          },
+        ),
+      );
+    }
+
     Project newProject = Project(
+      context,
+      syncStatus: SyncStatus.NewTask,
       name: name,
       start: start,
       deadline: deadline,
       category: category,
       labels: [],
-      id: DateTime.now().toString(),
+      id: response != null ? json.decode(response.body)['name'] : id,
       paymentMode: paymentMode,
       rate: rate,
       client: client,
@@ -136,5 +174,164 @@ class Projects with ChangeNotifier {
     await writeCsv(_projects);
     notifyListeners();
     return newProject.id;
+  }
+
+  Future<bool> get _isConnected async {
+    try {
+      final result =
+          await InternetAddress.lookup('taskflow1-4a77f.firebaseio.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return true;
+      }
+    } on SocketException catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> addLabels(
+    final int index,
+    final List<String> selected,
+    final List<String> labels,
+  ) async {
+    // Arguments => index: The index of the task in the list to which the labels are to be added,
+    //              selected: The list of labels to be added to the Task,
+    //              labels: The list of available labels (shown as chips),
+    //
+    // Adds 'selected' labels to the task at 'index' in the _projects list
+    // Also updates the 'AvailableLabels' key in SharedPreferences
+
+    _projects[index].labels.addAll(selected);
+    _projects[index].labels = _projects[index].labels.toSet().toList();
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('AvailableLabels', labels);
+    var authData = Provider.of<Auth>(context, listen: false);
+    if (await _isConnected && await authData.isAuth) {
+      String userId = await authData.userId;
+      String token = authData.token.token;
+      final url =
+          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${_projects[index].id}.json?auth=$token";
+      var res = await http.patch(
+        url,
+        body: json.encode(
+          {
+            'labels': _projects[index].labels.join('|'),
+          },
+        ),
+      );
+    }
+
+    _projects[index].syncStatus = (await authData.isAuth)
+        ? (await _isConnected
+            ? (_projects[index].syncStatus == SyncStatus.UpdatedTask
+                ? SyncStatus.FullySynced
+                : _projects[index].syncStatus)
+            : (_projects[index].syncStatus != SyncStatus.NewTask
+                ? SyncStatus.UpdatedTask
+                : SyncStatus.NewTask))
+        : SyncStatus.FullySynced;
+    await writeCsv(_projects);
+    notifyListeners();
+  }
+
+  Future<List<String>> get availableLabels async {
+    // getter to fetch the list of available labels from SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList('AvailableLabels') ?? [];
+  }
+
+  Future<void> pullFromFireBase() async {
+    if (await _isConnected) {
+      Map<String, dynamic> syncedProjects;
+      var authData = Provider.of<Auth>(context, listen: false);
+      if (await authData.isAuth) {
+        String userId = await authData.userId;
+        String token = authData.token.token;
+        final url =
+            "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects.json?auth=$token";
+        final res = await http.get(url);
+        syncedProjects = json.decode(res.body);
+      }
+      if (_projects != null) {
+        _projects.clear();
+      }
+      if (syncedProjects != null) {
+        syncedProjects.forEach((id, data) {
+          _projects.add(Project(
+              context,
+              id: id,
+              name: data['name'],
+              start: parser.parse(data['start']),
+              category: data['category'],
+              labels:
+                  data.containsKey('labels') ? data['labels'].split('|') : [],
+              deadline: parser.parse(data['deadline']),
+              end: data.containsKey('end') ? parser.parse(data['end']) : null,
+              paymentMode: PaymentMode.values[data['paymentMode']],
+              rate: data['rate'],
+              client: data['client'],
+              syncStatus: SyncStatus.FullySynced));
+        });
+        await writeCsv(_projects);
+      }
+    }
+  }
+
+  Future<void> syncEngine() async {
+    var authData = Provider.of<Auth>(context, listen: false);
+    await loadData();
+    if (_projects != null && await authData.isAuth) {
+      String userId = await authData.userId;
+      String token = authData.token.token;
+      _projects.asMap().forEach(
+        (i, project) async {
+          if (await _isConnected) {
+            if (project.syncStatus == SyncStatus.UpdatedTask) {
+              final url =
+                  "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/${project.id}.json?auth=$token";
+              await http.patch(
+                url,
+                body: json.encode(
+                  {
+                    'end': project.end != null
+                        ? DateFormat("dd-MM-yyyy HH:mm:ss").format(project.end)
+                        : null,
+                    'labels': project.labels.join("|"),
+                  },
+                ),
+              );
+            } else if (project.syncStatus == SyncStatus.NewTask) {
+              final url =
+                  "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects.json?auth=$token";
+              final res = await http.post(
+                url,
+                body: json.encode(
+                  {
+                    'name': project.name,
+                    'start':
+                        DateFormat("dd-MM-yyyy HH:mm:ss").format(project.start),
+                    'deadline': DateFormat("dd-MM-yyyy HH:mm:ss")
+                        .format(project.deadline),
+                    'category': project.category,
+                    'paymentMode': project.paymentMode.index,
+                    'rate': project.rate,
+                    'client': project.client,
+                    'end': project.end != null
+                        ? DateFormat("dd-MM-yyyy HH:mm:ss").format(project.end)
+                        : null,
+                    'labels': project.labels.join("|"),
+                  },
+                ),
+              );
+              final path = await _localPath;
+              _projects[i].id = json.decode(res.body)['name'];
+              await File('$path/st_${project.id}.csv').rename('$path/st_${_projects[i].id}.csv');
+            }
+            _projects[i].syncStatus = SyncStatus.FullySynced;
+          }
+        },
+      );
+      await writeCsv(_projects);
+    }
   }
 }

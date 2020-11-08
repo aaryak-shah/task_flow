@@ -201,6 +201,7 @@ class _NewProjectState extends State<NewProject> {
                                   } else {
                                     projects
                                         .addProject(
+                                          id: DateTime.now().toString(),
                                           name: _titleController.text,
                                           start: DateTime.now(),
                                           deadline: _tentativeDeadline,
@@ -301,6 +302,7 @@ class _NewProjectState extends State<NewProject> {
                         if (_formKey.currentState.validate()) {
                           projects
                               .addProject(
+                                id: DateTime.now().toString(),
                                 name: _titleController.text,
                                 start: DateTime.now(),
                                 deadline: _tentativeDeadline,

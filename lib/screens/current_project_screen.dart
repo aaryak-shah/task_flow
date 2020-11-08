@@ -8,7 +8,28 @@ import 'package:task_flow/providers/projects.dart';
 import 'package:task_flow/providers/task.dart';
 import 'package:task_flow/screens/current_task_screen.dart';
 import 'package:task_flow/screens/tabs_screen.dart';
+import 'package:task_flow/widgets/new_labels.dart';
 import '../widgets/app_bar.dart';
+
+void showLabelForm(BuildContext context, int i) {
+  // Arguments => context: The context for the modal sheet to be created in
+  //              i: The index of the task to which the labels are to be added to
+  //
+  // Opens up a modal sheet to add labels to the current task
+
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    isDismissible: true,
+    builder: (_) {
+      return GestureDetector(
+        onTap: () {},
+        child: NewLabels('project', i),
+        behavior: HitTestBehavior.opaque,
+      );
+    },
+  );
+}
 
 class CurrentProjectScreen extends StatefulWidget {
   static const routeName = '/current-project-screen';
@@ -89,6 +110,8 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
               onPressed: () async {
                 if (key.currentState.validate()) {
                   await project.addSubTask(
+                    ctx: context,
+                    id: DateTime.now().toString(),
                     start: DateTime.now(),
                     title: titleController.text,
                   );
@@ -177,7 +200,9 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                         Spacer(),
                         GestureDetector(
                           child: Icon(Icons.add),
-                          onTap: () {},
+                          onTap: () {
+                            //
+                          },
                         ),
                       ],
                     ),

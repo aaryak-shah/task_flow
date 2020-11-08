@@ -71,6 +71,27 @@ class _NewLabelsState extends State<NewLabels> {
   @override
   void didChangeDependencies() {
     if (_isInit) {
+      switch (widget.mode) {
+        case 'task':
+          {
+            Provider.of<Tasks>(context)
+                .availableLabels
+                .then((value) => _labels = value);
+            break;
+          }
+        case 'goal': 
+        {
+          Provider.of<Goals>(context)
+              .availableLabels
+              .then((value) => _labels = value);
+          break;
+        }
+        case 'project':
+        {
+          //
+        }
+      }
+
       widget.mode == 'task'
           ? Provider.of<Tasks>(context)
               .availableLabels
@@ -78,6 +99,7 @@ class _NewLabelsState extends State<NewLabels> {
           : Provider.of<Goals>(context)
               .availableLabels
               .then((value) => _labels = value);
+
       _isInit = false;
     }
     super.didChangeDependencies();
