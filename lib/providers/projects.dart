@@ -66,9 +66,9 @@ class Projects with ChangeNotifier {
     // function to load the data from the tasks.csv file into Task
     // models which are then put into the _projects list
 
+    File csvFile = await _localFile;
+    String csvString = await csvFile.readAsString();
     String csvPath = await _localPath;
-    String csvString = await File('$csvPath/projects.csv').readAsString();
-
     // String csvString = await rootBundle.loadString('assets/data/tasks.csv');
     List<List<dynamic>> rowsAsListOfValues =
         const CsvToListConverter().convert(csvString);
@@ -79,29 +79,28 @@ class Projects with ChangeNotifier {
       String subTaskCsvString = await File(
               '$csvPath/st_${row[0].replaceAll(new RegExp(r'[:. \-]'), "")}.csv')
           .readAsString();
-
+      print(subTaskCsvString);
       List<List<dynamic>> subTasksAsListOfValues =
           const CsvToListConverter().convert(subTaskCsvString);
 
       subTasks = [];
       subTasksAsListOfValues.forEach((stRow) {
-        if (row[0] == stRow[11]) {
-          subTasks.add(Task(
-              id: stRow[0],
-              title: stRow[1],
-              start: parser.parse(stRow[2]),
-              latestPause: stRow[3].isNotEmpty ? parser.parse(stRow[3]) : null,
-              end: stRow[4].isNotEmpty ? parser.parse(stRow[4]) : null,
-              pauses: stRow[5],
-              pauseTime: Duration(seconds: stRow[6]),
-              isRunning: stRow[7] == 1,
-              isPaused: stRow[8] == 1,
-              category: stRow[9],
-              labels: stRow[10] != "" ? stRow[10].split("|") : [],
-              superProjectId: stRow[11],
-              syncStatus: SyncStatus.values[stRow[12]]));
-        }
+        subTasks.add(
+          Task(
+            id: stRow[0],
+            title: stRow[1],
+            start: parser.parse(stRow[2]),
+            latestPause: stRow[3].isNotEmpty ? parser.parse(stRow[3]) : null,
+            end: stRow[4].isNotEmpty ? parser.parse(stRow[4]) : null,
+            pauses: stRow[5],
+            pauseTime: Duration(seconds: stRow[6]),
+            isRunning: stRow[7] == 1,
+            isPaused: stRow[8] == 1,
+            syncStatus: SyncStatus.values[stRow[9]],
+          ),
+        );
       });
+      _projects = [];
       Project project = Project(
         context,
         id: row[0],
@@ -158,7 +157,6 @@ class Projects with ChangeNotifier {
 
     Project newProject = Project(
       context,
-      syncStatus: SyncStatus.NewTask,
       name: name,
       start: start,
       deadline: deadline,
@@ -169,8 +167,12 @@ class Projects with ChangeNotifier {
       rate: rate,
       client: client,
       subTasks: [],
+      syncStatus: (await authData.isAuth)
+          ? (await _isConnected ? SyncStatus.FullySynced : SyncStatus.NewTask)
+          : SyncStatus.FullySynced,
     );
     _projects.add(newProject);
+    print("Add projects: ${_projects.length}");
     await writeCsv(_projects);
     notifyListeners();
     return newProject.id;
@@ -257,8 +259,7 @@ class Projects with ChangeNotifier {
       }
       if (syncedProjects != null) {
         syncedProjects.forEach((id, data) {
-          _projects.add(Project(
-              context,
+          _projects.add(Project(context,
               id: id,
               name: data['name'],
               start: parser.parse(data['start']),
@@ -283,54 +284,59 @@ class Projects with ChangeNotifier {
     if (_projects != null && await authData.isAuth) {
       String userId = await authData.userId;
       String token = authData.token.token;
-      _projects.asMap().forEach(
-        (i, project) async {
-          if (await _isConnected) {
-            if (project.syncStatus == SyncStatus.UpdatedTask) {
-              final url =
-                  "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/${project.id}.json?auth=$token";
-              await http.patch(
-                url,
-                body: json.encode(
-                  {
-                    'end': project.end != null
-                        ? DateFormat("dd-MM-yyyy HH:mm:ss").format(project.end)
-                        : null,
-                    'labels': project.labels.join("|"),
-                  },
-                ),
-              );
-            } else if (project.syncStatus == SyncStatus.NewTask) {
-              final url =
-                  "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects.json?auth=$token";
-              final res = await http.post(
-                url,
-                body: json.encode(
-                  {
-                    'name': project.name,
-                    'start':
-                        DateFormat("dd-MM-yyyy HH:mm:ss").format(project.start),
-                    'deadline': DateFormat("dd-MM-yyyy HH:mm:ss")
-                        .format(project.deadline),
-                    'category': project.category,
-                    'paymentMode': project.paymentMode.index,
-                    'rate': project.rate,
-                    'client': project.client,
-                    'end': project.end != null
-                        ? DateFormat("dd-MM-yyyy HH:mm:ss").format(project.end)
-                        : null,
-                    'labels': project.labels.join("|"),
-                  },
-                ),
-              );
-              final path = await _localPath;
-              _projects[i].id = json.decode(res.body)['name'];
-              await File('$path/st_${project.id}.csv').rename('$path/st_${_projects[i].id}.csv');
-            }
-            _projects[i].syncStatus = SyncStatus.FullySynced;
+      for (int i = 0; i < _projects.length; i++) {
+        Project project = _projects[i];
+        if (await _isConnected) {
+          if (project.syncStatus == SyncStatus.UpdatedTask) {
+            final url =
+                "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/${project.id}.json?auth=$token";
+            await http.patch(
+              url,
+              body: json.encode(
+                {
+                  'end': project.end != null
+                      ? DateFormat("dd-MM-yyyy HH:mm:ss").format(project.end)
+                      : null,
+                  'labels': project.labels.join("|"),
+                },
+              ),
+            );
+          } else if (project.syncStatus == SyncStatus.NewTask) {
+            final url =
+                "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects.json?auth=$token";
+            final res = await http.post(
+              url,
+              body: json.encode(
+                {
+                  'name': project.name,
+                  'start':
+                      DateFormat("dd-MM-yyyy HH:mm:ss").format(project.start),
+                  'deadline': DateFormat("dd-MM-yyyy HH:mm:ss")
+                      .format(project.deadline),
+                  'category': project.category,
+                  'paymentMode': project.paymentMode.index,
+                  'rate': project.rate,
+                  'client': project.client,
+                  'end': project.end != null
+                      ? DateFormat("dd-MM-yyyy HH:mm:ss").format(project.end)
+                      : null,
+                  'labels': project.labels.join("|"),
+                },
+              ),
+            );
+            final path = await _localPath;
+            String oldId = project.id;
+            _projects[i].id = json.decode(res.body)['name'];
+            print(oldId);
+            print(_projects[i].id);
+            await File(
+                    '$path/st_${oldId.replaceAll(new RegExp(r'[:. \-]'), "")}.csv')
+                .rename(
+                    '$path/st_${_projects[i].id.replaceAll(new RegExp(r'[:. \-]'), "")}.csv');
           }
-        },
-      );
+          _projects[i].syncStatus = SyncStatus.FullySynced;
+        }
+      }
       await writeCsv(_projects);
     }
   }

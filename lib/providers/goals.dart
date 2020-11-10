@@ -72,9 +72,8 @@ class Goals with ChangeNotifier {
         isPaused: row[8] == 1,
         category: row[9],
         labels: row[10].split("|"),
-        superProjectId: row[11],
-        goalTime: Duration(seconds: row[12]),
-        syncStatus: SyncStatus.values[row[13]]
+        goalTime: Duration(seconds: row[11]),
+        syncStatus: SyncStatus.values[row[12]]
       );
     }).toList();
     notifyListeners();
@@ -100,7 +99,6 @@ class Goals with ChangeNotifier {
               g.isPaused ? 1 : 0,
               g.category,
               g.labels.join("|"),
-              g.superProjectId == null ? "" : g.superProjectId,
               g.goalTime.inSeconds,
               g.syncStatus.index
             ])
@@ -116,7 +114,6 @@ class Goals with ChangeNotifier {
     final DateTime start,
     final String category,
     final List<String> labels,
-    final String superProjectName,
     final Duration goalTime,
   ) async {
     // Arguments => id: The id of the goal to be added,
@@ -124,7 +121,6 @@ class Goals with ChangeNotifier {
     //              start: DateTime object of the start of the goal to be added,
     //              category: Category of the goal to be added,
     //              labels: List of labels of the goal to be added,
-    //              superProjectName: Name of the project the goal to be added is under,
     //              goalTime: Duration of time the goal is set for
     //
     // Adds the Task object with the above arguments to the _goals list
@@ -136,7 +132,6 @@ class Goals with ChangeNotifier {
       start: start,
       category: category,
       labels: labels,
-      superProjectId: superProjectName,
       goalTime: goalTime,
     );
 

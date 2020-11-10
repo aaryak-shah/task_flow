@@ -131,12 +131,12 @@ class _NewTaskState extends State<NewTask> {
                       if (_formKey.currentState.validate()) {
                         // if the form is valid
                         await tasks.addTask(
-                            DateTime.now().toString(),
-                            _titleController.text,
-                            DateTime.now(),
-                            _selectedCategory,
-                            [],
-                            null);
+                          DateTime.now().toString(),
+                          _titleController.text,
+                          DateTime.now(),
+                          _selectedCategory,
+                          [],
+                        );
                         // redirect to the CurrentTaskScreen with appropriate arguments
                         Navigator.of(context).pushReplacementNamed(
                             CurrentTaskScreen.routeName,

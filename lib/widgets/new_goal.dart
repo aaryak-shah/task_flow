@@ -189,7 +189,6 @@ class _NewGoalState extends State<NewGoal> {
                           DateTime.now(),
                           _selectedCategory,
                           [],
-                          null,
                           time,
                         );
                         // redirect to the CurrentGoalScreen

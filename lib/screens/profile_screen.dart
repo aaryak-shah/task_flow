@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/exceptions/http_exception.dart';
+import 'package:task_flow/providers/project.dart';
+import 'package:task_flow/providers/projects.dart';
 import 'package:task_flow/providers/tasks.dart';
 
 import '../widgets/sign_in_form.dart';
@@ -96,6 +98,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         },
       );
       await Provider.of<Tasks>(context).syncEngine();
+      Projects projects = Provider.of<Projects>(context);
+      await projects.syncEngine();
+      for (Project project in projects.projects) {
+        await project.syncEngine();
+      }
       await Provider.of<Auth>(context, listen: false).logout();
     } on HttpException catch (error) {
       Navigator.of(context).pop();
@@ -200,6 +207,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         .syncEngine();
                     await Provider.of<Tasks>(context, listen: false)
                         .writeCsv([]);
+                    Projects projects = Provider.of<Projects>(context);
+                    await projects.syncEngine();
+                    for (Project project in projects.projects) {
+                      await project.syncEngine();
+                      await project.purgeSubTasks();
+                    }
+                    projects.writeCsv([]);
                     await provider.logout();
                   },
                   child: ListTile(
@@ -224,7 +238,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     });
                     Provider.of<Tasks>(context, listen: false)
                         .pullFromFireBase()
-                        .then((_) {
+                        .then((_) async {
+                      await Provider.of<Projects>(context, listen: false)
+                          .pullFromFireBase();
+                      for (Project project
+                          in Provider.of<Projects>(context, listen: false)
+                              .projects) {
+                        await project.pullFromFireBase();
+                      }
                       setState(() {
                         _isSyncing = false;
                       });
@@ -261,6 +282,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 .googleAuth();
                             await Provider.of<Tasks>(context, listen: false)
                                 .pullFromFireBase();
+                            await Provider.of<Projects>(context, listen: false)
+                                .pullFromFireBase();
+                            for (Project project
+                                in Provider.of<Projects>(context, listen: false)
+                                    .projects) {
+                              await project.pullFromFireBase();
+                            }
                           } on PlatformException catch (error) {
                             var errorMessage = 'Authentication error';
                             if (error.message.contains('sign_in_canceled') ||

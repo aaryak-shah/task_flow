@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:task_flow/providers/project.dart';
 import 'package:task_flow/providers/projects.dart';
 import 'package:task_flow/providers/theme_switcher.dart';
 
@@ -119,6 +120,11 @@ class _TabsScreenState extends State<TabsScreen> {
       Provider.of<Tasks>(context).purgeOldTasks();
       Provider.of<Goals>(context).purgeOldGoals();
       Provider.of<Tasks>(context).syncEngine();
+      Projects projects = Provider.of<Projects>(context);
+      projects.syncEngine();
+      for (Project project in projects.projects) {
+        project.syncEngine();
+      }
       _isInit = false;
     }
     super.didChangeDependencies();

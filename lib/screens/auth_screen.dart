@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/exceptions/http_exception.dart';
 import 'package:task_flow/providers/auth.dart';
+import 'package:task_flow/providers/project.dart';
+import 'package:task_flow/providers/projects.dart';
 import 'package:task_flow/providers/tasks.dart';
 import 'package:task_flow/screens/tabs_screen.dart';
 import 'package:task_flow/widgets/sign_in_form.dart';
@@ -45,7 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _showErrorDialog(String title, String message) {
+  void _showErrorDialog(BuildContext context, String title, String message) {
     showDialog(
       context: context,
       builder: (context) {
@@ -122,6 +124,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             .googleAuth();
                         await Provider.of<Tasks>(context, listen: false)
                             .pullFromFireBase();
+                        await Provider.of<Projects>(context, listen: false)
+                            .pullFromFireBase();
+                        for (Project project
+                            in Provider.of<Projects>(context, listen: false)
+                                .projects) {
+                          await project.pullFromFireBase();
+                        }
                       } on PlatformException catch (error) {
                         var errorMessage = 'Authentication error';
                         if (error.message.contains('sign_in_canceled') ||
@@ -130,12 +139,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         } else if (error.message.contains('network_error')) {
                           errorMessage = 'Sign in failed due to network issue';
                         }
-                        _showErrorDialog("Something went wrong", errorMessage);
+                        _showErrorDialog(
+                            context, "Something went wrong", errorMessage);
                       } catch (error) {
                         // Navigator.of(context).pop();
                         const errorMessage =
                             'Could not sign you in, please try again later.';
-                        _showErrorDialog("Something went wrong", errorMessage);
+                        _showErrorDialog(
+                            context, "Something went wrong", errorMessage);
                         throw error;
                       }
                     },

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/exceptions/http_exception.dart';
 import 'package:task_flow/providers/auth.dart';
+import 'package:task_flow/providers/project.dart';
+import 'package:task_flow/providers/projects.dart';
 import 'package:task_flow/providers/tasks.dart';
 
 class SignInForm extends StatefulWidget {
@@ -123,6 +125,11 @@ class _SignInFormState extends State<SignInForm> {
 
       if (isVerified) {
         await Provider.of<Tasks>(context, listen: false).pullFromFireBase();
+        await Provider.of<Projects>(context, listen: false).pullFromFireBase();
+        for (Project project
+            in Provider.of<Projects>(context, listen: false).projects) {
+          await project.pullFromFireBase();
+        }
         Navigator.of(context).pop();
       } else {
         _showErrorDialog("Email not verified",
