@@ -43,7 +43,7 @@ class CurrentProjectScreen extends StatefulWidget {
 }
 
 class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
-  bool loaded = false;
+  bool loaded = false, _isInit = true;
   Project project;
 
   @override
@@ -62,17 +62,20 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    project = Provider.of<Projects>(context)
-        .projects
-        .firstWhere((proj) => proj.id == widget.projectId);
+    if (_isInit) {
+      project = Provider.of<Projects>(context).projects.firstWhere((proj) {
+        return proj.id == widget.projectId;
+      });
+      _isInit = false;
+    }
     setState(() {
       loaded = false;
     });
     Future.delayed(Duration.zero, () async {
       await project.loadData();
+      await project.syncEngine();
       setState(() {
         loaded = true;
-        print('loaded subtasks');
       });
     });
   }
@@ -115,7 +118,6 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                     start: DateTime.now(),
                     title: titleController.text,
                   );
-                  print(project.subTasks[0].title);
                   Navigator.of(context).pushReplacementNamed(
                     CurrentTaskScreen.routeName,
                     arguments: {
@@ -136,7 +138,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
     if (loaded) {
       return WillPopScope(
         onWillPop: () async {
-          print('pushreplacing back to tabsscreen');
+          await Provider.of<Projects>(context, listen: false).syncEngine();
           Navigator.pushReplacementNamed(
             context,
             TabsScreen.routeName,

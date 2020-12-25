@@ -56,7 +56,11 @@ class Projects with ChangeNotifier {
             ])
         .toList());
     File f = await _localFile;
+    print("projects.csv before");
+    print(await f.readAsString());
     await f.writeAsString(rows, mode: FileMode.writeOnly);
+    print("projects.csv after");
+    print(await f.readAsString());
     notifyListeners();
   }
 
@@ -79,7 +83,6 @@ class Projects with ChangeNotifier {
       String subTaskCsvString = await File(
               '$csvPath/st_${row[0].replaceAll(new RegExp(r'[:. \-]'), "")}.csv')
           .readAsString();
-      print(subTaskCsvString);
       List<List<dynamic>> subTasksAsListOfValues =
           const CsvToListConverter().convert(subTaskCsvString);
 
@@ -100,7 +103,7 @@ class Projects with ChangeNotifier {
           ),
         );
       });
-      _projects = [];
+      // _projects = [];
       Project project = Project(
         context,
         id: row[0],
@@ -172,7 +175,7 @@ class Projects with ChangeNotifier {
           : SyncStatus.FullySynced,
     );
     _projects.add(newProject);
-    print("Add projects: ${_projects.length}");
+    print("new project");
     await writeCsv(_projects);
     notifyListeners();
     return newProject.id;
@@ -273,6 +276,7 @@ class Projects with ChangeNotifier {
               client: data['client'],
               syncStatus: SyncStatus.FullySynced));
         });
+        print("pull from firebase");
         await writeCsv(_projects);
       }
     }
@@ -327,8 +331,6 @@ class Projects with ChangeNotifier {
             final path = await _localPath;
             String oldId = project.id;
             _projects[i].id = json.decode(res.body)['name'];
-            print(oldId);
-            print(_projects[i].id);
             await File(
                     '$path/st_${oldId.replaceAll(new RegExp(r'[:. \-]'), "")}.csv')
                 .rename(
@@ -337,6 +339,8 @@ class Projects with ChangeNotifier {
           _projects[i].syncStatus = SyncStatus.FullySynced;
         }
       }
+      print("sync engine");
+      print(_projects.length);
       await writeCsv(_projects);
     }
   }

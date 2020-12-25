@@ -347,7 +347,6 @@ class Tasks with ChangeNotifier {
   Future<void> pause(int index) async {
     // Arguments => index: The index of the task to be paused
     // Pauses the task at 'index' in the _tasks list
-    print('task pause');
     _tasks[index].isRunning = false;
     _tasks[index].isPaused = true;
     _tasks[index].pauses++;

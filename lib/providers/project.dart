@@ -315,8 +315,6 @@ class Project with ChangeNotifier {
   }
 
   Future<void> complete(int index) async {
-    print('subtask complete');
-    print(index);
     subTasks[index].isRunning = false;
     subTasks[index].isPaused = true;
     subTasks[index].end = DateTime.now();
@@ -398,58 +396,63 @@ class Project with ChangeNotifier {
   }
 
   Future<void> syncEngine() async {
-    var authData = Provider.of<Auth>(context, listen: false);
-    await loadData();
-    if (subTasks != null && await authData.isAuth) {
-      String userId = await authData.userId;
-      String token = authData.token.token;
-      for (int i = 0; i < subTasks.length; i++) {
-        Task task = subTasks[i];
-        if (task.syncStatus == SyncStatus.UpdatedTask) {
-          final url =
-              "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks/${task.id}.json?auth=$token";
-          await http.patch(
-            url,
-            body: json.encode(
-              {
-                'isRunning': task.isRunning,
-                'isPaused': task.isPaused,
-                'latestPause':
-                    DateFormat("dd-MM-yyyy HH:mm:ss").format(task.latestPause),
-                'end': task.end != null
-                    ? DateFormat("dd-MM-yyyy HH:mm:ss").format(task.end)
-                    : null,
-              },
-            ),
-          );
-        } else if (task.syncStatus == SyncStatus.NewTask) {
-          final url =
-              "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks.json?auth=$token";
-          final res = await http.post(
-            url,
-            body: json.encode(
-              {
-                'title': task.title,
-                'start': DateFormat("dd-MM-yyyy HH:mm:ss").format(task.start),
-                'latestPause': task.latestPause != null
-                    ? DateFormat("dd-MM-yyyy HH:mm:ss").format(task.latestPause)
-                    : null,
-                'end': task.end != null
-                    ? DateFormat("dd-MM-yyyy HH:mm:ss").format(task.end)
-                    : null,
-                'pauses': task.pauses,
-                'pauseTime':
-                    task.pauseTime != null ? task.pauseTime.inSeconds : null,
-                'isRunning': task.isRunning,
-                'isPaused': task.isPaused,
-              },
-            ),
-          );
-          subTasks[i].id = json.decode(res.body)['name'];
+    if (await _isConnected) {
+      var authData = Provider.of<Auth>(context, listen: false);
+      await loadData();
+      if (subTasks != null && await authData.isAuth) {
+        String userId = await authData.userId;
+        String token = authData.token.token;
+        print("Token $token");
+        for (int i = 0; i < subTasks.length; i++) {
+          Task task = subTasks[i];
+          if (task.syncStatus == SyncStatus.UpdatedTask) {
+            final url =
+                "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks/${task.id}.json?auth=$token";
+            await http.patch(
+              url,
+              body: json.encode(
+                {
+                  'isRunning': task.isRunning,
+                  'isPaused': task.isPaused,
+                  'latestPause': DateFormat("dd-MM-yyyy HH:mm:ss")
+                      .format(task.latestPause),
+                  'end': task.end != null
+                      ? DateFormat("dd-MM-yyyy HH:mm:ss").format(task.end)
+                      : null,
+                },
+              ),
+            );
+          } else if (task.syncStatus == SyncStatus.NewTask) {
+            final url =
+                "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks.json?auth=$token";
+            final res = await http.post(
+              url,
+              body: json.encode(
+                {
+                  'title': task.title,
+                  'start': DateFormat("dd-MM-yyyy HH:mm:ss").format(task.start),
+                  'latestPause': task.latestPause != null
+                      ? DateFormat("dd-MM-yyyy HH:mm:ss")
+                          .format(task.latestPause)
+                      : null,
+                  'end': task.end != null
+                      ? DateFormat("dd-MM-yyyy HH:mm:ss").format(task.end)
+                      : null,
+                  'pauses': task.pauses,
+                  'pauseTime':
+                      task.pauseTime != null ? task.pauseTime.inSeconds : null,
+                  'isRunning': task.isRunning,
+                  'isPaused': task.isPaused,
+                },
+              ),
+            );
+            print(json.decode(res.body));
+            subTasks[i].id = json.decode(res.body)['name'];
+          }
+          subTasks[i].syncStatus = SyncStatus.FullySynced;
         }
-        subTasks[i].syncStatus = SyncStatus.FullySynced;
+        await writeCsv(subTasks);
       }
-      await writeCsv(subTasks);
     }
   }
 

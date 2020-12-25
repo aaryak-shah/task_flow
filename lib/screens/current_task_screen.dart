@@ -93,7 +93,6 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
         : Provider.of<Projects>(context, listen: true)
             .projects
             .firstWhere((project) => project.id == widget.superProjectId);
-    print('provider: $_provider');
     Task _task = widget.superProjectName.isEmpty
         ? _provider.tasks[widget.index]
         : _provider.subTasks[widget.index];
@@ -241,8 +240,6 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                                 await _provider.resume(widget.index);
                               } else {
                                 watch.stop();
-                                print('provider2 $_provider');
-
                                 await _provider.pause(widget.index);
                               }
                               paused = !paused;

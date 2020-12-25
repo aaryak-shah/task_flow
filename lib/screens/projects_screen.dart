@@ -24,12 +24,10 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
 
       Projects projects = Provider.of<Projects>(context, listen: false);
       for (Project project in projects.projects) {
-        print('loading');
         await project.loadData();
       }
       setState(() {
         loaded = true;
-        print("loaded");
       });
     });
   }
@@ -37,7 +35,6 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
   @override
   Widget build(BuildContext context) {
     if (loaded) {
-      print('running this');
       Projects projects = Provider.of<Projects>(context, listen: false);
       List<Project> sortedProjects = projects.projects;
       sortedProjects.sort(

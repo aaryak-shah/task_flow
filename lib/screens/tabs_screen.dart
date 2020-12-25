@@ -120,11 +120,11 @@ class _TabsScreenState extends State<TabsScreen> {
       Provider.of<Tasks>(context).purgeOldTasks();
       Provider.of<Goals>(context).purgeOldGoals();
       Provider.of<Tasks>(context).syncEngine();
-      Projects projects = Provider.of<Projects>(context);
-      projects.syncEngine();
-      for (Project project in projects.projects) {
-        project.syncEngine();
-      }
+      // Projects projects = Provider.of<Projects>(context);
+      // projects.syncEngine();
+      // for (Project project in projects.projects) {
+      //   project.syncEngine();
+      // }
       _isInit = false;
     }
     super.didChangeDependencies();
