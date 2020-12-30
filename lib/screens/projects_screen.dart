@@ -69,7 +69,10 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                             onTap: () {
                               Navigator.of(context).pushNamed(
                                   CurrentProjectScreen.routeName,
-                                  arguments: sortedProjects[index].id);
+                                  arguments: {
+                                    'projectId': sortedProjects[index].id,
+                                    'index': projects.projectIndex(sortedProjects[index].id)
+                                  });
                             },
                             child: Padding(
                               padding: const EdgeInsets.all(10.0),
@@ -136,7 +139,10 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                             onTap: () {
                               Navigator.of(context).pushNamed(
                                   CurrentProjectScreen.routeName,
-                                  arguments: sortedProjects[index].id);
+                                  arguments: {
+                                    'projectId': sortedProjects[index].id,
+                                    'index': projects.projectIndex(sortedProjects[index].id)
+                                  });
                             },
                             child: Padding(
                               padding: const EdgeInsets.all(10),

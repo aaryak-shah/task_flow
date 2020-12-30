@@ -214,7 +214,11 @@ class _NewProjectState extends State<NewProject> {
                                           (id) => Navigator.of(context)
                                               .pushReplacementNamed(
                                             CurrentProjectScreen.routeName,
-                                            arguments: id,
+                                            arguments: {
+                                              'projectId': id,
+                                              'index':
+                                                  projects.projects.length - 1
+                                            },
                                           ),
                                         );
                                   }
@@ -315,7 +319,10 @@ class _NewProjectState extends State<NewProject> {
                                 (id) =>
                                     Navigator.of(context).pushReplacementNamed(
                                   CurrentProjectScreen.routeName,
-                                  arguments: id,
+                                  arguments: {
+                                    'projectId': id,
+                                    'index': projects.projects.length - 1
+                                  },
                                 ),
                               );
                         }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../providers/projects.dart';
 import '../providers/tasks.dart';
 import '../providers/goals.dart';
 
@@ -79,26 +80,21 @@ class _NewLabelsState extends State<NewLabels> {
                 .then((value) => _labels = value);
             break;
           }
-        case 'goal': 
-        {
-          Provider.of<Goals>(context)
-              .availableLabels
-              .then((value) => _labels = value);
-          break;
-        }
+        case 'goal':
+          {
+            Provider.of<Goals>(context)
+                .availableLabels
+                .then((value) => _labels = value);
+            break;
+          }
         case 'project':
-        {
-          //
-        }
+          {
+            Provider.of<Goals>(context)
+                .availableLabels
+                .then((value) => _labels = value);
+            break;
+          }
       }
-
-      widget.mode == 'task'
-          ? Provider.of<Tasks>(context)
-              .availableLabels
-              .then((value) => _labels = value)
-          : Provider.of<Goals>(context)
-              .availableLabels
-              .then((value) => _labels = value);
 
       _isInit = false;
     }
@@ -115,6 +111,7 @@ class _NewLabelsState extends State<NewLabels> {
   Widget build(BuildContext context) {
     final tasks = Provider.of<Tasks>(context);
     final goals = Provider.of<Goals>(context);
+    final projects = Provider.of<Projects>(context);
     Widget returnLabelChips() {
       // function that returns the label chips
       return labelChips(
@@ -196,11 +193,26 @@ class _NewLabelsState extends State<NewLabels> {
               color: Theme.of(context).accentColor,
               textColor: Theme.of(context).primaryColor,
               onPressed: () async {
-                widget.mode == 'task'
-                    ? await tasks.addLabels(
-                        widget.taskIndex, _selectedLabels, _labels)
-                    : await goals.addLabels(
-                        widget.taskIndex, _selectedLabels, _labels);
+                switch (widget.mode) {
+                  case 'task':
+                    {
+                      await tasks.addLabels(
+                          widget.taskIndex, _selectedLabels, _labels);
+                      break;
+                    }
+                  case 'goal':
+                    {
+                      await goals.addLabels(
+                          widget.taskIndex, _selectedLabels, _labels);
+                      break;
+                    }
+                  case 'project':
+                    {
+                      await projects.addLabels(
+                          widget.taskIndex, _selectedLabels, _labels);
+                      break;
+                    }
+                }
                 Navigator.of(context).pop();
               },
             ),

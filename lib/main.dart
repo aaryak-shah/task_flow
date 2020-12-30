@@ -147,9 +147,13 @@ class _MyAppState extends State<MyApp> {
                 return TabsScreen(selected);
               });
             } else if (settings.name == CurrentProjectScreen.routeName) {
-              final String id = settings.arguments;
+              final String id = (settings.arguments as Map)['projectId'];
+              final int index = (settings.arguments as Map)['index'];
               return MaterialPageRoute(builder: (context) {
-                return CurrentProjectScreen(id);
+                return CurrentProjectScreen(
+                  projectId: id,
+                  index: index,
+                );
               });
             }
           },

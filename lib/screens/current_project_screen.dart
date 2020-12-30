@@ -33,10 +33,10 @@ void showLabelForm(BuildContext context, int i) {
 
 class CurrentProjectScreen extends StatefulWidget {
   static const routeName = '/current-project-screen';
-
+  final int index;
   final String projectId;
 
-  CurrentProjectScreen(this.projectId);
+  CurrentProjectScreen({this.projectId, this.index});
 
   @override
   _CurrentProjectScreenState createState() => _CurrentProjectScreenState();
@@ -203,7 +203,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                         GestureDetector(
                           child: Icon(Icons.add),
                           onTap: () {
-                            //
+                            showLabelForm(context, widget.index);
                           },
                         ),
                       ],
