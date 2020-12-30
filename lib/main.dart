@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:task_flow/providers/auth.dart';
 import 'package:task_flow/providers/project.dart';
 import 'package:task_flow/providers/projects.dart';
+import 'package:task_flow/providers/settings.dart';
 import 'package:task_flow/providers/theme_switcher.dart';
 import 'package:task_flow/screens/current_project_screen.dart';
 import 'package:task_flow/screens/profile_screen.dart';
@@ -13,7 +14,7 @@ import 'package:task_flow/screens/profile_screen.dart';
 import 'screens/auth_screen.dart';
 import './screens/current_goal_screen.dart';
 import './screens/stats_screen.dart';
-import './screens/settings_screen.dart';
+import 'screens/settings_screen.dart';
 import './screens/tabs_screen.dart';
 import 'screens/current_task_screen.dart';
 
@@ -83,6 +84,9 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(
           create: (context) => ThemeModel(),
         ),
+        ChangeNotifierProvider(
+          create: (context) => Settings(),
+        )
       ],
       child: Consumer<Auth>(builder: (context, auth, _) {
         auth.isAuth.then((value) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:task_flow/providers/settings.dart';
 
 import '../providers/goals.dart';
 import '../widgets/plus_btn_controllers.dart';
@@ -81,8 +82,10 @@ class _GoalsScreenState extends State<GoalsScreen> {
                             goals.categoryString(g.id),
                             style: Theme.of(context).textTheme.bodyText2,
                           ),
-                          trailing: Text(
-                            g.getTimeString('goal'),
+                          trailing: Consumer<Settings>(
+                            builder: (context, settings, _) => Text(
+                              g.getTimeString('goal', settings.showSeconds),
+                            ),
                           ),
                         ),
                       );

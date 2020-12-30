@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/providers/project.dart';
 import 'package:task_flow/providers/projects.dart';
+import 'package:task_flow/providers/settings.dart';
 import 'package:task_flow/providers/task.dart';
 import 'package:task_flow/screens/current_task_screen.dart';
 import 'package:task_flow/screens/tabs_screen.dart';
@@ -312,7 +313,14 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                               },
                             ),
                       title: Text(current.title),
-                      trailing: Text(current.getTimeString('run')),
+                      trailing: Consumer<Settings>(
+                        builder: (context, settings, _) => Text(
+                          current.end == null
+                              ? current.getTimeString(
+                                  'run', settings.showSeconds)
+                              : 'Completed',
+                        ),
+                      ),
                     );
                   },
                   itemCount:

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:task_flow/providers/settings.dart';
 import 'package:task_flow/providers/theme_switcher.dart';
 import 'package:task_flow/widgets/plus_btn_controllers.dart';
 
@@ -14,9 +15,9 @@ class TasksScreen extends StatefulWidget {
 
 class _TasksScreenState extends State<TasksScreen> {
   int selectedDay = 6;
-  Widget chartBtn(int i) {
+  Widget chartBtn(int i, bool shorten) {
     return Container(
-      height: 200,
+      height: shorten ? 100 : 200,
       width: 30,
       color: Color(0x00000000),
       child: GestureDetector(
@@ -40,39 +41,41 @@ class _TasksScreenState extends State<TasksScreen> {
             backgroundColor: Theme.of(context).primaryColor,
             body: Column(
               children: <Widget>[
-                Container(
-                  height: 230,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    fit: StackFit.expand,
-                    children: <Widget>[
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          boxShadow: [
-                            Provider.of<ThemeModel>(context)
-                                .bottomFallingShadow,
-                          ],
+                Consumer<Settings>(
+                  builder: (context, settings, _) => Container(
+                    height: settings.shortTaskChart ? 115 : 230,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      fit: StackFit.expand,
+                      children: <Widget>[
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor,
+                            boxShadow: [
+                              Provider.of<ThemeModel>(context)
+                                  .bottomFallingShadow,
+                            ],
+                          ),
+                          padding: const EdgeInsets.only(top: 10),
+                          child: Chart(selectedDay),
                         ),
-                        padding: const EdgeInsets.only(top: 10),
-                        child: Chart(selectedDay),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 18),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: <Widget>[
-                            chartBtn(0),
-                            chartBtn(1),
-                            chartBtn(2),
-                            chartBtn(3),
-                            chartBtn(4),
-                            chartBtn(5),
-                            chartBtn(6),
-                          ],
-                        ),
-                      )
-                    ],
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 18),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: <Widget>[
+                              chartBtn(0, settings.shortTaskChart),
+                              chartBtn(1, settings.shortTaskChart),
+                              chartBtn(2, settings.shortTaskChart),
+                              chartBtn(3, settings.shortTaskChart),
+                              chartBtn(4, settings.shortTaskChart),
+                              chartBtn(5, settings.shortTaskChart),
+                              chartBtn(6, settings.shortTaskChart),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ),
                 Padding(
@@ -127,7 +130,10 @@ class _TasksScreenState extends State<TasksScreen> {
                                   },
                                   icon: Icon(
                                     Icons.refresh,
-                                    color: Theme.of(context).textTheme.bodyText1.color,
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodyText1
+                                        .color,
                                   ),
                                 )
                               : IconButton(
@@ -143,31 +149,41 @@ class _TasksScreenState extends State<TasksScreen> {
                                   },
                                   icon: Icon(
                                     Icons.play_arrow,
-                                    color: Theme.of(context).textTheme.bodyText1.color,
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodyText1
+                                        .color,
                                   ),
                                 ),
                           title: Text(
                             t.title.length <= 40
                                 ? t.title
                                 : (t.title.substring(0, 40) + '...'),
-                            style:
-                                Theme.of(context).textTheme.bodyText1.copyWith(
-                                      fontWeight: t.end == null
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
-                                      color: (t.end != null)
-                                          ? Theme.of(context).unselectedWidgetColor
-                                          : Theme.of(context).textTheme.bodyText1.color,
-                                    ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyText1
+                                .copyWith(
+                                  fontWeight: t.end == null
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  color: (t.end != null)
+                                      ? Theme.of(context).unselectedWidgetColor
+                                      : Theme.of(context)
+                                          .textTheme
+                                          .bodyText1
+                                          .color,
+                                ),
                           ),
                           subtitle: Text(
                             tasks.categoryString(t.id),
                             style: Theme.of(context).textTheme.bodyText2,
                           ),
-                          trailing: Text(
-                            t.end == null
-                                ? t.getTimeString('run')
-                                : 'Completed',
+                          trailing: Consumer<Settings>(
+                            builder: (context, settings, _) => Text(
+                              t.end == null
+                                  ? t.getTimeString('run', settings.showSeconds)
+                                  : 'Completed',
+                            ),
                           ),
                         ),
                       );
