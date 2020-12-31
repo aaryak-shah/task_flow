@@ -47,6 +47,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   bool isAuth = false;
   bool isGuest = false;
+  bool isInit = true;
   ThemeData theme = ThemeData(
     brightness: Brightness.dark,
     primaryColor: Color(0xFF121212),
@@ -89,23 +90,32 @@ class _MyAppState extends State<MyApp> {
         )
       ],
       child: Consumer<Auth>(builder: (context, auth, _) {
-        auth.isAuth.then((value) {
-          setState(() {
-            isAuth = value;
-          });
-        });
+        auth.isAuth.then(
+          (value) async {
+            setState(() {
+              isAuth = value;
+              if (!value) isInit = true;
+            });
+            if (value && isInit) {
+              isInit = false;
+              Provider.of<Tasks>(context, listen: false).pullFromFireBase();
+              await Provider.of<Projects>(context, listen: false)
+                  .pullFromFireBase();
+              for (Project project
+                  in Provider.of<Projects>(context, listen: false).projects) {
+                project.pullFromFireBase();
+              }
+              setState(() {
+                isInit = false;
+              });
+            }
+          },
+        );
         auth.isGuestUser.then((value) {
           setState(() {
             isGuest = value;
           });
         });
-        // if (auth.isGuestUser) {
-        // Future.delayed(Duration.zero, () {
-        //   setState(() {
-        //     isGuest = true;
-        //   });
-        // });
-        // }
         Provider.of<ThemeModel>(context, listen: false)
             .currentTheme
             .then((value) => theme = value);

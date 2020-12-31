@@ -68,11 +68,13 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                                 Theme.of(context).accentColor.withOpacity(0.4),
                             onTap: () {
                               Navigator.of(context).pushNamed(
-                                  CurrentProjectScreen.routeName,
-                                  arguments: {
-                                    'projectId': sortedProjects[index].id,
-                                    'index': projects.projectIndex(sortedProjects[index].id)
-                                  });
+                                CurrentProjectScreen.routeName,
+                                arguments: {
+                                  'projectId': sortedProjects[index].id,
+                                  'index': projects
+                                      .projectIndex(sortedProjects[index].id)
+                                },
+                              );
                             },
                             child: Padding(
                               padding: const EdgeInsets.all(10.0),
@@ -138,11 +140,13 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                             highlightColor: Colors.transparent,
                             onTap: () {
                               Navigator.of(context).pushNamed(
-                                  CurrentProjectScreen.routeName,
-                                  arguments: {
-                                    'projectId': sortedProjects[index].id,
-                                    'index': projects.projectIndex(sortedProjects[index].id)
-                                  });
+                                CurrentProjectScreen.routeName,
+                                arguments: {
+                                  'projectId': sortedProjects[index].id,
+                                  'index': projects
+                                      .projectIndex(sortedProjects[index].id)
+                                },
+                              );
                             },
                             child: Padding(
                               padding: const EdgeInsets.all(10),

@@ -207,7 +207,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         .syncEngine();
                     await Provider.of<Tasks>(context, listen: false)
                         .writeCsv([]);
-                    Projects projects = Provider.of<Projects>(context);
+                    Projects projects = Provider.of<Projects>(context, listen: false);
                     await projects.syncEngine();
                     for (Project project in projects.projects) {
                       await project.syncEngine();

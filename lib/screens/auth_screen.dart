@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:task_flow/exceptions/http_exception.dart';
 import 'package:task_flow/providers/auth.dart';
-import 'package:task_flow/providers/project.dart';
-import 'package:task_flow/providers/projects.dart';
-import 'package:task_flow/providers/tasks.dart';
 import 'package:task_flow/screens/tabs_screen.dart';
 import 'package:task_flow/widgets/sign_in_form.dart';
 import 'package:task_flow/widgets/sign_up_form.dart';
@@ -122,15 +118,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       try {
                         await Provider.of<Auth>(context, listen: false)
                             .googleAuth();
-                        await Provider.of<Tasks>(context, listen: false)
-                            .pullFromFireBase();
-                        await Provider.of<Projects>(context, listen: false)
-                            .pullFromFireBase();
-                        // for (Project project
-                        //     in Provider.of<Projects>(context, listen: false)
-                        //         .projects) {
-                        //   await project.pullFromFireBase();
-                        // }
                       } on PlatformException catch (error) {
                         var errorMessage = 'Authentication error';
                         if (error.message.contains('sign_in_canceled') ||
@@ -147,7 +134,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             'Could not sign you in, please try again later.';
                         _showErrorDialog(
                             context, "Something went wrong", errorMessage);
-                        throw error;
                       }
                     },
                     color: Color(0xDEFFFFFF),
