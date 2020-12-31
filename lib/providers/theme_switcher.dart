@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-enum ThemeMode {
+enum BrightnessMode {
   Dark,
   Light,
 }
@@ -23,12 +23,12 @@ List<Color> lightAccents = [
 ];
 
 class ThemeModel with ChangeNotifier {
-  ThemeMode _mode = ThemeMode.Dark;
+  BrightnessMode _mode = BrightnessMode.Dark;
   int _accentIndex = 0;
 
   Future<ThemeData> get currentTheme async {
     await loadSettings();
-    return _mode == ThemeMode.Dark
+    return _mode == BrightnessMode.Dark
         ? ThemeData(
             // dark theme
             brightness: Brightness.dark,
@@ -102,13 +102,13 @@ class ThemeModel with ChangeNotifier {
     notifyListeners();
   }
 
-  void setBrightnessMode(ThemeMode mode) {
+  void setBrightnessMode(BrightnessMode mode) {
     _mode = mode;
     notifyListeners();
   }
 
   BoxShadow get bottomFallingShadow {
-    return (_mode == ThemeMode.Dark)
+    return (_mode == BrightnessMode.Dark)
         ? BoxShadow(
             color: Colors.black26,
             blurRadius: 60,
@@ -124,7 +124,7 @@ class ThemeModel with ChangeNotifier {
   }
 
   BoxShadow get topFallingShadow {
-    return (_mode == ThemeMode.Dark)
+    return (_mode == BrightnessMode.Dark)
         ? BoxShadow(
             blurRadius: 30,
             spreadRadius: 30,
@@ -138,7 +138,7 @@ class ThemeModel with ChangeNotifier {
   }
 
   BoxShadow get cardShadows {
-    return (_mode == ThemeMode.Dark)
+    return (_mode == BrightnessMode.Dark)
         ? BoxShadow(
             color: Colors.black26,
             blurRadius: 10,
@@ -157,13 +157,13 @@ class ThemeModel with ChangeNotifier {
     // function to load the settings stored in SharedPreferences
     final prefs = await SharedPreferences.getInstance();
     _mode = ((prefs.getBool('isDarkTheme') != null)
-        ? (prefs.getBool('isDarkTheme') ? ThemeMode.Dark : ThemeMode.Light)
-        : ThemeMode.Dark);
+        ? (prefs.getBool('isDarkTheme') ? BrightnessMode.Dark : BrightnessMode.Light)
+        : BrightnessMode.Dark);
     _accentIndex =
         (prefs.getInt('accentIndex') != null) ? prefs.getInt('accentIndex') : 0;
   }
 
   List<Color> availableAccents() {
-    return _mode == ThemeMode.Dark ? darkAccents : lightAccents;
+    return _mode == BrightnessMode.Dark ? darkAccents : lightAccents;
   }
 }

@@ -21,11 +21,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           availableColors: theme.availableAccents(),
           onColorChanged: (selectedColor) async {
             int index = theme.availableAccents().indexOf(selectedColor);
-            setState(() {
-              theme.setAccent(index);
-            });
             final settings = Provider.of<Settings>(context, listen: false);
             await settings.setAccentIndex(index);
+            theme.setAccent(index);
           },
         ),
       ),
@@ -95,6 +93,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 switchTile(settings.isDarkTheme, 'Dark Theme',
                     'Set a dark theme for the app', (val) async {
                   await settings.setIsDarkTheme(val);
+                  Provider.of<ThemeModel>(context).setBrightnessMode(
+                      (val ? BrightnessMode.Dark : BrightnessMode.Light));
                 }),
                 ListTile(
                   title: Text(
@@ -130,8 +130,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             Column(
               children: <Widget>[
-                switchTile(settings.shortTaskChart, 'Show Shorter Chart on Tasks Tab',
-                    'Reduce the height of the chart on the Tasks tab', (val) async {
+                switchTile(
+                    settings.shortTaskChart,
+                    'Show Shorter Chart on Tasks Tab',
+                    'Reduce the height of the chart on the Tasks tab',
+                    (val) async {
                   await settings.setShortTaskChart(val);
                 }),
                 switchTile(settings.showSeconds, 'Show Seconds',

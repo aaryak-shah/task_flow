@@ -49,7 +49,7 @@ class Settings with ChangeNotifier {
 
   Future<void> setAccentIndex(int value) async {
     final prefs = await preferences;
-    prefs.setInt('showSeconds', value);
+    prefs.setInt('accentIndex', value);
     _accentIndex = value;
     notifyListeners();
   }

@@ -120,57 +120,59 @@ class _MyAppState extends State<MyApp> {
             .currentTheme
             .then((value) => theme = value);
 
-        return MaterialApp(
-          title: 'Task Flow',
-          theme: theme,
-          // setting home screen as tasks screen
-          home: (isAuth || isGuest) ? TabsScreen(0) : LoginScreen(),
-          routes: {
-            SettingsScreen.routeName: (_) => SettingsScreen(),
-            StatsScreen.routeName: (_) => StatsScreen(),
-            ProfileScreen.routeName: (_) => ProfileScreen(),
-          },
-          onGenerateRoute: (settings) {
-            // passing arguments to routes
-            if (settings.name == CurrentTaskScreen.routeName) {
-              final int index = (settings.arguments as Map)['index'];
-              final bool wasSuspended =
-                  (settings.arguments as Map)['wasSuspended'];
-              final String superProjectName =
-                  (settings.arguments as Map)['superProjectName'];
-              final String superProjectId =
-                  (settings.arguments as Map)['superProjectId'];
-              return MaterialPageRoute(builder: (context) {
-                return CurrentTaskScreen(
-                  index: index,
-                  wasSuspended: wasSuspended,
-                  superProjectName: superProjectName,
-                  superProjectId: superProjectId,
-                );
-              });
-            } else if (settings.name == CurrentGoalScreen.routeName) {
-              final int index = settings.arguments;
-              return MaterialPageRoute(builder: (context) {
-                return CurrentGoalScreen(
-                  index: index,
-                );
-              });
-            } else if (settings.name == TabsScreen.routeName) {
-              final int selected = settings.arguments;
-              return MaterialPageRoute(builder: (context) {
-                return TabsScreen(selected);
-              });
-            } else if (settings.name == CurrentProjectScreen.routeName) {
-              final String id = (settings.arguments as Map)['projectId'];
-              final int index = (settings.arguments as Map)['index'];
-              return MaterialPageRoute(builder: (context) {
-                return CurrentProjectScreen(
-                  projectId: id,
-                  index: index,
-                );
-              });
-            }
-          },
+        return Consumer<ThemeModel>(
+          builder: (context, themeModel, _) => MaterialApp(
+            title: 'Task Flow',
+            theme: theme,
+            // setting home screen as tasks screen
+            home: (isAuth || isGuest) ? TabsScreen(0) : LoginScreen(),
+            routes: {
+              SettingsScreen.routeName: (_) => SettingsScreen(),
+              StatsScreen.routeName: (_) => StatsScreen(),
+              ProfileScreen.routeName: (_) => ProfileScreen(),
+            },
+            onGenerateRoute: (settings) {
+              // passing arguments to routes
+              if (settings.name == CurrentTaskScreen.routeName) {
+                final int index = (settings.arguments as Map)['index'];
+                final bool wasSuspended =
+                    (settings.arguments as Map)['wasSuspended'];
+                final String superProjectName =
+                    (settings.arguments as Map)['superProjectName'];
+                final String superProjectId =
+                    (settings.arguments as Map)['superProjectId'];
+                return MaterialPageRoute(builder: (context) {
+                  return CurrentTaskScreen(
+                    index: index,
+                    wasSuspended: wasSuspended,
+                    superProjectName: superProjectName,
+                    superProjectId: superProjectId,
+                  );
+                });
+              } else if (settings.name == CurrentGoalScreen.routeName) {
+                final int index = settings.arguments;
+                return MaterialPageRoute(builder: (context) {
+                  return CurrentGoalScreen(
+                    index: index,
+                  );
+                });
+              } else if (settings.name == TabsScreen.routeName) {
+                final int selected = settings.arguments;
+                return MaterialPageRoute(builder: (context) {
+                  return TabsScreen(selected);
+                });
+              } else if (settings.name == CurrentProjectScreen.routeName) {
+                final String id = (settings.arguments as Map)['projectId'];
+                final int index = (settings.arguments as Map)['index'];
+                return MaterialPageRoute(builder: (context) {
+                  return CurrentProjectScreen(
+                    projectId: id,
+                    index: index,
+                  );
+                });
+              }
+            },
+          ),
         );
       }),
     );
