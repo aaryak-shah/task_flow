@@ -126,11 +126,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             .pullFromFireBase();
                         await Provider.of<Projects>(context, listen: false)
                             .pullFromFireBase();
-                        for (Project project
-                            in Provider.of<Projects>(context, listen: false)
-                                .projects) {
-                          await project.pullFromFireBase();
-                        }
+                        // for (Project project
+                        //     in Provider.of<Projects>(context, listen: false)
+                        //         .projects) {
+                        //   await project.pullFromFireBase();
+                        // }
                       } on PlatformException catch (error) {
                         var errorMessage = 'Authentication error';
                         if (error.message.contains('sign_in_canceled') ||

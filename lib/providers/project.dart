@@ -372,24 +372,28 @@ class Project with ChangeNotifier {
         subTasks.clear();
       }
       if (syncedTasks != null) {
-        syncedTasks.forEach((id, data) {
-          subTasks.add(Task(
-            id: id,
-            title: data['title'],
-            start: parser.parse(data['start']),
-            isRunning: data['isRunning'],
-            isPaused: data['isPaused'],
-            latestPause: data.containsKey('latestPause')
-                ? parser.parse(data['latestPause'])
-                : null,
-            pauses: data.containsKey('pauses') ? data['pauses'] : 0,
-            pauseTime: data.containsKey('pauseTime')
-                ? Duration(seconds: data['pauseTime'])
-                : Duration.zero,
-            end: data.containsKey('end') ? parser.parse(data['end']) : null,
-            syncStatus: SyncStatus.FullySynced,
-          ));
-        });
+        syncedTasks.forEach(
+          (id, data) {
+            subTasks.add(
+              Task(
+                id: id,
+                title: data['title'],
+                start: parser.parse(data['start']),
+                isRunning: data['isRunning'],
+                isPaused: data['isPaused'],
+                latestPause: data.containsKey('latestPause')
+                    ? parser.parse(data['latestPause'])
+                    : null,
+                pauses: data.containsKey('pauses') ? data['pauses'] : 0,
+                pauseTime: data.containsKey('pauseTime')
+                    ? Duration(seconds: data['pauseTime'])
+                    : Duration.zero,
+                end: data.containsKey('end') ? parser.parse(data['end']) : null,
+                syncStatus: SyncStatus.FullySynced,
+              ),
+            );
+          },
+        );
         await writeCsv(subTasks);
       }
     }

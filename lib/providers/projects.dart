@@ -265,21 +265,31 @@ class Projects with ChangeNotifier {
         _projects.clear();
       }
       if (syncedProjects != null) {
-        syncedProjects.forEach((id, data) {
-          _projects.add(Project(context,
-              id: id,
-              name: data['name'],
-              start: parser.parse(data['start']),
-              category: data['category'],
-              labels:
-                  data.containsKey('labels') ? data['labels'].split('|') : [],
-              deadline: parser.parse(data['deadline']),
-              end: data.containsKey('end') ? parser.parse(data['end']) : null,
-              paymentMode: PaymentMode.values[data['paymentMode']],
-              rate: data['rate'],
-              client: data['client'],
-              syncStatus: SyncStatus.FullySynced));
-        });
+        for (MapEntry<String, dynamic> m in syncedProjects.entries) {
+          Project p = Project(
+            context,
+            id: m.key,
+            name: m.value['name'],
+            start: parser.parse(m.value['start']),
+            category: m.value['category'],
+            labels: m.value.containsKey('labels')
+                ? m.value['labels'].split('|')
+                : [],
+            deadline: parser.parse(m.value['deadline']),
+            end: m.value.containsKey('end')
+                ? parser.parse(m.value['end'])
+                : null,
+            paymentMode: PaymentMode.values[m.value['paymentMode']],
+            rate: m.value['rate'],
+            client: m.value['client'],
+            syncStatus: SyncStatus.FullySynced,
+          );
+          _projects.add(p);
+          File f = File(
+              '${await _localPath}/st_${p.id.replaceAll(new RegExp(r'[:. \-]'), "")}.csv');
+          f.writeAsStringSync('');
+          await p.pullFromFireBase();
+        }
         print("pull from firebase");
         await writeCsv(_projects);
       }
