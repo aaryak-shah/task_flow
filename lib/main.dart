@@ -8,6 +8,7 @@ import 'package:task_flow/providers/project.dart';
 import 'package:task_flow/providers/projects.dart';
 import 'package:task_flow/providers/settings.dart';
 import 'package:task_flow/providers/theme_switcher.dart';
+import 'package:task_flow/screens/clients_screen.dart';
 import 'package:task_flow/screens/current_project_screen.dart';
 import 'package:task_flow/screens/profile_screen.dart';
 
@@ -130,6 +131,7 @@ class _MyAppState extends State<MyApp> {
               SettingsScreen.routeName: (_) => SettingsScreen(),
               StatsScreen.routeName: (_) => StatsScreen(),
               ProfileScreen.routeName: (_) => ProfileScreen(),
+              ClientsScreen.routeName: (_) => ClientsScreen(),
             },
             onGenerateRoute: (settings) {
               // passing arguments to routes

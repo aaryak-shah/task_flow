@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/providers/auth.dart';
+import 'package:task_flow/screens/clients_screen.dart';
 import 'package:task_flow/screens/profile_screen.dart';
 import 'package:task_flow/screens/stats_screen.dart';
 import '../screens/settings_screen.dart';
@@ -102,14 +103,36 @@ class _MainDrawerState extends State<MainDrawer> {
             ),
             // Drawer tiles
             buildDrawerTile(
-                context, Icons.perm_contact_calendar, 'Clients', "/"),
+              context,
+              Icons.perm_contact_calendar,
+              'Clients',
+              ClientsScreen.routeName,
+            ),
             buildDrawerTile(
-                context, Icons.equalizer, 'Stats', StatsScreen.routeName),
-            buildDrawerTile(context, Icons.info, 'About', "/"),
-            buildDrawerTile(context, Icons.feedback, 'Feedback', "/"),
+              context,
+              Icons.equalizer,
+              'Stats',
+              StatsScreen.routeName,
+            ),
+            buildDrawerTile(
+              context,
+              Icons.info,
+              'About',
+              "/",
+            ),
+            buildDrawerTile(
+              context,
+              Icons.feedback,
+              'Feedback',
+              "/",
+            ),
             Spacer(),
             buildDrawerTile(
-                context, Icons.settings, 'Settings', SettingsScreen.routeName),
+              context,
+              Icons.settings,
+              'Settings',
+              SettingsScreen.routeName,
+            ),
             SizedBox(
               height: 30,
             ),
