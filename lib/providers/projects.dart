@@ -252,11 +252,13 @@ class Projects with ChangeNotifier {
   Map<String, int> get clients {
     final Map<String, int> clientMap = {};
     _projects.forEach((project) {
-      clientMap[project.client] = 0;
+      if (project.client.isNotEmpty) clientMap[project.client] = 0;
     });
     _projects.forEach((project) {
-      clientMap.update(
-          project.client, (value) => value + project.workingDuration.inSeconds);
+      // if (project.client == "Test") print(project.workingDuration.inSeconds);
+      if (project.client.isNotEmpty)
+        clientMap.update(project.client,
+            (value) => value + project.workingDuration.inSeconds);
     });
     return clientMap;
   }
