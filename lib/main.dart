@@ -166,10 +166,12 @@ class _MyAppState extends State<MyApp> {
               } else if (settings.name == CurrentProjectScreen.routeName) {
                 final String id = (settings.arguments as Map)['projectId'];
                 final int index = (settings.arguments as Map)['index'];
+                final bool isFromClients = (settings.arguments as Map)['isFromClients'];
                 return MaterialPageRoute(builder: (context) {
                   return CurrentProjectScreen(
                     projectId: id,
                     index: index,
+                    isFromClients: isFromClients,
                   );
                 });
               }

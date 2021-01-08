@@ -235,6 +235,16 @@ class Project with ChangeNotifier {
     }
   }
 
+  double get earningsAsNum {
+    if (paymentMode == PaymentMode.None) {
+      return 0;
+    } else if (paymentMode == PaymentMode.Fixed) {
+      return rate;
+    } else {
+      return (rate * workingDuration.inHours);
+    }
+  }
+
   Future<void> resume(int index) async {
     // Arguments => index: The index of the task to be resumed
     // Resumes the task at 'index' in the subTasks list

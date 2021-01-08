@@ -249,18 +249,22 @@ class Projects with ChangeNotifier {
     return projects.indexWhere((project) => project.id == id);
   }
 
-  Map<String, int> get clients {
-    final Map<String, int> clientMap = {};
+  Map<String, List<double>> get clients {
+    final Map<String, List<double>> clientMap = {};
     _projects.forEach((project) {
-      if (project.client.isNotEmpty) clientMap[project.client] = 0;
+      if (project.client.isNotEmpty) clientMap[project.client] = [0, 0];
     });
     _projects.forEach((project) {
       // if (project.client == "Test") print(project.workingDuration.inSeconds);
       if (project.client.isNotEmpty)
         clientMap.update(project.client,
-            (value) => value + project.workingDuration.inSeconds);
+            (value) => [value[0] + project.workingDuration.inSeconds, value[1] + project.earningsAsNum]);
     });
     return clientMap;
+  }
+
+  List<Project> projectsByClient(String client) {
+    return projects.where((project) => project.client.toLowerCase() == client.toLowerCase()).toList();
   }
 
   Future<void> pullFromFireBase() async {

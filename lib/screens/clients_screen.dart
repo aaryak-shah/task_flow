@@ -2,6 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/providers/projects.dart';
 import 'package:task_flow/providers/settings.dart';
+import 'package:task_flow/widgets/client_details.dart';
+
+void showClientDetails(
+    BuildContext context, String clientName, double earning, String time) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    isDismissible: true,
+    builder: (_) {
+      return GestureDetector(
+        onTap: () {},
+        child: ClientDetails(
+          clientName: clientName,
+          earning: earning,
+          time: time,
+        ),
+        behavior: HitTestBehavior.opaque,
+      );
+    },
+  );
+}
 
 class ClientsScreen extends StatefulWidget {
   static const routeName = '/clients';
@@ -27,7 +48,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final List<MapEntry<String, int>> clients =
+    final List<MapEntry<String, List<double>>> clients =
         Provider.of<Projects>(context).clients.entries.toList();
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
@@ -42,21 +63,30 @@ class _ClientsScreenState extends State<ClientsScreen> {
       ),
       body: ListView.builder(
         itemBuilder: (context, index) {
-          int time = clients[index].value;
-          return ListTile(
-            leading: Text(
-              clients[index].key.length <= 40
-                  ? clients[index].key
-                  : (clients[index].key.substring(0, 40) + '...'),
-              style: Theme.of(context).textTheme.bodyText1.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).textTheme.bodyText1.color,
-                    fontSize: 20,
-                  ),
-            ),
-            trailing: Consumer<Settings>(
-              builder: (context, settings, _) => Text(
-                timeString(time, settings.showSeconds),
+          int time = clients[index].value[0].toInt();
+          double earning = clients[index].value[1];
+
+          return Consumer<Settings>(
+            builder: (context, settings, _) => InkWell(
+              onTap: () {
+                showClientDetails(context, clients[index].key, earning,
+                    timeString(time, settings.showSeconds));
+              },
+              child: ListTile(
+                title: Text(
+                  clients[index].key.length <= 40
+                      ? clients[index].key
+                      : (clients[index].key.substring(0, 40) + '...'),
+                  style: Theme.of(context).textTheme.bodyText1.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).textTheme.bodyText1.color,
+                        fontSize: 20,
+                      ),
+                ),
+                subtitle: Text("₹" + earning.toStringAsFixed(2)),
+                trailing: Text(
+                  timeString(time, settings.showSeconds),
+                ),
               ),
             ),
           );

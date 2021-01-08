@@ -34,10 +34,16 @@ void showLabelForm(BuildContext context, int i) {
 
 class CurrentProjectScreen extends StatefulWidget {
   static const routeName = '/current-project-screen';
+
   final int index;
   final String projectId;
+  final bool isFromClients;
 
-  CurrentProjectScreen({this.projectId, this.index});
+  CurrentProjectScreen({
+    this.projectId,
+    this.index,
+    this.isFromClients = false,
+  });
 
   @override
   _CurrentProjectScreenState createState() => _CurrentProjectScreenState();
@@ -140,11 +146,13 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
       return WillPopScope(
         onWillPop: () async {
           await Provider.of<Projects>(context, listen: false).syncEngine();
-          Navigator.pushReplacementNamed(
-            context,
-            TabsScreen.routeName,
-            arguments: 2,
-          );
+          widget.isFromClients != null
+              ? Navigator.pop(context)
+              : Navigator.pushReplacementNamed(
+                  context,
+                  TabsScreen.routeName,
+                  arguments: 2,
+                );
           return true;
         },
         child: Scaffold(
