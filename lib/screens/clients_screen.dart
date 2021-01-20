@@ -79,7 +79,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                       : (clients[index].key.substring(0, 40) + '...'),
                   style: Theme.of(context).textTheme.bodyText1.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).textTheme.bodyText1.color,
+                        color: Theme.of(context).accentColor,
                         fontSize: 20,
                       ),
                 ),

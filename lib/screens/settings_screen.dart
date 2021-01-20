@@ -93,7 +93,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 switchTile(settings.isDarkTheme, 'Dark Theme',
                     'Set a dark theme for the app', (val) async {
                   await settings.setIsDarkTheme(val);
-                  Provider.of<ThemeModel>(context).setBrightnessMode(
+                  Provider.of<ThemeModel>(context, listen: false).setBrightnessMode(
                       (val ? BrightnessMode.Dark : BrightnessMode.Light));
                 }),
                 ListTile(

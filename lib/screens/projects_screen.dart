@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/providers/project.dart';
 import 'package:task_flow/providers/projects.dart';
+import 'package:task_flow/providers/theme_switcher.dart';
 import 'package:task_flow/screens/current_project_screen.dart';
 
 // Screen to display all the projects in the past week
@@ -39,6 +40,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
       List<Project> sortedProjects = projects.projects;
       sortedProjects.sort(
           (prev, next) => prev.lastActive.isBefore(next.lastActive) ? 1 : 0);
+      ThemeModel themeModel = Provider.of<ThemeModel>(context);
       Project latestProject = sortedProjects.isEmpty ? null : sortedProjects[0];
       return Scaffold(
         backgroundColor: Theme.of(context).primaryColor,
@@ -53,11 +55,13 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                       height: 200,
                       margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage('assets/images/card_bg.png'),
-                            fit: BoxFit.cover,
-                          ),
-                          borderRadius: BorderRadius.circular(10)),
+                        image: DecorationImage(
+                          image: AssetImage('assets/images/card_bg.png'),
+                          fit: BoxFit.cover,
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [themeModel.cardShadows],
+                      ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         child: Material(
@@ -130,6 +134,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                       decoration: BoxDecoration(
                         color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(10),
+                        boxShadow: [themeModel.cardShadows],
                       ),
                       margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       child: ClipRRect(

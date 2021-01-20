@@ -7,6 +7,7 @@ import 'package:task_flow/providers/project.dart';
 import 'package:task_flow/providers/projects.dart';
 import 'package:task_flow/providers/settings.dart';
 import 'package:task_flow/providers/task.dart';
+import 'package:task_flow/providers/theme_switcher.dart';
 import 'package:task_flow/screens/current_task_screen.dart';
 import 'package:task_flow/screens/tabs_screen.dart';
 import 'package:task_flow/widgets/new_labels.dart';
@@ -91,7 +92,6 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
   Widget build(BuildContext context) {
     void newSubTask(String name) {
       final key = GlobalKey<FormState>();
-
       TextEditingController titleController = TextEditingController(text: name);
       showDialog(
         context: context,
@@ -143,6 +143,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
     }
 
     if (loaded) {
+      ThemeModel themeModel = Provider.of<ThemeModel>(context);
       return WillPopScope(
         onWillPop: () async {
           await Provider.of<Projects>(context, listen: false).syncEngine();
@@ -183,6 +184,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                     image: AssetImage('assets/images/card_bg.png'),
                     fit: BoxFit.cover,
                   ),
+                  boxShadow: [themeModel.cardShadows],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,6 +233,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(5),
                       color: Theme.of(context).cardColor,
+                      boxShadow: [themeModel.cardShadows],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -260,6 +263,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(5),
                       color: Theme.of(context).cardColor,
+                      boxShadow: [themeModel.cardShadows],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

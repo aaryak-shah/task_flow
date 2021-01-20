@@ -49,11 +49,11 @@ class _MyAppState extends State<MyApp> {
   bool isAuth = false;
   bool isGuest = false;
   bool isInit = true;
-  ThemeData theme = ThemeData(
-    brightness: Brightness.dark,
-    primaryColor: Color(0xFF121212),
-    accentColor: Colors.lightGreenAccent,
-  );
+  // ThemeData theme = ThemeData(
+  //   brightness: Brightness.dark,
+  //   primaryColor: Color(0xFF121212),
+  //   accentColor: Colors.lightGreenAccent,
+  // );
 
   @override
   Widget build(BuildContext context) {
@@ -117,14 +117,12 @@ class _MyAppState extends State<MyApp> {
             isGuest = value;
           });
         });
-        Provider.of<ThemeModel>(context, listen: false)
-            .currentTheme
-            .then((value) => theme = value);
+        // theme = Provider.of<ThemeModel>(context, listen: false).currentTheme;
 
         return Consumer<ThemeModel>(
           builder: (context, themeModel, _) => MaterialApp(
             title: 'Task Flow',
-            theme: theme,
+            theme: themeModel.currentTheme,
             // setting home screen as tasks screen
             home: (isAuth || isGuest) ? TabsScreen(0) : LoginScreen(),
             routes: {
@@ -166,7 +164,8 @@ class _MyAppState extends State<MyApp> {
               } else if (settings.name == CurrentProjectScreen.routeName) {
                 final String id = (settings.arguments as Map)['projectId'];
                 final int index = (settings.arguments as Map)['index'];
-                final bool isFromClients = (settings.arguments as Map)['isFromClients'];
+                final bool isFromClients =
+                    (settings.arguments as Map)['isFromClients'];
                 return MaterialPageRoute(builder: (context) {
                   return CurrentProjectScreen(
                     projectId: id,

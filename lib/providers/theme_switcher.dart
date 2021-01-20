@@ -26,8 +26,8 @@ class ThemeModel with ChangeNotifier {
   BrightnessMode _mode = BrightnessMode.Dark;
   int _accentIndex = 0;
 
-  Future<ThemeData> get currentTheme async {
-    await loadSettings();
+  ThemeData get currentTheme {
+    loadSettings();
     return _mode == BrightnessMode.Dark
         ? ThemeData(
             // dark theme
@@ -148,7 +148,7 @@ class ThemeModel with ChangeNotifier {
         : BoxShadow(
             color: Colors.black12,
             blurRadius: 10,
-            spreadRadius: 3,
+            spreadRadius: 1,
             offset: Offset(5, 5),
           );
   }
