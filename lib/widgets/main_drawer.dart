@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/providers/auth.dart';
+import 'package:task_flow/providers/auth_service.dart';
 import 'package:task_flow/screens/clients_screen.dart';
 import 'package:task_flow/screens/profile_screen.dart';
 import 'package:task_flow/screens/stats_screen.dart';
@@ -45,11 +46,10 @@ class _MainDrawerState extends State<MainDrawer> {
 
   @override
   void didChangeDependencies() {
-    photoUrl = Provider.of<Auth>(context, listen: true).photoUrl;
-    Provider.of<Auth>(context, listen: true).userName.then((value) {
-      if (value != null) userName = value;
-      super.didChangeDependencies();
-    });
+    photoUrl = Provider.of<AuthService>(context, listen: true).photoUrl;
+    String name = Provider.of<AuthService>(context, listen: true).userName;
+    if (name != null) userName = name;
+    super.didChangeDependencies();
   }
 
   @override

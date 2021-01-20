@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/exceptions/http_exception.dart';
+import 'package:task_flow/providers/auth_service.dart';
 import 'package:task_flow/providers/project.dart';
 import 'package:task_flow/providers/projects.dart';
 import 'package:task_flow/providers/tasks.dart';
@@ -27,7 +29,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String userName = 'Guest';
   String photoUrl = '';
   String email = '';
-  Auth provider;
+  User provider;
 
   void _showFormDialog(BuildContext context) {
     showDialog(
@@ -78,9 +80,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _showUpdatePasswordDialog() async {
-    var email = await Provider.of<Auth>(context, listen: false).email;
+    var email = context.watch<User>().email;
     try {
-      await Provider.of<Auth>(context, listen: false).forgotPassword(email);
+      await Provider.of<AuthService>(context).forgotPassword(email);
 
       showDialog(
         context: context,
@@ -103,7 +105,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       for (Project project in projects.projects) {
         await project.syncEngine();
       }
-      await Provider.of<Auth>(context, listen: false).logout();
+      await Provider.of<AuthService>(context, listen: false).signOut();
     } on HttpException catch (error) {
       Navigator.of(context).pop();
       var errorMessage = 'An error occurred';
@@ -120,27 +122,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   void didChangeDependencies() {
-    provider = Provider.of<Auth>(context);
+    provider = context.watch<User>();
     setState(() {
-      photoUrl = provider.photoUrl;
+      photoUrl = provider.photoURL;
     });
-    provider.isAuth.then((value) {
-      setState(() {
-        _isAuthenticated = value;
-      });
+
+    setState(() {
+      _isAuthenticated = provider != null;
     });
-    provider.isGoogleUser.then((value) {
+
+    Provider.of<AuthService>(context).isGoogleUser.then((value) {
       setState(() {
         _usingGoogle = value;
       });
     });
-    provider.userName.then((value) {
-      if (value != null) userName = value;
-    });
-    provider.email.then((value) {
-      setState(() {
-        email = value;
-      });
+
+    String name = Provider.of<AuthService>(context).userName;
+    if (name != null) userName = name;
+
+    setState(() {
+      email = provider.email;
     });
     super.didChangeDependencies();
   }
@@ -175,7 +176,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       textInputAction: TextInputAction.done,
                       readOnly: !isEditingName,
                       onFieldSubmitted: (name) async {
-                        await Provider.of<Auth>(context, listen: false)
+                        await Provider.of<AuthService>(context, listen: false)
                             .updateName(name);
                         setState(() {
                           isEditingName = false;
@@ -207,14 +208,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         .syncEngine();
                     await Provider.of<Tasks>(context, listen: false)
                         .writeCsv([]);
-                    Projects projects = Provider.of<Projects>(context, listen: false);
+                    Projects projects =
+                        Provider.of<Projects>(context, listen: false);
                     await projects.syncEngine();
                     for (Project project in projects.projects) {
                       await project.syncEngine();
                       await project.purgeSubTasks();
                     }
                     projects.writeCsv([]);
-                    await provider.logout();
+                    await Provider.of<AuthService>(context).signOut();
                   },
                   child: ListTile(
                     leading: Icon(
@@ -278,8 +280,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             borderRadius: BorderRadius.circular(30)),
                         onPressed: () async {
                           try {
-                            await Provider.of<Auth>(context, listen: false)
-                                .googleAuth();
+                            await Provider.of<AuthService>(context,
+                                    listen: false)
+                                .signInWithGoogle();
                             await Provider.of<Tasks>(context, listen: false)
                                 .pullFromFireBase();
                             await Provider.of<Projects>(context, listen: false)

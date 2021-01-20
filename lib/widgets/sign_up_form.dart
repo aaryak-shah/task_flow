@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/exceptions/http_exception.dart';
 import 'package:task_flow/providers/auth.dart';
+import 'package:task_flow/providers/auth_service.dart';
 
 class SignUpForm extends StatefulWidget {
   @override
@@ -45,8 +46,11 @@ class _SignUpFormState extends State<SignUpForm> {
       _isLoading = true;
     });
     try {
-      await Provider.of<Auth>(context, listen: false).signupWithEmail(
-          _authData['name'], _authData['email'], _authData['password']);
+      await Provider.of<AuthService>(context, listen: false).emailSignUp(
+        name: _authData['name'],
+        email: _authData['email'],
+        password: _authData['password'],
+      );
       _showErrorDialog("Verify your email",
           "We have just sent you a verification email. Please verify your email before continuing");
     } on HttpException catch (error) {

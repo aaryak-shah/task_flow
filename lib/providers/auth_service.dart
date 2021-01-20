@@ -16,7 +16,7 @@ class AuthService {
   }
 
   String get displayName => FirebaseAuth.instance.currentUser.displayName;
-  String get photoURL => FirebaseAuth.instance.currentUser.photoURL;
+  String get photoUrl => FirebaseAuth.instance.currentUser.photoURL;
 
   /// This won't pop routes so you could do something like
   /// Navigator.of(context).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
@@ -85,6 +85,28 @@ class AuthService {
       }
       user.updateProfile(displayName: name);
       return "Signed up";
+    } on FirebaseAuthException catch (e) {
+      throw e;
+    }
+  }
+
+  Future<bool> get isGoogleUser async {
+    return await GoogleSignIn().isSignedIn();
+  }
+
+  String get userName {
+    User user = FirebaseAuth.instance.currentUser;
+    return user != null ? user.displayName : 'Guest';
+  }
+
+  Future<void> updateName(String name) async {
+    User user = FirebaseAuth.instance.currentUser;
+    await user.updateProfile(displayName: name);
+  }
+
+  Future<void> forgotPassword(String email) async {
+    try {
+      await _firebaseAuth.sendPasswordResetEmail(email: email);
     } on FirebaseAuthException catch (e) {
       throw e;
     }

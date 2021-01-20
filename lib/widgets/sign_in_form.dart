@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/exceptions/http_exception.dart';
 import 'package:task_flow/providers/auth.dart';
+import 'package:task_flow/providers/auth_service.dart';
 import 'package:task_flow/providers/project.dart';
 import 'package:task_flow/providers/projects.dart';
 import 'package:task_flow/providers/tasks.dart';
@@ -74,7 +76,7 @@ class _SignInFormState extends State<SignInForm> {
               onPressed: () async {
                 if (_formKey.currentState.validate()) {
                   try {
-                    await Provider.of<Auth>(context, listen: false)
+                    await Provider.of<AuthService>(context, listen: false)
                         .forgotPassword(_emailController.text);
                     Navigator.of(context).pop();
                     _showErrorDialog(
@@ -120,9 +122,12 @@ class _SignInFormState extends State<SignInForm> {
       _isLoading = true;
     });
     try {
-      bool isVerified = await Provider.of<Auth>(context, listen: false)
-          .loginWithEmail(_authData['email'], _authData['password']);
+      await Provider.of<AuthService>(context, listen: false).emailSignIn(
+        email: _authData['email'],
+        password: _authData['password'],
+      );
 
+      bool isVerified = context.read<User>().emailVerified;
       if (isVerified) {
         await Provider.of<Tasks>(context, listen: false).pullFromFireBase();
         await Provider.of<Projects>(context, listen: false).pullFromFireBase();
