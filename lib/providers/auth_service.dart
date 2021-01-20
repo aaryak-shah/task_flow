@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
@@ -9,16 +10,38 @@ class AuthService {
   /// Changed to idTokenChanges as it updates depending on more cases.
   Stream<User> get authStateChanges => _firebaseAuth.idTokenChanges();
 
-  Future<void> setGuest() async {
+  Future<void> setGuestValue(bool value) async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setBool('isGuestUser', true);
+    prefs.setBool('isGuestUser', value);
   }
+
+  String get displayName => FirebaseAuth.instance.currentUser.displayName;
+  String get photoURL => FirebaseAuth.instance.currentUser.photoURL;
 
   /// This won't pop routes so you could do something like
   /// Navigator.of(context).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
   /// after you called this method if you want to pop all routes.
   Future<void> signOut() async {
     await _firebaseAuth.signOut();
+    await setGuestValue(true);
+  }
+
+  Future<UserCredential> signInWithGoogle() async {
+    // Trigger the authentication flow
+    final GoogleSignInAccount googleUser = await GoogleSignIn().signIn();
+
+    // Obtain the auth details from the request
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
+
+    // Create a new credential
+    final GoogleAuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    // Once signed in, return the UserCredential
+    return await FirebaseAuth.instance.signInWithCredential(credential);
   }
 
   /// There are a lot of different ways on how you can do exception handling.
@@ -29,7 +52,14 @@ class AuthService {
     try {
       await _firebaseAuth.signInWithEmailAndPassword(
           email: email, password: password);
-      return "Signed in";
+      User user = FirebaseAuth.instance.currentUser;
+      if (user.emailVerified) {
+        await setGuestValue(false);
+        return "Signed in";
+      } else {
+        await user.sendEmailVerification();
+        return "pls verify";
+      }
     } on FirebaseAuthException catch (e) {
       throw e;
     }

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:csv/csv.dart';
 import 'package:flutter/foundation.dart';
@@ -61,20 +62,19 @@ class Goals with ChangeNotifier {
 
     _goals = rowsAsListOfValues.map((row) {
       return Task(
-        id: row[0],
-        title: row[1],
-        start: parser.parse(row[2]),
-        latestPause: row[3].isNotEmpty ? parser.parse(row[3]) : null,
-        end: row[4].isNotEmpty ? parser.parse(row[4]) : null,
-        pauses: row[5],
-        pauseTime: Duration(seconds: row[6]),
-        isRunning: row[7] == 1,
-        isPaused: row[8] == 1,
-        category: row[9],
-        labels: row[10].split("|"),
-        goalTime: Duration(seconds: row[11]),
-        syncStatus: SyncStatus.values[row[12]]
-      );
+          id: row[0],
+          title: row[1],
+          start: parser.parse(row[2]),
+          latestPause: row[3].isNotEmpty ? parser.parse(row[3]) : null,
+          end: row[4].isNotEmpty ? parser.parse(row[4]) : null,
+          pauses: row[5],
+          pauseTime: Duration(seconds: row[6]),
+          isRunning: row[7] == 1,
+          isPaused: row[8] == 1,
+          category: row[9],
+          labels: row[10].split("|"),
+          goalTime: Duration(seconds: row[11]),
+          syncStatus: SyncStatus.values[row[12]]);
     }).toList();
     notifyListeners();
   }
@@ -186,10 +186,10 @@ class Goals with ChangeNotifier {
     _goals[index].isPaused = true;
     _goals[index].end = DateTime.now();
 
-    var authData = Provider.of<Auth>(context, listen: false);
-    if (await _isConnected && await authData.isAuth) {
-      String userId = await authData.userId;
-      String token = authData.token.token;
+    final firebaseUser = context.watch<User>();
+    if (await _isConnected && firebaseUser != null) {
+      String userId = firebaseUser.uid;
+      String token = (await firebaseUser.getIdTokenResult()).token;
       final url =
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token";
       final res = await http.post(

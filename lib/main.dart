@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:task_flow/providers/auth.dart';
 import 'package:task_flow/providers/auth_service.dart';
 import 'package:task_flow/providers/project.dart';
@@ -101,8 +102,13 @@ class _MyAppState extends State<MyApp> {
 class AuthenticationWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    bool isGuest;
     final firebaseUser = context.watch<User>();
-    if (firebaseUser == null) {
+    Future.delayed(Duration.zero, () async {
+      final prefs = await SharedPreferences.getInstance();
+      isGuest = prefs.getBool('isGuest');
+    });
+    if (firebaseUser == null && !isGuest) {
       return LoginScreen();
     }
     return HomeScreen();
