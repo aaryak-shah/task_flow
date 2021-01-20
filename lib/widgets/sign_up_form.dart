@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/exceptions/http_exception.dart';
-import 'package:task_flow/providers/auth.dart';
 import 'package:task_flow/providers/auth_service.dart';
 
 class SignUpForm extends StatefulWidget {

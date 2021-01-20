@@ -10,7 +10,6 @@ import 'package:task_flow/providers/tasks.dart';
 
 import '../widgets/sign_in_form.dart';
 import '../widgets/sign_up_form.dart';
-import '../providers/auth.dart';
 import '../widgets/app_bar.dart';
 
 class ProfileScreen extends StatefulWidget {

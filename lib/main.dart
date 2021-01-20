@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:task_flow/providers/auth.dart';
 import 'package:task_flow/providers/auth_service.dart';
 import 'package:task_flow/providers/project.dart';
 import 'package:task_flow/providers/projects.dart';
@@ -63,15 +62,12 @@ class _MyAppState extends State<MyApp> {
         StreamProvider(
           create: (context) => context.read<AuthService>().authStateChanges,
         ),
-        ChangeNotifierProvider(
-          create: (context) => Auth(),
-        ),
+        // ChangeNotifierProvider(
+        //   create: (context) => Auth(),
+        // ),
         ChangeNotifierProvider(
           create: (context) => Tasks(
               context), //passing context for calling Auth provider in Tasks
-        ),
-        ChangeNotifierProvider(
-          create: (context) => Task(),
         ),
         ChangeNotifierProvider(
           create: (context) => Goals(
@@ -99,17 +95,37 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-class AuthenticationWrapper extends StatelessWidget {
+class AuthenticationWrapper extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    bool isGuest;
-    final firebaseUser = context.watch<User>();
+  _AuthenticationWrapperState createState() => _AuthenticationWrapperState();
+}
+
+class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
+  bool isGuest = false;
+
+  @override
+  void initState() {
     Future.delayed(Duration.zero, () async {
       final prefs = await SharedPreferences.getInstance();
-      isGuest = prefs.getBool('isGuest');
+      print('isGuest is... $isGuest before assignment');
+      isGuest = prefs.getBool('isGuest') ?? false;
+      print('isGuest is... $isGuest after assignment');
+      setState(() {});
     });
-    if (firebaseUser == null && !isGuest) {
-      return LoginScreen();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final firebaseUser = context.watch<User>();
+    print('isGuest is... $isGuest before comparision');
+    if (firebaseUser == null && !(isGuest)) {
+      return Consumer<ThemeModel>(
+        builder: (context, themeModel, _) => MaterialApp(
+          theme: themeModel.currentTheme,
+          home: LoginScreen(),
+        ),
+      );
     }
     return HomeScreen();
   }

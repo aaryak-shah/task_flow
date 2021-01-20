@@ -12,7 +12,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import './task.dart';
-import 'auth.dart';
 
 class Tasks with ChangeNotifier {
   // variable that stores list of tasks

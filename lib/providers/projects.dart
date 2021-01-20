@@ -12,7 +12,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:task_flow/providers/task.dart';
 import 'package:http/http.dart' as http;
 
-import 'auth.dart';
 import 'project.dart';
 
 class Projects with ChangeNotifier {
