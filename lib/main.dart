@@ -11,16 +11,9 @@ import 'package:task_flow/providers/project.dart';
 import 'package:task_flow/providers/projects.dart';
 import 'package:task_flow/providers/settings.dart';
 import 'package:task_flow/providers/theme_switcher.dart';
-import 'package:task_flow/screens/clients_screen.dart';
-import 'package:task_flow/screens/current_project_screen.dart';
-import 'package:task_flow/screens/profile_screen.dart';
+import 'package:task_flow/screens/home_screen.dart';
 
 import 'screens/auth_screen.dart';
-import './screens/current_goal_screen.dart';
-import './screens/stats_screen.dart';
-import 'screens/settings_screen.dart';
-import './screens/tabs_screen.dart';
-import 'screens/current_task_screen.dart';
 
 import './providers/goals.dart';
 import './providers/task.dart';
@@ -100,167 +93,18 @@ class _MyAppState extends State<MyApp> {
           create: (context) => Settings(),
         )
       ],
-      child: Consumer<Auth>(builder: (context, auth, _) {
-        auth.isAuth.then(
-          (value) async {
-            setState(() {
-              isAuth = value;
-              if (!value) isInit = true;
-            });
-            if (value && isInit) {
-              isInit = false;
-              Provider.of<Tasks>(context, listen: false).pullFromFireBase();
-              await Provider.of<Projects>(context, listen: false)
-                  .pullFromFireBase();
-              for (Project project
-                  in Provider.of<Projects>(context, listen: false).projects) {
-                project.pullFromFireBase();
-              }
-              setState(() {
-                isInit = false;
-              });
-            }
-          },
-        );
-        auth.isGuestUser.then((value) {
-          setState(() {
-            isGuest = value;
-          });
-        });
-        // theme = Provider.of<ThemeModel>(context, listen: false).currentTheme;
-
-        return Consumer<ThemeModel>(
-          builder: (context, themeModel, _) => MaterialApp(
-            title: 'Task Flow',
-            theme: themeModel.currentTheme,
-            // setting home screen as tasks screen
-            home: (isAuth || isGuest) ? TabsScreen(0) : LoginScreen(),
-            routes: {
-              SettingsScreen.routeName: (_) => SettingsScreen(),
-              StatsScreen.routeName: (_) => StatsScreen(),
-              ProfileScreen.routeName: (_) => ProfileScreen(),
-              ClientsScreen.routeName: (_) => ClientsScreen(),
-            },
-            onGenerateRoute: (settings) {
-              // passing arguments to routes
-              if (settings.name == CurrentTaskScreen.routeName) {
-                final int index = (settings.arguments as Map)['index'];
-                final bool wasSuspended =
-                    (settings.arguments as Map)['wasSuspended'];
-                final String superProjectName =
-                    (settings.arguments as Map)['superProjectName'];
-                final String superProjectId =
-                    (settings.arguments as Map)['superProjectId'];
-                return MaterialPageRoute(builder: (context) {
-                  return CurrentTaskScreen(
-                    index: index,
-                    wasSuspended: wasSuspended,
-                    superProjectName: superProjectName,
-                    superProjectId: superProjectId,
-                  );
-                });
-              } else if (settings.name == CurrentGoalScreen.routeName) {
-                final int index = settings.arguments;
-                return MaterialPageRoute(builder: (context) {
-                  return CurrentGoalScreen(
-                    index: index,
-                  );
-                });
-              } else if (settings.name == TabsScreen.routeName) {
-                final int selected = settings.arguments;
-                return MaterialPageRoute(builder: (context) {
-                  return TabsScreen(selected);
-                });
-              } else if (settings.name == CurrentProjectScreen.routeName) {
-                final String id = (settings.arguments as Map)['projectId'];
-                final int index = (settings.arguments as Map)['index'];
-                final bool isFromClients =
-                    (settings.arguments as Map)['isFromClients'];
-                return MaterialPageRoute(builder: (context) {
-                  return CurrentProjectScreen(
-                    projectId: id,
-                    index: index,
-                    isFromClients: isFromClients,
-                  );
-                });
-              }
-            },
-          ),
-        );
-      }),
+      child: AuthenticationWrapper(),
     );
   }
 }
 
-class AuthenticationWrapper extends StatefulWidget {
-  @override
-  _AuthenticationWrapperState createState() => _AuthenticationWrapperState();
-}
-
-class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
+class AuthenticationWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final firebaseUser = context.watch<User>();
     if (firebaseUser == null) {
       return LoginScreen();
     }
-    return Consumer<ThemeModel>(
-      builder: (context, themeModel, _) => MaterialApp(
-        title: 'Task Flow',
-        theme: themeModel.currentTheme,
-        // setting home screen as tasks screen
-        home: TabsScreen(0),
-        routes: {
-          SettingsScreen.routeName: (_) => SettingsScreen(),
-          StatsScreen.routeName: (_) => StatsScreen(),
-          ProfileScreen.routeName: (_) => ProfileScreen(),
-          ClientsScreen.routeName: (_) => ClientsScreen(),
-        },
-        onGenerateRoute: (settings) {
-          // passing arguments to routes
-          if (settings.name == CurrentTaskScreen.routeName) {
-            final int index = (settings.arguments as Map)['index'];
-            final bool wasSuspended =
-                (settings.arguments as Map)['wasSuspended'];
-            final String superProjectName =
-                (settings.arguments as Map)['superProjectName'];
-            final String superProjectId =
-                (settings.arguments as Map)['superProjectId'];
-            return MaterialPageRoute(builder: (context) {
-              return CurrentTaskScreen(
-                index: index,
-                wasSuspended: wasSuspended,
-                superProjectName: superProjectName,
-                superProjectId: superProjectId,
-              );
-            });
-          } else if (settings.name == CurrentGoalScreen.routeName) {
-            final int index = settings.arguments;
-            return MaterialPageRoute(builder: (context) {
-              return CurrentGoalScreen(
-                index: index,
-              );
-            });
-          } else if (settings.name == TabsScreen.routeName) {
-            final int selected = settings.arguments;
-            return MaterialPageRoute(builder: (context) {
-              return TabsScreen(selected);
-            });
-          } else if (settings.name == CurrentProjectScreen.routeName) {
-            final String id = (settings.arguments as Map)['projectId'];
-            final int index = (settings.arguments as Map)['index'];
-            final bool isFromClients =
-                (settings.arguments as Map)['isFromClients'];
-            return MaterialPageRoute(builder: (context) {
-              return CurrentProjectScreen(
-                projectId: id,
-                index: index,
-                isFromClients: isFromClients,
-              );
-            });
-          }
-        },
-      ),
-    );
+    return HomeScreen();
   }
 }
