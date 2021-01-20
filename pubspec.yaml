@@ -31,8 +31,8 @@ dependencies:
   shared_preferences: ^0.5.8
   circular_countdown_timer: ^0.0.4
   http: ^0.12.2
-  firebase_core: ^0.4.0+9
-  firebase_auth: ^0.14.0+5
+  firebase_core: ^0.7.0
+  firebase_auth: ^0.20.0+1
   google_sign_in: ^4.5.1
   flutter_colorpicker: ^0.3.4
 

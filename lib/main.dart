@@ -1,9 +1,12 @@
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/providers/auth.dart';
+import 'package:task_flow/providers/auth_service.dart';
 import 'package:task_flow/providers/project.dart';
 import 'package:task_flow/providers/projects.dart';
 import 'package:task_flow/providers/settings.dart';
@@ -23,8 +26,9 @@ import './providers/goals.dart';
 import './providers/task.dart';
 import './providers/tasks.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   var path = await getApplicationDocumentsDirectory();
   // create the tasks.csv file if it doesn't exist
   File f = File('${path.path}/tasks.csv');
@@ -59,6 +63,12 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        Provider<AuthService>(
+          create: (_) => AuthService(FirebaseAuth.instance),
+        ),
+        StreamProvider(
+          create: (context) => context.read<AuthService>().authStateChanges,
+        ),
         ChangeNotifierProvider(
           create: (context) => Auth(),
         ),
@@ -178,6 +188,79 @@ class _MyAppState extends State<MyApp> {
           ),
         );
       }),
+    );
+  }
+}
+
+class AuthenticationWrapper extends StatefulWidget {
+  @override
+  _AuthenticationWrapperState createState() => _AuthenticationWrapperState();
+}
+
+class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
+  @override
+  Widget build(BuildContext context) {
+    final firebaseUser = context.watch<User>();
+    if (firebaseUser == null) {
+      return LoginScreen();
+    }
+    return Consumer<ThemeModel>(
+      builder: (context, themeModel, _) => MaterialApp(
+        title: 'Task Flow',
+        theme: themeModel.currentTheme,
+        // setting home screen as tasks screen
+        home: TabsScreen(0),
+        routes: {
+          SettingsScreen.routeName: (_) => SettingsScreen(),
+          StatsScreen.routeName: (_) => StatsScreen(),
+          ProfileScreen.routeName: (_) => ProfileScreen(),
+          ClientsScreen.routeName: (_) => ClientsScreen(),
+        },
+        onGenerateRoute: (settings) {
+          // passing arguments to routes
+          if (settings.name == CurrentTaskScreen.routeName) {
+            final int index = (settings.arguments as Map)['index'];
+            final bool wasSuspended =
+                (settings.arguments as Map)['wasSuspended'];
+            final String superProjectName =
+                (settings.arguments as Map)['superProjectName'];
+            final String superProjectId =
+                (settings.arguments as Map)['superProjectId'];
+            return MaterialPageRoute(builder: (context) {
+              return CurrentTaskScreen(
+                index: index,
+                wasSuspended: wasSuspended,
+                superProjectName: superProjectName,
+                superProjectId: superProjectId,
+              );
+            });
+          } else if (settings.name == CurrentGoalScreen.routeName) {
+            final int index = settings.arguments;
+            return MaterialPageRoute(builder: (context) {
+              return CurrentGoalScreen(
+                index: index,
+              );
+            });
+          } else if (settings.name == TabsScreen.routeName) {
+            final int selected = settings.arguments;
+            return MaterialPageRoute(builder: (context) {
+              return TabsScreen(selected);
+            });
+          } else if (settings.name == CurrentProjectScreen.routeName) {
+            final String id = (settings.arguments as Map)['projectId'];
+            final int index = (settings.arguments as Map)['index'];
+            final bool isFromClients =
+                (settings.arguments as Map)['isFromClients'];
+            return MaterialPageRoute(builder: (context) {
+              return CurrentProjectScreen(
+                projectId: id,
+                index: index,
+                isFromClients: isFromClients,
+              );
+            });
+          }
+        },
+      ),
     );
   }
 }
