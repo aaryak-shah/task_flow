@@ -327,7 +327,7 @@ class Projects with ChangeNotifier {
   }
 
   Future<void> syncEngine() async {
-    final firebaseUser = context.watch<User>();
+    final firebaseUser = context.read<User>();
 
     await loadData();
     if (_projects != null && firebaseUser != null) {

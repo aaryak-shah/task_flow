@@ -121,7 +121,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   void didChangeDependencies() {
-    provider = context.watch<User>();
+    provider = context.read<User>();
     setState(() {
       photoUrl = provider.photoURL;
     });
@@ -155,7 +155,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: <Widget>[
                 ListTile(
                   leading: CircleAvatar(
-                    backgroundImage: photoUrl == ''
+                    backgroundImage: photoUrl == null
                         ? AssetImage(
                             'assets/images/default_pfp.png',
                           )
@@ -215,7 +215,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       await project.purgeSubTasks();
                     }
                     projects.writeCsv([]);
-                    await Provider.of<AuthService>(context).signOut();
+                    await Provider.of<AuthService>(context, listen: false).signOut();
                   },
                   child: ListTile(
                     leading: Icon(

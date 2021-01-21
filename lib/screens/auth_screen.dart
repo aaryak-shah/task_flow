@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:task_flow/exceptions/http_exception.dart';
 import 'package:task_flow/providers/auth_service.dart';
 import 'package:task_flow/screens/tabs_screen.dart';
 import 'package:task_flow/widgets/sign_in_form.dart';
@@ -114,26 +115,26 @@ class _LoginScreenState extends State<LoginScreen> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30)),
                     onPressed: () async {
-                      // try {
-                      //   await Provider.of<Auth>(context, listen: false)
-                      //       .googleAuth();
-                      // } on PlatformException catch (error) {
-                      //   var errorMessage = 'Authentication error';
-                      //   if (error.message.contains('sign_in_canceled') ||
-                      //       error.message.contains('sign_in_failed')) {
-                      //     errorMessage = 'Sign in failed, try again later';
-                      //   } else if (error.message.contains('network_error')) {
-                      //     errorMessage = 'Sign in failed due to network issue';
-                      //   }
-                      //   _showErrorDialog(
-                      //       context, "Something went wrong", errorMessage);
-                      // } catch (error) {
-                      //   // Navigator.of(context).pop();
-                      //   const errorMessage =
-                      //       'Could not sign you in, please try again later.';
-                      //   _showErrorDialog(
-                      //       context, "Something went wrong", errorMessage);
-                      // }
+                      try {
+                        await Provider.of<AuthService>(context, listen: false)
+                            .signInWithGoogle();
+                      } on HttpException catch (error) {
+                        var errorMessage = 'Authentication error';
+                        if (error.message.contains('sign_in_canceled') ||
+                            error.message.contains('sign_in_failed')) {
+                          errorMessage = 'Sign in failed, try again later';
+                        } else if (error.message.contains('network_error')) {
+                          errorMessage = 'Sign in failed due to network issue';
+                        }
+                        _showErrorDialog(
+                            context, "Something went wrong", errorMessage);
+                      } catch (error) {
+                        // Navigator.of(context).pop();
+                        const errorMessage =
+                            'Could not sign you in, please try again later.';
+                        _showErrorDialog(
+                            context, "Something went wrong", errorMessage);
+                      }
                     },
                     color: Color(0xDEFFFFFF),
                     textColor: Colors.black,
@@ -273,7 +274,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 //Skip authentication button
                 GestureDetector(
                   onTap: () {
-                    Provider.of<AuthService>(context).setGuestValue(true);
+                    Provider.of<AuthService>(context, listen: false).setGuestValue(true);
                     Navigator.of(context).pushReplacementNamed(
                         TabsScreen.routeName,
                         arguments: 0);

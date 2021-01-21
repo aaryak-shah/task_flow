@@ -119,7 +119,7 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
   Widget build(BuildContext context) {
     final firebaseUser = context.watch<User>();
     print('isGuest is... $isGuest before comparision');
-    if (firebaseUser == null && !(isGuest)) {
+    if ((firebaseUser == null) || (!firebaseUser.emailVerified) && !(isGuest)) {
       return Consumer<ThemeModel>(
         builder: (context, themeModel, _) => MaterialApp(
           theme: themeModel.currentTheme,

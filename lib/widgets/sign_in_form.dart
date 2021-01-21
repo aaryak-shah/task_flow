@@ -121,10 +121,10 @@ class _SignInFormState extends State<SignInForm> {
       _isLoading = true;
     });
     try {
-      await Provider.of<AuthService>(context, listen: false).emailSignIn(
+      print(await Provider.of<AuthService>(context, listen: false).emailSignIn(
         email: _authData['email'],
         password: _authData['password'],
-      );
+      ));
 
       bool isVerified = context.read<User>().emailVerified;
       if (isVerified) {

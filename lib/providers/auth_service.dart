@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:task_flow/exceptions/http_exception.dart';
 
 class AuthService {
   final FirebaseAuth _firebaseAuth;
@@ -28,6 +29,7 @@ class AuthService {
 
   Future<UserCredential> signInWithGoogle() async {
     // Trigger the authentication flow
+    print("sign in with google");
     final GoogleSignInAccount googleUser = await GoogleSignIn().signIn();
 
     // Obtain the auth details from the request
@@ -57,8 +59,11 @@ class AuthService {
         await setGuestValue(false);
         return "Signed in";
       } else {
+        // print("not verified");
         await user.sendEmailVerification();
-        return "pls verify";
+        // return "pls verify";
+        // throw HttpException("pls verify");
+        return "not verified";
       }
     } on FirebaseAuthException catch (e) {
       throw e;
