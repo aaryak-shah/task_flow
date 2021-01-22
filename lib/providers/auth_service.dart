@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:task_flow/exceptions/http_exception.dart';
 
-class AuthService {
+class AuthService with ChangeNotifier {
   final FirebaseAuth _firebaseAuth;
 
   AuthService(this._firebaseAuth);
@@ -16,12 +16,15 @@ class AuthService {
     prefs.setBool('isGuestUser', value);
   }
 
-  String get displayName => FirebaseAuth.instance.currentUser.displayName;
-  String get photoUrl => FirebaseAuth.instance.currentUser.photoURL;
+  Future<bool> get isGuest async {
+    final prefs = await SharedPreferences.getInstance();
+    notifyListeners();
+    return prefs.getBool('isGuestUser') ?? false;
+  }
 
-  /// This won't pop routes so you could do something like
-  /// Navigator.of(context).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
-  /// after you called this method if you want to pop all routes.
+  String get displayName => FirebaseAuth.instance.currentUser?.displayName;
+  String get photoUrl => FirebaseAuth.instance.currentUser?.photoURL;
+
   Future<void> signOut() async {
     await _firebaseAuth.signOut();
     await setGuestValue(true);
@@ -46,10 +49,6 @@ class AuthService {
     return await FirebaseAuth.instance.signInWithCredential(credential);
   }
 
-  /// There are a lot of different ways on how you can do exception handling.
-  /// This is to make it as easy as possible but a better way would be to
-  /// use your own custom class that would take the exception and return better
-  /// error messages. That way you can throw, return or whatever you prefer with that instead.
   Future<String> emailSignIn({String email, String password}) async {
     try {
       await _firebaseAuth.signInWithEmailAndPassword(
@@ -59,10 +58,7 @@ class AuthService {
         await setGuestValue(false);
         return "Signed in";
       } else {
-        // print("not verified");
         await user.sendEmailVerification();
-        // return "pls verify";
-        // throw HttpException("pls verify");
         return "not verified";
       }
     } on FirebaseAuthException catch (e) {
@@ -70,10 +66,6 @@ class AuthService {
     }
   }
 
-  /// There are a lot of different ways on how you can do exception handling.
-  /// This is to make it as easy as possible but a better way would be to
-  /// use your own custom class that would take the exception and return better
-  /// error messages. That way you can throw, return or whatever you prefer with that instead.
   Future<String> emailSignUp({
     String name,
     String email,

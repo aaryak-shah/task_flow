@@ -123,7 +123,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void didChangeDependencies() {
     provider = context.read<User>();
     setState(() {
-      photoUrl = provider.photoURL;
+      photoUrl = provider?.photoURL;
     });
 
     setState(() {
@@ -140,7 +140,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (name != null) userName = name;
 
     setState(() {
-      email = provider.email;
+      email = provider?.email;
     });
     super.didChangeDependencies();
   }

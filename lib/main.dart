@@ -5,7 +5,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:task_flow/providers/auth_service.dart';
 import 'package:task_flow/providers/project.dart';
 import 'package:task_flow/providers/projects.dart';
@@ -16,7 +15,6 @@ import 'package:task_flow/screens/home_screen.dart';
 import 'screens/auth_screen.dart';
 
 import './providers/goals.dart';
-import './providers/task.dart';
 import './providers/tasks.dart';
 
 Future<void> main() async {
@@ -44,7 +42,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool isAuth = false;
-  bool isGuest = false;
+  // bool isGuest = false;
   bool isInit = true;
   // ThemeData theme = ThemeData(
   //   brightness: Brightness.dark,
@@ -56,7 +54,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<AuthService>(
+        ChangeNotifierProvider(
           create: (_) => AuthService(FirebaseAuth.instance),
         ),
         StreamProvider(
@@ -104,29 +102,35 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
   bool isGuest = false;
 
   @override
-  void initState() {
-    Future.delayed(Duration.zero, () async {
-      final prefs = await SharedPreferences.getInstance();
-      print('isGuest is... $isGuest before assignment');
-      isGuest = prefs.getBool('isGuest') ?? false;
-      print('isGuest is... $isGuest after assignment');
-      setState(() {});
-    });
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final firebaseUser = context.watch<User>();
     print('isGuest is... $isGuest before comparision');
-    if ((firebaseUser == null) || (!firebaseUser.emailVerified) && !(isGuest)) {
-      return Consumer<ThemeModel>(
-        builder: (context, themeModel, _) => MaterialApp(
-          theme: themeModel.currentTheme,
-          home: LoginScreen(),
-        ),
-      );
-    }
-    return HomeScreen();
+    return FutureBuilder<bool>(
+      future: Provider.of<AuthService>(context).isGuest,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Consumer<ThemeModel>(
+            builder: (context, themeModel, _) => MaterialApp(
+              theme: themeModel.currentTheme,
+              home: LoginScreen(),
+            ),
+          );
+        } else {
+          print('isGuest is... ${snapshot.data} after comparision');
+
+          if ((snapshot.data) ||
+              ((firebaseUser != null) && (firebaseUser.emailVerified))) {
+            return HomeScreen();
+          } else {
+            return Consumer<ThemeModel>(
+              builder: (context, themeModel, _) => MaterialApp(
+                theme: themeModel.currentTheme,
+                home: LoginScreen(),
+              ),
+            );
+          }
+        }
+      },
+    );
   }
 }
