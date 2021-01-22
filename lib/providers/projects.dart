@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:csv/csv.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
@@ -11,7 +12,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:task_flow/providers/task.dart';
 import 'package:http/http.dart' as http;
 
-import 'auth.dart';
 import 'project.dart';
 
 class Projects with ChangeNotifier {
@@ -91,7 +91,7 @@ class Projects with ChangeNotifier {
         subTasks.add(
           Task(
             id: stRow[0],
-            title: stRow[1],
+            title: stRow[1].toString(),
             start: parser.parse(stRow[2]),
             latestPause: stRow[3].isNotEmpty ? parser.parse(stRow[3]) : null,
             end: stRow[4].isNotEmpty ? parser.parse(stRow[4]) : null,
@@ -136,10 +136,10 @@ class Projects with ChangeNotifier {
     String client,
   }) async {
     var response;
-    var authData = Provider.of<Auth>(context, listen: false);
-    if (await _isConnected && await authData.isAuth) {
-      String userId = await authData.userId;
-      String token = authData.token.token;
+    final firebaseUser = context.read<User>();
+    if (await _isConnected && firebaseUser != null) {
+      String userId = firebaseUser.uid;
+      String token = (await firebaseUser.getIdTokenResult()).token;
       final url =
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects.json?auth=$token";
       response = await http.post(
@@ -170,7 +170,7 @@ class Projects with ChangeNotifier {
       rate: rate,
       client: client,
       subTasks: [],
-      syncStatus: (await authData.isAuth)
+      syncStatus: (firebaseUser != null)
           ? (await _isConnected ? SyncStatus.FullySynced : SyncStatus.NewTask)
           : SyncStatus.FullySynced,
     );
@@ -210,10 +210,10 @@ class Projects with ChangeNotifier {
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('AvailableLabels', labels);
-    var authData = Provider.of<Auth>(context, listen: false);
-    if (await _isConnected && await authData.isAuth) {
-      String userId = await authData.userId;
-      String token = authData.token.token;
+    final firebaseUser = context.read<User>();
+    if (await _isConnected && firebaseUser != null) {
+      String userId = firebaseUser.uid;
+      String token = (await firebaseUser.getIdTokenResult()).token;
       final url =
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/${_projects[index].id}.json?auth=$token";
       var res = await http.patch(
@@ -226,7 +226,7 @@ class Projects with ChangeNotifier {
       );
     }
 
-    _projects[index].syncStatus = (await authData.isAuth)
+    _projects[index].syncStatus = (firebaseUser != null)
         ? (await _isConnected
             ? (_projects[index].syncStatus == SyncStatus.UpdatedTask
                 ? SyncStatus.FullySynced
@@ -254,26 +254,43 @@ class Projects with ChangeNotifier {
     _projects.forEach((project) {
       if (project.client.isNotEmpty) clientMap[project.client] = [0, 0];
     });
-    _projects.forEach((project) {
-      // if (project.client == "Test") print(project.workingDuration.inSeconds);
-      if (project.client.isNotEmpty)
-        clientMap.update(project.client,
-            (value) => [value[0] + project.workingDuration.inSeconds, value[1] + project.earningsAsNum]);
-    });
+    _projects.forEach(
+      (project) {
+        // if (project.client == "Test") print(project.workingDuration.inSeconds);
+        if (project.client.isNotEmpty)
+          clientMap.update(
+            project.client,
+            (value) => [
+              value[0] + project.workingDuration.inSeconds,
+              value[1] + project.earningsAsNum
+            ],
+          );
+      },
+    );
     return clientMap;
   }
 
   List<Project> projectsByClient(String client) {
-    return projects.where((project) => project.client.toLowerCase() == client.toLowerCase()).toList();
+    return projects
+        .where(
+            (project) => project.client.toLowerCase() == client.toLowerCase())
+        .toList();
+  }
+
+  Future<void> purgeProjects() async {
+    _projects = [];
+    await writeCsv([]);
   }
 
   Future<void> pullFromFireBase() async {
     if (await _isConnected) {
       Map<String, dynamic> syncedProjects;
-      var authData = Provider.of<Auth>(context, listen: false);
-      if (await authData.isAuth) {
-        String userId = await authData.userId;
-        String token = authData.token.token;
+
+      final firebaseUser = context.read<User>();
+
+      if (firebaseUser != null) {
+        String userId = firebaseUser.uid;
+        String token = (await firebaseUser.getIdTokenResult()).token;
         final url =
             "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects.json?auth=$token";
         final res = await http.get(url);
@@ -315,11 +332,12 @@ class Projects with ChangeNotifier {
   }
 
   Future<void> syncEngine() async {
-    var authData = Provider.of<Auth>(context, listen: false);
+    final firebaseUser = context.read<User>();
+
     await loadData();
-    if (_projects != null && await authData.isAuth) {
-      String userId = await authData.userId;
-      String token = authData.token.token;
+    if (_projects != null && firebaseUser != null) {
+      String userId = firebaseUser.uid;
+      String token = (await firebaseUser.getIdTokenResult()).token;
       for (int i = 0; i < _projects.length; i++) {
         Project project = _projects[i];
         if (await _isConnected) {

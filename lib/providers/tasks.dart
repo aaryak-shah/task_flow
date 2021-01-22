@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:csv/csv.dart';
@@ -11,7 +12,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import './task.dart';
-import 'auth.dart';
 
 class Tasks with ChangeNotifier {
   // variable that stores list of tasks
@@ -59,7 +59,7 @@ class Tasks with ChangeNotifier {
     _tasks = rowsAsListOfValues.map((row) {
       return Task(
         id: row[0],
-        title: row[1],
+        title: row[1].toString(),
         start: parser.parse(row[2]),
         latestPause: row[3].isNotEmpty ? parser.parse(row[3]) : null,
         end: row[4].isNotEmpty ? parser.parse(row[4]) : null,
@@ -199,10 +199,11 @@ class Tasks with ChangeNotifier {
     // and also to the tasks.csv file
 
     var response;
-    var authData = Provider.of<Auth>(context, listen: false);
-    if (await _isConnected && await authData.isAuth) {
-      String userId = await authData.userId;
-      String token = authData.token.token;
+    final firebaseUser = context.read<User>();
+
+    if (await _isConnected && firebaseUser != null) {
+      String userId = firebaseUser.uid;
+      String token = (await firebaseUser.getIdTokenResult()).token;
       final url =
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token";
       response = await http.post(
@@ -225,7 +226,7 @@ class Tasks with ChangeNotifier {
         start: start,
         category: category,
         labels: labels,
-        syncStatus: (await authData.isAuth)
+        syncStatus: (firebaseUser != null)
             ? (await _isConnected ? SyncStatus.FullySynced : SyncStatus.NewTask)
             : SyncStatus.FullySynced);
     final row = const ListToCsvConverter().convert(
@@ -270,10 +271,11 @@ class Tasks with ChangeNotifier {
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('AvailableLabels', labels);
-    var authData = Provider.of<Auth>(context, listen: false);
-    if (await _isConnected && await authData.isAuth) {
-      String userId = await authData.userId;
-      String token = authData.token.token;
+    final firebaseUser = context.read<User>();
+
+    if (await _isConnected && firebaseUser != null) {
+      String userId = firebaseUser.uid;
+      String token = (await firebaseUser.getIdTokenResult()).token;
       final url =
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${_tasks[index].id}.json?auth=$token";
       var res = await http.patch(
@@ -286,7 +288,7 @@ class Tasks with ChangeNotifier {
       );
     }
 
-    _tasks[index].syncStatus = (await authData.isAuth)
+    _tasks[index].syncStatus = (firebaseUser != null)
         ? (await _isConnected
             ? (_tasks[index].syncStatus == SyncStatus.UpdatedTask
                 ? SyncStatus.FullySynced
@@ -313,10 +315,11 @@ class Tasks with ChangeNotifier {
     _tasks[index].isPaused = false;
     _tasks[index].pauseTime +=
         DateTime.now().difference(_tasks[index].latestPause);
-    var authData = Provider.of<Auth>(context, listen: false);
-    if (await _isConnected && await authData.isAuth) {
-      String userId = await authData.userId;
-      String token = authData.token.token;
+    final firebaseUser = context.read<User>();
+
+    if (await _isConnected && firebaseUser != null) {
+      String userId = firebaseUser.uid;
+      String token = (await firebaseUser.getIdTokenResult()).token;
       final url =
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${_tasks[index].id}.json?auth=$token";
       var res = await http.patch(
@@ -331,7 +334,7 @@ class Tasks with ChangeNotifier {
       );
     }
 
-    _tasks[index].syncStatus = (await authData.isAuth)
+    _tasks[index].syncStatus = (firebaseUser != null)
         ? (await _isConnected
             ? (_tasks[index].syncStatus == SyncStatus.UpdatedTask
                 ? SyncStatus.FullySynced
@@ -351,10 +354,11 @@ class Tasks with ChangeNotifier {
     _tasks[index].isPaused = true;
     _tasks[index].pauses++;
     _tasks[index].latestPause = DateTime.now();
-    var authData = Provider.of<Auth>(context, listen: false);
-    if (await _isConnected && await authData.isAuth) {
-      String userId = await authData.userId;
-      String token = authData.token.token;
+    final firebaseUser = context.read<User>();
+
+    if (await _isConnected && firebaseUser != null) {
+      String userId = firebaseUser.uid;
+      String token = (await firebaseUser.getIdTokenResult()).token;
       final url =
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${_tasks[index].id}.json?auth=$token";
       var res = await http.patch(
@@ -374,7 +378,7 @@ class Tasks with ChangeNotifier {
       );
     }
 
-    _tasks[index].syncStatus = (await authData.isAuth)
+    _tasks[index].syncStatus = (firebaseUser != null)
         ? (await _isConnected
             ? (_tasks[index].syncStatus == SyncStatus.UpdatedTask
                 ? SyncStatus.FullySynced
@@ -418,10 +422,10 @@ class Tasks with ChangeNotifier {
     _tasks[index].end = DateTime.now();
     _tasks[index].latestPause = _tasks[index].end;
 
-    var authData = Provider.of<Auth>(context, listen: false);
-    if (await _isConnected && await authData.isAuth) {
-      String userId = await authData.userId;
-      String token = authData.token.token;
+    final firebaseUser = context.read<User>();
+    if (await _isConnected && firebaseUser != null) {
+      String userId = firebaseUser.uid;
+      String token = (await firebaseUser.getIdTokenResult()).token;
       final url =
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${_tasks[index].id}.json?auth=$token";
       final res = await http.patch(
@@ -441,7 +445,7 @@ class Tasks with ChangeNotifier {
       );
     }
 
-    _tasks[index].syncStatus = (await authData.isAuth)
+    _tasks[index].syncStatus = (firebaseUser != null)
         ? (await _isConnected
             ? (_tasks[index].syncStatus == SyncStatus.UpdatedTask
                 ? SyncStatus.FullySynced
@@ -457,10 +461,11 @@ class Tasks with ChangeNotifier {
   Future<void> pullFromFireBase() async {
     if (await _isConnected) {
       Map<String, dynamic> syncedTasks;
-      var authData = Provider.of<Auth>(context, listen: false);
-      if (await authData.isAuth) {
-        String userId = await authData.userId;
-        String token = authData.token.token;
+      final firebaseUser = context.read<User>();
+
+      if (firebaseUser != null) {
+        String userId = firebaseUser.uid;
+        String token = (await firebaseUser.getIdTokenResult()).token;
         final url =
             "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token";
         final res = await http.get(url);
@@ -499,11 +504,12 @@ class Tasks with ChangeNotifier {
   }
 
   Future<void> syncEngine() async {
-    var authData = Provider.of<Auth>(context, listen: false);
+    final firebaseUser = context.read<User>();
+
     await loadData();
-    if (_tasks != null && await authData.isAuth) {
-      String userId = await authData.userId;
-      String token = authData.token.token;
+    if (_tasks != null && firebaseUser != null) {
+      String userId = firebaseUser.uid;
+      String token = (await firebaseUser.getIdTokenResult()).token;
       for (int i = 0; i < _tasks.length; i++) {
         Task task = _tasks[i];
         if (await _isConnected) {

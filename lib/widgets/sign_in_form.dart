@@ -1,7 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/exceptions/http_exception.dart';
-import 'package:task_flow/providers/auth.dart';
+import 'package:task_flow/providers/auth_service.dart';
 import 'package:task_flow/providers/project.dart';
 import 'package:task_flow/providers/projects.dart';
 import 'package:task_flow/providers/tasks.dart';
@@ -19,7 +20,7 @@ class _SignInFormState extends State<SignInForm> {
     'password': '',
   };
 
-  void _showErrorDialog(String title, String message) {
+  void _showErrorDialog(String title, String message, BuildContext context) {
     showDialog(
       context: context,
       builder: (context) {
@@ -74,12 +75,13 @@ class _SignInFormState extends State<SignInForm> {
               onPressed: () async {
                 if (_formKey.currentState.validate()) {
                   try {
-                    await Provider.of<Auth>(context, listen: false)
+                    await Provider.of<AuthService>(context, listen: false)
                         .forgotPassword(_emailController.text);
                     Navigator.of(context).pop();
                     _showErrorDialog(
                       "Password reset mail sent",
                       "We have just sent you a link to reset your password. Please check your spam folder too",
+                      context,
                     );
                   } on HttpException catch (error) {
                     Navigator.of(context).pop();
@@ -93,12 +95,20 @@ class _SignInFormState extends State<SignInForm> {
                         .contains('ERROR_TOO_MANY_REQUESTS')) {
                       errorMessage = 'Please try again later';
                     }
-                    _showErrorDialog("Something went wrong", errorMessage);
+                    _showErrorDialog(
+                      "Something went wrong",
+                      errorMessage,
+                      context,
+                    );
                   } catch (error) {
                     Navigator.of(context).pop();
                     const errorMessage =
                         'Could not sign you in, please try again later.';
-                    _showErrorDialog("Something went wrong", errorMessage);
+                    _showErrorDialog(
+                      "Something went wrong",
+                      errorMessage,
+                      context,
+                    );
                   }
                 }
               },
@@ -120,11 +130,14 @@ class _SignInFormState extends State<SignInForm> {
       _isLoading = true;
     });
     try {
-      bool isVerified = await Provider.of<Auth>(context, listen: false)
-          .loginWithEmail(_authData['email'], _authData['password']);
+      print(await Provider.of<AuthService>(context, listen: false).emailSignIn(
+        email: _authData['email'],
+        password: _authData['password'],
+      ));
 
+      bool isVerified = context.read<User>().emailVerified;
       if (isVerified) {
-        await Provider.of<Tasks>(context, listen: false).pullFromFireBase();
+        Provider.of<Tasks>(context, listen: false).pullFromFireBase();
         await Provider.of<Projects>(context, listen: false).pullFromFireBase();
         for (Project project
             in Provider.of<Projects>(context, listen: false).projects) {
@@ -132,8 +145,11 @@ class _SignInFormState extends State<SignInForm> {
         }
         Navigator.of(context).pop();
       } else {
-        _showErrorDialog("Email not verified",
-            "We have just sent you a verification email. Please verify your email before continuing");
+        _showErrorDialog(
+          "Email not verified",
+          "We have just sent you a verification email. Please verify your email before continuing",
+          context,
+        );
       }
     } on HttpException catch (error) {
       var errorMessage = 'Authentication error';
@@ -146,10 +162,18 @@ class _SignInFormState extends State<SignInForm> {
       } else if (error.message.contains('ERROR_TOO_MANY_REQUESTS')) {
         errorMessage = 'Please try again later';
       }
-      _showErrorDialog("Something went wrong", errorMessage);
+      _showErrorDialog(
+        "Something went wrong",
+        errorMessage,
+        context,
+      );
     } catch (error) {
       const errorMessage = 'Could not sign you in, please try again later.';
-      _showErrorDialog("Something went wrong", errorMessage);
+      _showErrorDialog(
+        "Something went wrong",
+        errorMessage,
+        context,
+      );
       throw error;
     }
     setState(() {
