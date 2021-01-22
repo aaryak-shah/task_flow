@@ -62,7 +62,7 @@ class Goals with ChangeNotifier {
     _goals = rowsAsListOfValues.map((row) {
       return Task(
           id: row[0],
-          title: row[1],
+          title: row[1].toString(),
           start: parser.parse(row[2]),
           latestPause: row[3].isNotEmpty ? parser.parse(row[3]) : null,
           end: row[4].isNotEmpty ? parser.parse(row[4]) : null,
@@ -185,7 +185,7 @@ class Goals with ChangeNotifier {
     _goals[index].isPaused = true;
     _goals[index].end = DateTime.now();
 
-    final firebaseUser = context.watch<User>();
+    final firebaseUser = context.read<User>();
     if (await _isConnected && firebaseUser != null) {
       String userId = firebaseUser.uid;
       String token = (await firebaseUser.getIdTokenResult()).token;

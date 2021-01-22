@@ -23,6 +23,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isAuthenticated = false;
   bool _usingGoogle = true;
   bool _isSyncing = false;
+  bool _isLoading = false;
   bool isSigningIn = true;
   bool isEditingName = false;
   String userName = 'Guest';
@@ -79,7 +80,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _showUpdatePasswordDialog() async {
-    var email = context.watch<User>().email;
+    var email = context.read<User>().email;
     try {
       await Provider.of<AuthService>(context).forgotPassword(email);
 
@@ -147,143 +148,102 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: showAppBar(context),
-      backgroundColor: Theme.of(context).primaryColor,
-      body: _isAuthenticated
-          ? Column(
-              children: <Widget>[
-                ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: photoUrl == null
-                        ? AssetImage(
-                            'assets/images/default_pfp.png',
-                          )
-                        : NetworkImage(photoUrl),
-                  ),
-                  title: Theme(
-                    data: Theme.of(context)
-                        .copyWith(primaryColor: Theme.of(context).accentColor),
-                    child: TextFormField(
-                      autofocus: !_usingGoogle,
-                      initialValue: userName,
-                      validator: (val) {
-                        if (val.trim().isEmpty) {
-                          return "Enter a name";
-                        }
-                      },
-                      textInputAction: TextInputAction.done,
-                      readOnly: !isEditingName,
-                      onFieldSubmitted: (name) async {
-                        await Provider.of<AuthService>(context, listen: false)
-                            .updateName(name);
-                        setState(() {
-                          isEditingName = false;
-                        });
-                      },
-                    ),
-                  ),
-                  subtitle: Text(email),
-                  trailing: !_usingGoogle
-                      ? IconButton(
-                          icon: Icon(Icons.edit),
-                          onPressed: () {
-                            setState(() {
-                              isEditingName = true;
-                            });
-                          },
-                        )
-                      : null,
-                ),
-                SizedBox(
-                  height: 30,
-                ),
-                InkWell(
-                  onTap: () async {
-                    setState(() {
-                      photoUrl = '';
-                    });
-                    await Provider.of<Tasks>(context, listen: false)
-                        .syncEngine();
-                    await Provider.of<Tasks>(context, listen: false)
-                        .writeCsv([]);
-                    Projects projects =
-                        Provider.of<Projects>(context, listen: false);
-                    await projects.syncEngine();
-                    for (Project project in projects.projects) {
-                      await project.syncEngine();
-                      await project.purgeSubTasks();
-                    }
-                    projects.writeCsv([]);
-                    await Provider.of<AuthService>(context, listen: false).signOut();
-                  },
-                  child: ListTile(
-                    leading: Icon(
-                      Icons.exit_to_app,
-                    ),
-                    title: Text('Sign Out'),
-                  ),
-                ),
-                if (!_usingGoogle)
-                  InkWell(
-                    onTap: _showUpdatePasswordDialog,
-                    child: ListTile(
-                      leading: Icon(Icons.lock_outline),
-                      title: Text('Change Password'),
-                    ),
-                  ),
-                InkWell(
-                  onTap: () {
-                    setState(() {
-                      _isSyncing = true;
-                    });
-                    Provider.of<Tasks>(context, listen: false)
-                        .pullFromFireBase()
-                        .then((_) async {
-                      await Provider.of<Projects>(context, listen: false)
-                          .pullFromFireBase();
-                      for (Project project
-                          in Provider.of<Projects>(context, listen: false)
-                              .projects) {
-                        await project.pullFromFireBase();
-                      }
-                      setState(() {
-                        _isSyncing = false;
-                      });
-                    });
-                  },
-                  child: ListTile(
-                    leading: _isSyncing
-                        ? CircularProgressIndicator(
-                            strokeWidth: 1,
-                          )
-                        : Icon(Icons.sync),
-                    title: Text('Sync My Data'),
-                  ),
-                ),
-              ],
-            )
-          : Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    //Sign in with google button
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.6,
-                      child: RaisedButton(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 8, horizontal: 15),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30)),
-                        onPressed: () async {
-                          try {
-                            await Provider.of<AuthService>(context,
-                                    listen: false)
-                                .signInWithGoogle();
-                            await Provider.of<Tasks>(context, listen: false)
-                                .pullFromFireBase();
+    return !_isLoading
+        ? Scaffold(
+            appBar: showAppBar(context),
+            backgroundColor: Theme.of(context).primaryColor,
+            body: _isAuthenticated
+                ? Column(
+                    children: <Widget>[
+                      ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: photoUrl == null
+                              ? AssetImage(
+                                  'assets/images/default_pfp.png',
+                                )
+                              : NetworkImage(photoUrl),
+                        ),
+                        title: Theme(
+                          data: Theme.of(context).copyWith(
+                              primaryColor: Theme.of(context).accentColor),
+                          child: TextFormField(
+                            autofocus: !_usingGoogle,
+                            initialValue: userName,
+                            validator: (val) {
+                              if (val.trim().isEmpty) {
+                                return "Enter a name";
+                              }
+                            },
+                            textInputAction: TextInputAction.done,
+                            readOnly: !isEditingName,
+                            onFieldSubmitted: (name) async {
+                              await Provider.of<AuthService>(context,
+                                      listen: false)
+                                  .updateName(name);
+                              setState(() {
+                                isEditingName = false;
+                              });
+                            },
+                          ),
+                        ),
+                        subtitle: Text(email),
+                        trailing: !_usingGoogle
+                            ? IconButton(
+                                icon: Icon(Icons.edit),
+                                onPressed: () {
+                                  setState(() {
+                                    isEditingName = true;
+                                  });
+                                },
+                              )
+                            : null,
+                      ),
+                      SizedBox(
+                        height: 30,
+                      ),
+                      InkWell(
+                        onTap: () async {
+                          setState(() {
+                            photoUrl = '';
+                          });
+                          await Provider.of<Tasks>(context, listen: false)
+                              .syncEngine();
+                          await Provider.of<Tasks>(context, listen: false)
+                              .writeCsv([]);
+                          Projects projects =
+                              Provider.of<Projects>(context, listen: false);
+                          await projects.syncEngine();
+                          for (Project project in projects.projects) {
+                            await project.syncEngine();
+                            await project.purgeSubTasks();
+                          }
+                          await projects.purgeProjects();
+                          await Provider.of<AuthService>(context, listen: false)
+                              .signOut();
+                        },
+                        child: ListTile(
+                          leading: Icon(
+                            Icons.exit_to_app,
+                          ),
+                          title: Text('Sign Out'),
+                        ),
+                      ),
+                      if (!_usingGoogle)
+                        InkWell(
+                          onTap: _showUpdatePasswordDialog,
+                          child: ListTile(
+                            leading: Icon(Icons.lock_outline),
+                            title: Text('Change Password'),
+                          ),
+                        ),
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            _isSyncing = true;
+                          });
+                          Provider.of<Tasks>(context, listen: false)
+                              .pullFromFireBase()
+                              .then((_) async {
                             await Provider.of<Projects>(context, listen: false)
                                 .pullFromFireBase();
                             for (Project project
@@ -291,96 +251,159 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     .projects) {
                               await project.pullFromFireBase();
                             }
-                          } on PlatformException catch (error) {
-                            var errorMessage = 'Authentication error';
-                            if (error.message.contains('sign_in_canceled') ||
-                                error.message.contains('sign_in_failed')) {
-                              errorMessage = 'Sign in failed, try again later';
-                            } else if (error.message
-                                .contains('network_error')) {
-                              errorMessage =
-                                  'Sign in failed due to network issue';
-                            }
-                            _showErrorDialog(
-                                "Something went wrong", errorMessage);
-                          } catch (error) {
-                            Navigator.of(context).pop();
-                            const errorMessage =
-                                'Could not sign you in, please try again later.';
-                            _showErrorDialog(
-                                "Something went wrong", errorMessage);
-                            throw error;
-                          }
-                        },
-                        color: Color(0xDEFFFFFF),
-                        textColor: Colors.black,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Image.asset(
-                              "assets/images/google_logo.png",
-                              scale: 20,
-                            ),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            Text(
-                              'Sign In With Google',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 18,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    //Sign in with email button
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.6,
-                      child: RaisedButton(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30)),
-                        onPressed: () {
-                          setState(() {
-                            isSigningIn = true;
+                            setState(() {
+                              _isSyncing = false;
+                            });
                           });
-                          _showFormDialog(context);
                         },
-                        color: Color(0xDEFFFFFF),
-                        textColor: Colors.black,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Icon(Icons.email),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            Text(
-                              'Continue With Email',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 18,
-                              ),
-                            ),
-                          ],
+                        child: ListTile(
+                          leading: _isSyncing
+                              ? CircularProgressIndicator(
+                                  strokeWidth: 1,
+                                )
+                              : Icon(Icons.sync),
+                          title: Text('Sync My Data'),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  )
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          //Sign in with google button
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.6,
+                            child: RaisedButton(
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 8, horizontal: 15),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30)),
+                              onPressed: () async {
+                                try {
+                                  await Provider.of<AuthService>(context,
+                                          listen: false)
+                                      .signInWithGoogle();
+                                  setState(() {
+                                    _isLoading = true;
+                                  });
+                                  Provider.of<Tasks>(context, listen: false)
+                                      .pullFromFireBase();
+                                  await Provider.of<Projects>(context,
+                                          listen: false)
+                                      .pullFromFireBase();
+                                  for (Project project in Provider.of<Projects>(
+                                          context,
+                                          listen: false)
+                                      .projects) {
+                                    project.pullFromFireBase();
+                                  }
+                                  setState(() {
+                                    _isLoading = false;
+                                  });
+                                } on PlatformException catch (error) {
+                                  var errorMessage = 'Authentication error';
+                                  if (error.message
+                                          .contains('sign_in_canceled') ||
+                                      error.message
+                                          .contains('sign_in_failed')) {
+                                    errorMessage =
+                                        'Sign in failed, try again later';
+                                  } else if (error.message
+                                      .contains('network_error')) {
+                                    errorMessage =
+                                        'Sign in failed due to network issue';
+                                  }
+                                  _showErrorDialog(
+                                      "Something went wrong", errorMessage);
+                                } catch (error) {
+                                  Navigator.of(context).pop();
+                                  const errorMessage =
+                                      'Could not sign you in, please try again later.';
+                                  _showErrorDialog(
+                                      "Something went wrong", errorMessage);
+                                  throw error;
+                                }
+                              },
+                              color: Color(0xDEFFFFFF),
+                              textColor: Colors.black,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  Image.asset(
+                                    "assets/images/google_logo.png",
+                                    scale: 20,
+                                  ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Text(
+                                    'Sign In With Google',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          //Sign in with email button
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.6,
+                            child: RaisedButton(
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 8, horizontal: 10),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30)),
+                              onPressed: () {
+                                setState(() {
+                                  isSigningIn = true;
+                                });
+                                _showFormDialog(context);
+                              },
+                              color: Color(0xDEFFFFFF),
+                              textColor: Colors.black,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  Icon(Icons.email),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Text(
+                                    'Continue With Email',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+          )
+        : Scaffold(
+            backgroundColor: Theme.of(context).backgroundColor,
+            body: Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 1,
+              ),
             ),
-    );
+          );
   }
 }

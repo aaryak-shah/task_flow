@@ -130,7 +130,7 @@ class Project with ChangeNotifier {
     rowsAsListOfValues.forEach((row) {
       subTasks.add(Task(
         id: row[0],
-        title: row[1],
+        title: row[1].toString(),
         start: parser.parse(row[2]),
         latestPause: row[3].isNotEmpty ? parser.parse(row[3]) : null,
         end: row[4].isNotEmpty ? parser.parse(row[4]) : null,
@@ -151,7 +151,7 @@ class Project with ChangeNotifier {
     String title,
   }) async {
     var response;
-    final firebaseUser = context.watch<User>();
+    final firebaseUser = context.read<User>();
 
     if (await _isConnected && firebaseUser != null) {
       String userId = firebaseUser.uid;
@@ -246,6 +246,13 @@ class Project with ChangeNotifier {
     }
   }
 
+  Future<void> completeProject() async {
+    end = DateTime.now();
+    subTasks.forEach((subTask) {
+      subTask.end = subTask.latestPause;
+    });
+  }
+
   Future<void> resume(int index) async {
     // Arguments => index: The index of the task to be resumed
     // Resumes the task at 'index' in the subTasks list
@@ -255,7 +262,7 @@ class Project with ChangeNotifier {
     subTasks[index].pauseTime +=
         DateTime.now().difference(subTasks[index].latestPause);
 
-    final firebaseUser = context.watch<User>();
+    final firebaseUser = context.read<User>();
     if (await _isConnected && firebaseUser != null) {
       String userId = firebaseUser.uid;
       String token = (await firebaseUser.getIdTokenResult()).token;
@@ -293,7 +300,7 @@ class Project with ChangeNotifier {
     subTasks[index].isPaused = true;
     subTasks[index].pauses++;
     subTasks[index].latestPause = DateTime.now();
-    final firebaseUser = context.watch<User>();
+    final firebaseUser = context.read<User>();
     if (await _isConnected && await firebaseUser != null) {
       String userId = firebaseUser.uid;
       String token = (await firebaseUser.getIdTokenResult()).token;
@@ -331,7 +338,7 @@ class Project with ChangeNotifier {
     subTasks[index].end = DateTime.now();
     subTasks[index].latestPause = subTasks[index].end;
 
-    final firebaseUser = context.watch<User>();
+    final firebaseUser = context.read<User>();
     if (await _isConnected && firebaseUser != null) {
       String userId = firebaseUser.uid;
       String token = (await firebaseUser.getIdTokenResult()).token;
@@ -369,7 +376,7 @@ class Project with ChangeNotifier {
   Future<void> pullFromFireBase() async {
     if (await _isConnected) {
       Map<String, dynamic> syncedTasks;
-      final firebaseUser = context.watch<User>();
+      final firebaseUser = context.read<User>();
       if (firebaseUser != null) {
         String userId = firebaseUser.uid;
         String token = (await firebaseUser.getIdTokenResult()).token;
@@ -412,7 +419,7 @@ class Project with ChangeNotifier {
 
   Future<void> syncEngine() async {
     if (await _isConnected) {
-      final firebaseUser = context.watch<User>();
+      final firebaseUser = context.read<User>();
       await loadData();
       if (subTasks != null && firebaseUser != null) {
         String userId = firebaseUser.uid;

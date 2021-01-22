@@ -104,33 +104,37 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
   @override
   Widget build(BuildContext context) {
     final firebaseUser = context.watch<User>();
-    print('isGuest is... $isGuest before comparision');
     return FutureBuilder<bool>(
       future: Provider.of<AuthService>(context).isGuest,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return Consumer<ThemeModel>(
-            builder: (context, themeModel, _) => MaterialApp(
-              theme: themeModel.currentTheme,
-              home: LoginScreen(),
-            ),
-          );
+          return Login();
         } else {
-          print('isGuest is... ${snapshot.data} after comparision');
 
           if ((snapshot.data) ||
               ((firebaseUser != null) && (firebaseUser.emailVerified))) {
             return HomeScreen();
           } else {
-            return Consumer<ThemeModel>(
-              builder: (context, themeModel, _) => MaterialApp(
-                theme: themeModel.currentTheme,
-                home: LoginScreen(),
-              ),
-            );
+            return Login();
           }
         }
       },
+    );
+  }
+}
+
+class Login extends StatelessWidget {
+  const Login({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<ThemeModel>(
+      builder: (context, themeModel, _) => MaterialApp(
+        theme: themeModel.currentTheme,
+        home: LoginScreen(),
+      ),
     );
   }
 }

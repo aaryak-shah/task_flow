@@ -91,7 +91,7 @@ class Projects with ChangeNotifier {
         subTasks.add(
           Task(
             id: stRow[0],
-            title: stRow[1],
+            title: stRow[1].toString(),
             start: parser.parse(stRow[2]),
             latestPause: stRow[3].isNotEmpty ? parser.parse(stRow[3]) : null,
             end: stRow[4].isNotEmpty ? parser.parse(stRow[4]) : null,
@@ -136,8 +136,8 @@ class Projects with ChangeNotifier {
     String client,
   }) async {
     var response;
-    final firebaseUser = context.watch<User>();
-    if (await _isConnected && firebaseUser == null) {
+    final firebaseUser = context.read<User>();
+    if (await _isConnected && firebaseUser != null) {
       String userId = firebaseUser.uid;
       String token = (await firebaseUser.getIdTokenResult()).token;
       final url =
@@ -170,7 +170,7 @@ class Projects with ChangeNotifier {
       rate: rate,
       client: client,
       subTasks: [],
-      syncStatus: (firebaseUser == null)
+      syncStatus: (firebaseUser != null)
           ? (await _isConnected ? SyncStatus.FullySynced : SyncStatus.NewTask)
           : SyncStatus.FullySynced,
     );
@@ -210,7 +210,7 @@ class Projects with ChangeNotifier {
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('AvailableLabels', labels);
-    final firebaseUser = context.watch<User>();
+    final firebaseUser = context.read<User>();
     if (await _isConnected && firebaseUser != null) {
       String userId = firebaseUser.uid;
       String token = (await firebaseUser.getIdTokenResult()).token;
@@ -277,11 +277,16 @@ class Projects with ChangeNotifier {
         .toList();
   }
 
+  Future<void> purgeProjects() async {
+    _projects = [];
+    await writeCsv([]);
+  }
+
   Future<void> pullFromFireBase() async {
     if (await _isConnected) {
       Map<String, dynamic> syncedProjects;
 
-      final firebaseUser = context.watch<User>();
+      final firebaseUser = context.read<User>();
 
       if (firebaseUser != null) {
         String userId = firebaseUser.uid;
