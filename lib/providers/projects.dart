@@ -239,6 +239,41 @@ class Projects with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> complete(int index) async {
+    _projects[index].end = DateTime.now();
+    for (Project p in _projects) {
+      await p.completeProject();
+    }
+
+    final firebaseUser = context.read<User>();
+    if (await _isConnected && firebaseUser != null) {
+      String userId = firebaseUser.uid;
+      String token = (await firebaseUser.getIdTokenResult()).token;
+      final url =
+          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/${_projects[index].id}.json?auth=$token";
+      var res = await http.patch(
+        url,
+        body: json.encode(
+          {
+            'end':
+                DateFormat("dd-MM-yyyy HH:mm:ss").format(_projects[index].end),
+          },
+        ),
+      );
+    }
+
+    _projects[index].syncStatus = (firebaseUser != null)
+        ? (await _isConnected
+            ? (_projects[index].syncStatus == SyncStatus.UpdatedTask
+                ? SyncStatus.FullySynced
+                : _projects[index].syncStatus)
+            : (_projects[index].syncStatus != SyncStatus.NewTask
+                ? SyncStatus.UpdatedTask
+                : SyncStatus.NewTask))
+        : SyncStatus.FullySynced;
+    await writeCsv(_projects);
+  }
+
   Future<List<String>> get availableLabels async {
     // getter to fetch the list of available labels from SharedPreferences
     final prefs = await SharedPreferences.getInstance();

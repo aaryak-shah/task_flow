@@ -51,7 +51,7 @@ class CurrentProjectScreen extends StatefulWidget {
 }
 
 class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
-  bool loaded = false, _isInit = true;
+  bool loaded = false, _isInit = true, _isCompleted = false;
   Project project;
 
   @override
@@ -142,7 +142,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
       );
     }
 
-    if (loaded) {
+    if (loaded && !_isCompleted) {
       ThemeModel themeModel = Provider.of<ThemeModel>(context);
       return WillPopScope(
         onWillPop: () async {
@@ -159,17 +159,19 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
         child: Scaffold(
           backgroundColor: Theme.of(context).primaryColor,
           appBar: showAppBar(context),
-          floatingActionButton: FloatingActionButton(
-            child: Icon(
-              Icons.add,
-              size: 35,
-            ),
-            backgroundColor: Theme.of(context).cardColor,
-            foregroundColor: Theme.of(context).accentColor,
-            onPressed: () {
-              newSubTask('');
-            },
-          ),
+          floatingActionButton: project.end == null
+              ? FloatingActionButton(
+                  child: Icon(
+                    Icons.add,
+                    size: 35,
+                  ),
+                  backgroundColor: Theme.of(context).cardColor,
+                  foregroundColor: Theme.of(context).accentColor,
+                  onPressed: () {
+                    newSubTask('');
+                  },
+                )
+              : null,
           body: Column(
             children: [
               Container(
@@ -189,14 +191,33 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      project.name,
-                      style: TextStyle(
-                        color: Theme.of(context).textTheme.bodyText1.color,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Montserrat',
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          project.name,
+                          style: TextStyle(
+                            color: Theme.of(context).textTheme.bodyText1.color,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Montserrat',
+                          ),
+                        ),
+                        if (project.end == null)
+                        IconButton(
+                            icon: Icon(Icons.stop),
+                            onPressed: () async {
+                              setState(() {
+                                _isCompleted = true;
+                              });
+                              await Provider.of<Projects>(context,
+                                      listen: false)
+                                  .complete(widget.index);
+                              setState(() {
+                                _isCompleted = false;
+                              });
+                            })
+                      ],
                     ),
                     Text(
                       project.cardTags(requireLabels: false),
@@ -211,12 +232,13 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                           overflow: TextOverflow.ellipsis,
                         ),
                         Spacer(),
-                        GestureDetector(
-                          child: Icon(Icons.add),
-                          onTap: () {
-                            showLabelForm(context, widget.index);
-                          },
-                        ),
+                        if (project.end == null)
+                          GestureDetector(
+                            child: Icon(Icons.add),
+                            onTap: () {
+                              showLabelForm(context, widget.index);
+                            },
+                          ),
                       ],
                     ),
                   ],
