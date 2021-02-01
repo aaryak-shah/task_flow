@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:task_flow/exceptions/http_exception.dart';
+import 'package:task_flow/exceptions/firebase_auth_exception_codes.dart';
 import 'package:task_flow/providers/auth_service.dart';
 import 'package:task_flow/providers/project.dart';
 import 'package:task_flow/providers/projects.dart';
@@ -83,27 +83,9 @@ class _SignInFormState extends State<SignInForm> {
                       "We have just sent you a link to reset your password. Please check your spam folder too",
                       context,
                     );
-                  } on HttpException catch (error) {
+                  } on FirebaseAuthException catch (error) {
                     Navigator.of(context).pop();
-                    var errorMessage = 'An error occurred';
-                    if (error.message.contains('ERROR_INVALID_EMAIL')) {
-                      errorMessage = 'This email address is invalid';
-                    } else if (error.message.contains('ERROR_USER_NOT_FOUND')) {
-                      errorMessage =
-                          'Could not find a user with that email address';
-                    } else if (error.message
-                        .contains('ERROR_TOO_MANY_REQUESTS')) {
-                      errorMessage = 'Please try again later';
-                    }
-                    _showErrorDialog(
-                      "Something went wrong",
-                      errorMessage,
-                      context,
-                    );
-                  } catch (error) {
-                    Navigator.of(context).pop();
-                    const errorMessage =
-                        'Could not sign you in, please try again later.';
+                    String errorMessage = getMessageFromErrorCode(error);
                     _showErrorDialog(
                       "Something went wrong",
                       errorMessage,
@@ -151,30 +133,13 @@ class _SignInFormState extends State<SignInForm> {
           context,
         );
       }
-    } on HttpException catch (error) {
-      var errorMessage = 'Authentication error';
-      if (error.message.contains('ERROR_INVALID_EMAIL')) {
-        errorMessage = 'This email address is invalid';
-      } else if (error.message.contains('ERROR_USER_NOT_FOUND')) {
-        errorMessage = 'Could not find a user with that email address';
-      } else if (error.message.contains('ERROR_WRONG_PASSWORD')) {
-        errorMessage = 'This password is invalid';
-      } else if (error.message.contains('ERROR_TOO_MANY_REQUESTS')) {
-        errorMessage = 'Please try again later';
-      }
+    } on FirebaseAuthException catch (error) {
+      String errorMessage = getMessageFromErrorCode(error);
       _showErrorDialog(
         "Something went wrong",
         errorMessage,
         context,
       );
-    } catch (error) {
-      const errorMessage = 'Could not sign you in, please try again later.';
-      _showErrorDialog(
-        "Something went wrong",
-        errorMessage,
-        context,
-      );
-      throw error;
     }
     setState(() {
       _isLoading = false;

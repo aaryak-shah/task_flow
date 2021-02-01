@@ -241,10 +241,6 @@ class Projects with ChangeNotifier {
 
   Future<void> complete(int index) async {
     _projects[index].end = DateTime.now();
-    for (Project p in _projects) {
-      await p.completeProject();
-    }
-
     final firebaseUser = context.read<User>();
     if (await _isConnected && firebaseUser != null) {
       String userId = firebaseUser.uid;

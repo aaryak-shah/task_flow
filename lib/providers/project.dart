@@ -246,41 +246,6 @@ class Project with ChangeNotifier {
     }
   }
 
-  Future<void> completeProject() async {
-    final firebaseUser = context.read<User>();
-    for (Task subTask in subTasks) {
-      subTask.end = subTask.latestPause;
-
-      if (await _isConnected && firebaseUser != null) {
-        String userId = firebaseUser.uid;
-        String token = (await firebaseUser.getIdTokenResult()).token;
-        final url =
-            "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks/${subTask.id}.json?auth=$token";
-        var res = await http.patch(
-          url,
-          body: json.encode(
-            {
-              'isRunning': true,
-              'isPaused': false,
-              'pauseTime': subTask.pauseTime.inSeconds,
-            },
-          ),
-        );
-      }
-
-      subTask.syncStatus = (firebaseUser != null)
-          ? (await _isConnected
-              ? (subTask.syncStatus == SyncStatus.UpdatedTask
-                  ? SyncStatus.FullySynced
-                  : subTask.syncStatus)
-              : (subTask.syncStatus != SyncStatus.NewTask
-                  ? SyncStatus.UpdatedTask
-                  : SyncStatus.NewTask))
-          : SyncStatus.FullySynced;
-    }
-    await writeCsv(subTasks);
-  }
-
   Future<void> resume(int index) async {
     // Arguments => index: The index of the task to be resumed
     // Resumes the task at 'index' in the subTasks list

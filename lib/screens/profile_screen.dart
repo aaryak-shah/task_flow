@@ -106,7 +106,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         await project.syncEngine();
       }
       await Provider.of<AuthService>(context, listen: false).signOut();
-    } on HttpException catch (error) {
+    } on FirebaseAuthException catch (error) {
       Navigator.of(context).pop();
       var errorMessage = 'An error occurred';
       if (error.message.contains('ERROR_TOO_MANY_REQUESTS')) {

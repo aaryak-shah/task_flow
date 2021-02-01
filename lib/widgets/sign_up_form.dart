@@ -1,6 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:task_flow/exceptions/http_exception.dart';
+import 'package:task_flow/exceptions/firebase_auth_exception_codes.dart';
 import 'package:task_flow/providers/auth_service.dart';
 
 class SignUpForm extends StatefulWidget {
@@ -52,19 +53,8 @@ class _SignUpFormState extends State<SignUpForm> {
       );
       _showErrorDialog("Verify your email",
           "We have just sent you a verification email. Please verify your email before continuing");
-    } on HttpException catch (error) {
-      var errorMessage = 'Authentication error';
-      if (error.message.contains('ERROR_EMAIL_ALREADY_IN_USE')) {
-        errorMessage = 'That email address is already in use';
-      } else if (error.message.contains('ERROR_INVALID_EMAIL') ||
-          error.message.contains('ERROR_INVALID_CREDENTIAL')) {
-        errorMessage = 'This email address is invalid';
-      } else if (error.message.contains('ERROR_WEAK_PASSWORD')) {
-        errorMessage = 'This password is too weak';
-      }
-      _showErrorDialog("Something went wrong", errorMessage);
-    } catch (error) {
-      const errorMessage = 'Could not sign you up, try again later.';
+    } on FirebaseAuthException catch (error) {
+      String errorMessage = getMessageFromErrorCode(error);
       _showErrorDialog("Something went wrong", errorMessage);
     }
     setState(() {

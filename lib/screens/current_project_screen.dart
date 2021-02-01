@@ -204,19 +204,19 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                           ),
                         ),
                         if (project.end == null)
-                        IconButton(
-                            icon: Icon(Icons.stop),
-                            onPressed: () async {
-                              setState(() {
-                                _isCompleted = true;
-                              });
-                              await Provider.of<Projects>(context,
-                                      listen: false)
-                                  .complete(widget.index);
-                              setState(() {
-                                _isCompleted = false;
-                              });
-                            })
+                          IconButton(
+                              icon: Icon(Icons.stop),
+                              onPressed: () async {
+                                setState(() {
+                                  _isCompleted = true;
+                                });
+                                await Provider.of<Projects>(context,
+                                        listen: false)
+                                    .complete(widget.index);
+                                setState(() {
+                                  _isCompleted = false;
+                                });
+                              })
                       ],
                     ),
                     Text(
@@ -325,27 +325,29 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                   itemBuilder: (context, index) {
                     Task current = project.subTasks[index];
                     return ListTile(
-                      leading: current.end == null
-                          ? IconButton(
-                              icon: Icon(Icons.play_arrow),
-                              onPressed: () {
-                                Navigator.of(context).pushNamed(
-                                  CurrentTaskScreen.routeName,
-                                  arguments: {
-                                    'index': index,
-                                    'wasSuspended': false,
-                                    'superProjectName': project.name,
-                                    'superProjectId': project.id,
+                      leading: project.end == null
+                          ? (current.end == null
+                              ? IconButton(
+                                  icon: Icon(Icons.play_arrow),
+                                  onPressed: () {
+                                    Navigator.of(context).pushNamed(
+                                      CurrentTaskScreen.routeName,
+                                      arguments: {
+                                        'index': index,
+                                        'wasSuspended': false,
+                                        'superProjectName': project.name,
+                                        'superProjectId': project.id,
+                                      },
+                                    );
                                   },
-                                );
-                              },
-                            )
-                          : IconButton(
-                              icon: Icon(Icons.refresh),
-                              onPressed: () {
-                                newSubTask(current.title);
-                              },
-                            ),
+                                )
+                              : IconButton(
+                                  icon: Icon(Icons.refresh),
+                                  onPressed: () {
+                                    newSubTask(current.title);
+                                  },
+                                ))
+                          : null,
                       title: Text(current.title),
                       trailing: Consumer<Settings>(
                         builder: (context, settings, _) => Text(

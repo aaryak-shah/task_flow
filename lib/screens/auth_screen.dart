@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/exceptions/http_exception.dart';
 import 'package:task_flow/providers/auth_service.dart';
@@ -120,7 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     try {
                       await Provider.of<AuthService>(context, listen: false)
                           .signInWithGoogle();
-                    } on HttpException catch (error) {
+                    } on PlatformException catch (error) {
                       var errorMessage = 'Authentication error';
                       if (error.message.contains('sign_in_canceled') ||
                           error.message.contains('sign_in_failed')) {
@@ -208,69 +209,6 @@ class _LoginScreenState extends State<LoginScreen> {
           SizedBox(
             height: 10,
           ),
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.center,
-          //   children: <Widget>[
-          //     //Sign up with email button
-          //     RaisedButton(
-          //       padding: EdgeInsets.symmetric(vertical: 8),
-          //       shape: RoundedRectangleBorder(
-          //           borderRadius: BorderRadius.circular(30)),
-          //       onPressed: () {
-          //         setState(() {
-          //           isSigningIn = false;
-          //         });
-          //         _showFormDialog(context);
-          //       },
-          //       color: Colors.white,
-          //       textColor: Colors.black,
-          //       child: Container(
-          //         width: MediaQuery.of(context).size.width * 0.4,
-          //         child: Row(
-          //           mainAxisAlignment: MainAxisAlignment.center,
-          //           children: <Widget>[
-          //             Icon(Icons.assignment_ind),
-          //             SizedBox(
-          //               width: 10,
-          //             ),
-          //             Text(
-          //               'Sign Up',
-          //               textAlign: TextAlign.center,
-          //               style: TextStyle(
-          //                 fontSize: 18,
-          //               ),
-          //             ),
-          //           ],
-          //         ),
-          //       ),
-          //     ),
-          //   ],
-          // ),
-          // SizedBox(
-          //   height: 10,
-          // ),
-
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.center,
-          //   children: <Widget>[
-          //     RawMaterialButton(
-          //       onPressed: () {},
-          //       elevation: 2.0,
-          //       fillColor: Colors.white,
-          //       child: Image.asset('assets/images/google_logo.png', scale: 15,),
-          //       padding: EdgeInsets.all(3.0),
-          //       shape: CircleBorder(),
-          //     ),
-          //     RawMaterialButton(
-          //       onPressed: () {},
-          //       elevation: 2.0,
-          //       fillColor: Colors.white,
-          //       child: Image.asset('assets/images/facebook_logo.png'),
-          //       padding: EdgeInsets.all(3.0),
-          //       shape: CircleBorder(),
-          //     )
-          //   ],
-          // ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
