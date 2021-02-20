@@ -7,6 +7,7 @@ import 'package:task_flow/providers/project.dart';
 import 'package:task_flow/providers/projects.dart';
 import 'package:task_flow/providers/settings.dart';
 import 'package:task_flow/providers/task.dart';
+import 'package:task_flow/providers/theme_switcher.dart';
 import 'package:task_flow/screens/current_task_screen.dart';
 import 'package:task_flow/screens/tabs_screen.dart';
 import 'package:task_flow/widgets/new_labels.dart';
@@ -50,7 +51,7 @@ class CurrentProjectScreen extends StatefulWidget {
 }
 
 class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
-  bool loaded = false, _isInit = true;
+  bool loaded = false, _isInit = true, _isCompleted = false;
   Project project;
 
   @override
@@ -91,7 +92,6 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
   Widget build(BuildContext context) {
     void newSubTask(String name) {
       final key = GlobalKey<FormState>();
-
       TextEditingController titleController = TextEditingController(text: name);
       showDialog(
         context: context,
@@ -142,7 +142,8 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
       );
     }
 
-    if (loaded) {
+    if (loaded && !_isCompleted) {
+      ThemeModel themeModel = Provider.of<ThemeModel>(context);
       return WillPopScope(
         onWillPop: () async {
           await Provider.of<Projects>(context, listen: false).syncEngine();
@@ -158,17 +159,19 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
         child: Scaffold(
           backgroundColor: Theme.of(context).primaryColor,
           appBar: showAppBar(context),
-          floatingActionButton: FloatingActionButton(
-            child: Icon(
-              Icons.add,
-              size: 35,
-            ),
-            backgroundColor: Theme.of(context).cardColor,
-            foregroundColor: Theme.of(context).accentColor,
-            onPressed: () {
-              newSubTask('');
-            },
-          ),
+          floatingActionButton: project.end == null
+              ? FloatingActionButton(
+                  child: Icon(
+                    Icons.add,
+                    size: 35,
+                  ),
+                  backgroundColor: Theme.of(context).cardColor,
+                  foregroundColor: Theme.of(context).accentColor,
+                  onPressed: () {
+                    newSubTask('');
+                  },
+                )
+              : null,
           body: Column(
             children: [
               Container(
@@ -183,18 +186,38 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                     image: AssetImage('assets/images/card_bg.png'),
                     fit: BoxFit.cover,
                   ),
+                  boxShadow: [themeModel.cardShadows],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      project.name,
-                      style: TextStyle(
-                        color: Theme.of(context).textTheme.bodyText1.color,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Montserrat',
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          project.name,
+                          style: TextStyle(
+                            color: Theme.of(context).textTheme.bodyText1.color,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Montserrat',
+                          ),
+                        ),
+                        if (project.end == null)
+                          IconButton(
+                              icon: Icon(Icons.stop),
+                              onPressed: () async {
+                                setState(() {
+                                  _isCompleted = true;
+                                });
+                                await Provider.of<Projects>(context,
+                                        listen: false)
+                                    .complete(widget.index);
+                                setState(() {
+                                  _isCompleted = false;
+                                });
+                              })
+                      ],
                     ),
                     Text(
                       project.cardTags(requireLabels: false),
@@ -209,12 +232,13 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                           overflow: TextOverflow.ellipsis,
                         ),
                         Spacer(),
-                        GestureDetector(
-                          child: Icon(Icons.add),
-                          onTap: () {
-                            showLabelForm(context, widget.index);
-                          },
-                        ),
+                        if (project.end == null)
+                          GestureDetector(
+                            child: Icon(Icons.add),
+                            onTap: () {
+                              showLabelForm(context, widget.index);
+                            },
+                          ),
                       ],
                     ),
                   ],
@@ -231,6 +255,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(5),
                       color: Theme.of(context).cardColor,
+                      boxShadow: [themeModel.cardShadows],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -260,6 +285,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(5),
                       color: Theme.of(context).cardColor,
+                      boxShadow: [themeModel.cardShadows],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -299,27 +325,29 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                   itemBuilder: (context, index) {
                     Task current = project.subTasks[index];
                     return ListTile(
-                      leading: current.end == null
-                          ? IconButton(
-                              icon: Icon(Icons.play_arrow),
-                              onPressed: () {
-                                Navigator.of(context).pushNamed(
-                                  CurrentTaskScreen.routeName,
-                                  arguments: {
-                                    'index': index,
-                                    'wasSuspended': false,
-                                    'superProjectName': project.name,
-                                    'superProjectId': project.id,
+                      leading: project.end == null
+                          ? (current.end == null
+                              ? IconButton(
+                                  icon: Icon(Icons.play_arrow),
+                                  onPressed: () {
+                                    Navigator.of(context).pushNamed(
+                                      CurrentTaskScreen.routeName,
+                                      arguments: {
+                                        'index': index,
+                                        'wasSuspended': false,
+                                        'superProjectName': project.name,
+                                        'superProjectId': project.id,
+                                      },
+                                    );
                                   },
-                                );
-                              },
-                            )
-                          : IconButton(
-                              icon: Icon(Icons.refresh),
-                              onPressed: () {
-                                newSubTask(current.title);
-                              },
-                            ),
+                                )
+                              : IconButton(
+                                  icon: Icon(Icons.refresh),
+                                  onPressed: () {
+                                    newSubTask(current.title);
+                                  },
+                                ))
+                          : null,
                       title: Text(current.title),
                       trailing: Consumer<Settings>(
                         builder: (context, settings, _) => Text(
