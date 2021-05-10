@@ -112,10 +112,14 @@ class _LoginScreenState extends State<LoginScreen> {
               //Sign in with google button
               Container(
                 width: MediaQuery.of(context).size.width * 0.6,
-                child: RaisedButton(
-                  padding: EdgeInsets.symmetric(vertical: 8, horizontal: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    primary: Color(0xDEFFFFFF),
+                    textStyle: TextStyle(color: Colors.black),
                   ),
                   onPressed: () async {
                     try {
@@ -139,8 +143,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           context, "Something went wrong", errorMessage);
                     }
                   },
-                  color: Color(0xDEFFFFFF),
-                  textColor: Colors.black,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
@@ -173,10 +175,14 @@ class _LoginScreenState extends State<LoginScreen> {
               //Sign in with email button
               Container(
                 width: MediaQuery.of(context).size.width * 0.6,
-                child: RaisedButton(
-                  padding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    primary: Color(0xDEFFFFFF),
+                    textStyle: TextStyle(color: Colors.black),
                   ),
                   onPressed: () {
                     setState(() {
@@ -184,8 +190,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     });
                     _showFormDialog(context);
                   },
-                  color: Color(0xDEFFFFFF),
-                  textColor: Colors.black,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[

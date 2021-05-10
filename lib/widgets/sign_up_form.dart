@@ -26,7 +26,7 @@ class _SignUpFormState extends State<SignUpForm> {
           title: Text(title),
           content: Text(message),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text('OK'),
             )
@@ -173,16 +173,18 @@ class _SignUpFormState extends State<SignUpForm> {
               if (_isLoading)
                 CircularProgressIndicator()
               else
-                RaisedButton(
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
+                    primary: Colors.white,
+                    textStyle: TextStyle(color: Colors.black),
+                  ),
                   child: Text('SIGN UP'),
                   onPressed: _submit,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
-                  color: Colors.white,
-                  textColor: Colors.black,
                 ),
             ],
           ),

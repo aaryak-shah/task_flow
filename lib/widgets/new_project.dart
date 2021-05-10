@@ -171,10 +171,14 @@ class _NewProjectState extends State<NewProject> {
                       TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                 )),
                 child: Builder(
-                  builder: (context) => RaisedButton(
+                  builder: (context) => ElevatedButton(
                     child: Text('NEXT'),
-                    color: Theme.of(context).accentColor,
-                    textColor: Theme.of(context).primaryColor,
+                    style: ElevatedButton.styleFrom(
+                      primary: Theme.of(context).accentColor,
+                      textStyle: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
                     onPressed: (!isDisabled)
                         ? () async {
                             if (_formKey.currentState.validate()) {
@@ -297,10 +301,14 @@ class _NewProjectState extends State<NewProject> {
                 ),
               ),
               Spacer(),
-              RaisedButton(
+              ElevatedButton(
                 child: Text('CREATE PROJECT'),
-                color: Theme.of(context).accentColor,
-                textColor: Theme.of(context).primaryColor,
+                style: ElevatedButton.styleFrom(
+                  primary: Theme.of(context).accentColor,
+                  textStyle: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
                 onPressed: (!isDisabled)
                     ? () async {
                         if (_formKey.currentState.validate()) {

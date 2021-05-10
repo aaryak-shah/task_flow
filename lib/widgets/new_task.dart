@@ -122,10 +122,14 @@ class _NewTaskState extends State<NewTask> {
               ),
             ),
             Spacer(),
-            RaisedButton(
+            ElevatedButton(
               child: Text('START'),
-              color: Theme.of(context).accentColor,
-              textColor: Theme.of(context).primaryColor,
+              style: ElevatedButton.styleFrom(
+                primary: Theme.of(context).accentColor,
+                textStyle: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
               onPressed: (!isDisabled)
                   ? () async {
                       if (_formKey.currentState.validate()) {

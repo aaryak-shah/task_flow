@@ -175,10 +175,14 @@ class _NewGoalState extends State<NewGoal> {
               ),
             ),
             Spacer(),
-            RaisedButton(
+            ElevatedButton(
               child: Text('START'),
-              color: Theme.of(context).accentColor,
-              textColor: Theme.of(context).primaryColor,
+              style: ElevatedButton.styleFrom(
+                primary: Theme.of(context).accentColor,
+                textStyle: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
               onPressed: (!isDisabled && (time > Duration.zero))
                   ? () async {
                       if (_formKey.currentState.validate()) {

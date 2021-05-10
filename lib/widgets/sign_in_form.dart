@@ -28,7 +28,7 @@ class _SignInFormState extends State<SignInForm> {
           title: Text(title),
           content: Text(message),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text('OK'),
             )
@@ -71,7 +71,7 @@ class _SignInFormState extends State<SignInForm> {
             ),
           ),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               onPressed: () async {
                 if (_formKey.currentState.validate()) {
                   try {
@@ -211,24 +211,28 @@ class _SignInFormState extends State<SignInForm> {
                   },
                 ),
               ),
-              FlatButton(
-                padding: EdgeInsets.symmetric(vertical: 3),
+              TextButton(
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 3),
+                ),
                 child: Text("Forgot password?"),
                 onPressed: _showForgotPasswordDialog,
               ),
               if (_isLoading)
                 CircularProgressIndicator()
               else
-                RaisedButton(
+                ElevatedButton(
                   child: Text('SIGN IN'),
                   onPressed: _submit,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
+                    primary: Colors.white,
+                    textStyle: TextStyle(color: Colors.black),
                   ),
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
-                  color: Colors.white,
-                  textColor: Colors.black,
                 ),
             ],
           ),

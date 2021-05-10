@@ -105,7 +105,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     'Select an accent color for the app',
                     style: Theme.of(context).textTheme.bodyText1,
                   ),
-                  trailing: RaisedButton(
+                  trailing: ElevatedButton(
                     child: Text(
                       'CHANGE',
                     ),

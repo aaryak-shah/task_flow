@@ -188,10 +188,14 @@ class _NewLabelsState extends State<NewLabels> {
               ),
             ),
             Spacer(),
-            RaisedButton(
+            ElevatedButton(
               child: Text('ADD'),
-              color: Theme.of(context).accentColor,
-              textColor: Theme.of(context).primaryColor,
+               style: ElevatedButton.styleFrom(
+                primary: Theme.of(context).accentColor,
+                textStyle: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
               onPressed: () async {
                 switch (widget.mode) {
                   case 'task':

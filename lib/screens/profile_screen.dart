@@ -69,7 +69,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           title: Text(title),
           content: Text(message),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text('OK'),
             )
@@ -91,7 +91,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             title: Text("Password update email sent"),
             content: Text("Login using your new password"),
             actions: [
-              FlatButton(
+              TextButton(
                 onPressed: () => Navigator.of(context).pop(),
                 child: Text("OK"),
               )
@@ -276,11 +276,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           //Sign in with google button
                           Container(
                             width: MediaQuery.of(context).size.width * 0.6,
-                            child: RaisedButton(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 8, horizontal: 15),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30)),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 8, horizontal: 15),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
+                                primary: Color(0xDEFFFFFF),
+                                textStyle: TextStyle(color: Colors.black),
+                              ),
                               onPressed: () async {
                                 try {
                                   await Provider.of<AuthService>(context,
@@ -327,8 +331,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   throw error;
                                 }
                               },
-                              color: Color(0xDEFFFFFF),
-                              textColor: Colors.black,
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
@@ -361,19 +363,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           //Sign in with email button
                           Container(
                             width: MediaQuery.of(context).size.width * 0.6,
-                            child: RaisedButton(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 8, horizontal: 10),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30)),
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 8, horizontal: 10),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30)),
+                                primary: Color(0xDEFFFFFF),
+                                textStyle: TextStyle(color: Colors.black),
+                              ),
                               onPressed: () {
                                 setState(() {
                                   isSigningIn = true;
                                 });
                                 _showFormDialog(context);
                               },
-                              color: Color(0xDEFFFFFF),
-                              textColor: Colors.black,
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
