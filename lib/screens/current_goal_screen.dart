@@ -73,7 +73,7 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
         return true;
       },
       child: Scaffold(
-        resizeToAvoidBottomPadding: false,
+        resizeToAvoidBottomInset: false,
         appBar: showAppBar(context),
         backgroundColor: Theme.of(context).primaryColor,
         body: Column(

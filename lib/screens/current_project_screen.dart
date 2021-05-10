@@ -95,7 +95,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
       TextEditingController titleController = TextEditingController(text: name);
       showDialog(
         context: context,
-        child: AlertDialog(
+        builder: (context) => AlertDialog(
           title: Text('New Subtask'),
           content: Form(
             key: key,
@@ -115,7 +115,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
             ),
           ),
           actions: [
-            FlatButton(
+            TextButton(
               child: Text('START'),
               onPressed: () async {
                 if (key.currentState.validate()) {

@@ -14,8 +14,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void showColorPicker() {
     ThemeModel theme = Provider.of<ThemeModel>(context, listen: false);
     showDialog(
-      context: context,
-      child: AlertDialog(
+      builder: (context) => AlertDialog(
         content: BlockPicker(
           pickerColor: Theme.of(context).accentColor,
           availableColors: theme.availableAccents(),
@@ -27,6 +26,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           },
         ),
       ),
+      context: context,
     );
   }
 
@@ -93,8 +93,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 switchTile(settings.isDarkTheme, 'Dark Theme',
                     'Set a dark theme for the app', (val) async {
                   await settings.setIsDarkTheme(val);
-                  Provider.of<ThemeModel>(context, listen: false).setBrightnessMode(
-                      (val ? BrightnessMode.Dark : BrightnessMode.Light));
+                  Provider.of<ThemeModel>(context, listen: false)
+                      .setBrightnessMode(
+                          (val ? BrightnessMode.Dark : BrightnessMode.Light));
                 }),
                 ListTile(
                   title: Text(

@@ -175,7 +175,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
         return true;
       },
       child: Scaffold(
-        resizeToAvoidBottomPadding: false,
+        resizeToAvoidBottomInset: false,
         backgroundColor: Theme.of(context).primaryColor,
         appBar: showAppBar(context),
         body: Column(

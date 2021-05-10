@@ -16,7 +16,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void _showFormDialog(BuildContext context) {
     showDialog(
       context: context,
-      child: AlertDialog(
+      builder: (context) => AlertDialog(
         //dialog window for authentication forms
         titlePadding: EdgeInsets.fromLTRB(20, 20, 0, 0),
         contentPadding: EdgeInsets.symmetric(horizontal: 5),
@@ -51,7 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
           title: Text(title),
           content: Text(message),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text('OK'),
             )
