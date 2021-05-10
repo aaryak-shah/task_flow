@@ -216,7 +216,7 @@ class Projects with ChangeNotifier {
       String token = (await firebaseUser.getIdTokenResult()).token;
       final url =
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/${_projects[index].id}.json?auth=$token";
-      var res = await http.patch(
+      await http.patch(
         url,
         body: json.encode(
           {
@@ -247,7 +247,7 @@ class Projects with ChangeNotifier {
       String token = (await firebaseUser.getIdTokenResult()).token;
       final url =
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/${_projects[index].id}.json?auth=$token";
-      var res = await http.patch(
+      await http.patch(
         url,
         body: json.encode(
           {

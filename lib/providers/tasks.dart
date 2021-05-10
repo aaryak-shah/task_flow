@@ -278,7 +278,7 @@ class Tasks with ChangeNotifier {
       String token = (await firebaseUser.getIdTokenResult()).token;
       final url =
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${_tasks[index].id}.json?auth=$token";
-      var res = await http.patch(
+      await http.patch(
         url,
         body: json.encode(
           {
@@ -322,7 +322,7 @@ class Tasks with ChangeNotifier {
       String token = (await firebaseUser.getIdTokenResult()).token;
       final url =
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${_tasks[index].id}.json?auth=$token";
-      var res = await http.patch(
+     await http.patch(
         url,
         body: json.encode(
           {
@@ -361,7 +361,7 @@ class Tasks with ChangeNotifier {
       String token = (await firebaseUser.getIdTokenResult()).token;
       final url =
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${_tasks[index].id}.json?auth=$token";
-      var res = await http.patch(
+      await http.patch(
         url,
         body: json.encode(
           {
@@ -428,7 +428,7 @@ class Tasks with ChangeNotifier {
       String token = (await firebaseUser.getIdTokenResult()).token;
       final url =
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${_tasks[index].id}.json?auth=$token";
-      final res = await http.patch(
+      await http.patch(
         url,
         body: json.encode(
           {

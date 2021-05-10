@@ -35,7 +35,7 @@ class _CategoryChipsState extends State<CategoryChips> {
 
   List<Widget> _buildChoiceList() {
     // function to build a list of Category chip widgets
-    List<Widget> choices = List();
+    List<Widget> choices = [];
     categories.forEach((item) {
       choices.add(ChoiceChip(
         shape: RoundedRectangleBorder(

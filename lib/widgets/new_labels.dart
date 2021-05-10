@@ -32,7 +32,7 @@ class _NewLabelsState extends State<NewLabels> {
     final List<String> labels = _labels;
     List<Widget> _buildChoiceList() {
       // function to create a list of label chips
-      List<Widget> choices = List();
+      List<Widget> choices = [];
       labels.forEach((item) {
         choices.add(ChoiceChip(
           shape: RoundedRectangleBorder(

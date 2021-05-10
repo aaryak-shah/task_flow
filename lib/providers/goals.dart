@@ -191,7 +191,7 @@ class Goals with ChangeNotifier {
       String token = (await firebaseUser.getIdTokenResult()).token;
       final url =
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token";
-      final res = await http.post(
+      await http.post(
         url,
         body: json.encode(
           {

@@ -21,7 +21,7 @@ class _LabelChipsState extends State<LabelChips> {
 
   List<Widget> _buildChoiceList() {
     // function to build a list of Label chip widgets
-    List<Widget> choices = List();
+    List<Widget> choices =[];
     labels.forEach((item) {
       choices.add(ChoiceChip(
         shape: RoundedRectangleBorder(
