@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Settings with ChangeNotifier {
-  bool _shortTaskChart;
-  bool _isDarkTheme;
-  bool _showSeconds;
-  int _accentIndex;
+  bool? _shortTaskChart;
+  bool? _isDarkTheme;
+  bool? _showSeconds;
+  int? _accentIndex;
 
   Future<SharedPreferences> get preferences async {
     return await SharedPreferences.getInstance();

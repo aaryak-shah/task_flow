@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/providers/auth_service.dart';
-import 'package:task_flow/providers/project.dart';
+import 'package:task_flow/models/project.dart';
 import 'package:task_flow/providers/projects.dart';
 import 'package:task_flow/providers/tasks.dart';
 
@@ -28,7 +28,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String userName = 'Guest';
   String photoUrl = '';
   String email = '';
-  User provider;
+  User? provider;
 
   void _showFormDialog(BuildContext context) {
     showDialog(
@@ -123,7 +123,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void didChangeDependencies() {
     provider = context.read<User>();
     setState(() {
-      photoUrl = provider?.photoURL;
+      photoUrl = provider?.photoURL ?? '';
     });
 
     setState(() {
@@ -140,7 +140,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (name != null) userName = name;
 
     setState(() {
-      email = provider?.email;
+      email = provider?.email ?? '';
     });
     super.didChangeDependencies();
   }
@@ -149,18 +149,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return !_isLoading
         ? Scaffold(
-            appBar: showAppBar(context),
+            appBar: PreferredSize(
+              preferredSize: Size.fromHeight(100),
+              child: showAppBar(context),
+            ),
             backgroundColor: Theme.of(context).primaryColor,
             body: _isAuthenticated
                 ? Column(
                     children: <Widget>[
                       ListTile(
                         leading: CircleAvatar(
-                          backgroundImage: photoUrl == null
-                              ? AssetImage(
+                          backgroundImage: (photoUrl == ''
+                              ? const AssetImage(
                                   'assets/images/default_pfp.png',
                                 )
-                              : NetworkImage(photoUrl),
+                              : NetworkImage(photoUrl)) as ImageProvider,
                         ),
                         title: Theme(
                           data: Theme.of(context).copyWith(
@@ -169,7 +172,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             autofocus: !_usingGoogle,
                             initialValue: userName,
                             validator: (val) {
-                              if (val.trim().isEmpty) {
+                              if (val == null || val.trim().isEmpty) {
                                 return "Enter a name";
                               }
                             },
@@ -282,7 +285,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(30)),
                                 primary: Color(0xDEFFFFFF),
-                                textStyle: TextStyle(color: Colors.black),
+                                onPrimary: Colors.black,
                               ),
                               onPressed: () async {
                                 try {
@@ -308,14 +311,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   });
                                 } on PlatformException catch (error) {
                                   var errorMessage = 'Authentication error';
-                                  if (error.message
-                                          .contains('sign_in_canceled') ||
-                                      error.message
-                                          .contains('sign_in_failed')) {
+                                  var msg = error.message ?? '';
+                                  if (msg.contains('sign_in_canceled') ||
+                                      msg.contains('sign_in_failed')) {
                                     errorMessage =
                                         'Sign in failed, try again later';
-                                  } else if (error.message
-                                      .contains('network_error')) {
+                                  } else if (msg.contains('network_error')) {
                                     errorMessage =
                                         'Sign in failed due to network issue';
                                   }
@@ -369,7 +370,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(30)),
                                 primary: Color(0xDEFFFFFF),
-                                textStyle: TextStyle(color: Colors.black),
+                                onPrimary: Colors.black,
                               ),
                               onPressed: () {
                                 setState(() {
@@ -401,11 +402,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
           )
         : Scaffold(
-            backgroundColor: Theme.of(context).backgroundColor,
+            backgroundColor: Theme.of(context).primaryColor,
             body: Center(
-              child: CircularProgressIndicator(
-                strokeWidth: 1,
-              ),
+              child: CircularProgressIndicator(),
             ),
           );
   }

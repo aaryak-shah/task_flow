@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:task_flow/providers/project.dart';
+import 'package:task_flow/models/project.dart';
 import 'package:task_flow/providers/projects.dart';
 import 'package:task_flow/screens/current_project_screen.dart';
 import 'category_chip.dart';
@@ -17,7 +17,7 @@ class _NewProjectState extends State<NewProject> {
   Pages _currentPage = Pages.P1;
   PaymentMode _selectedMode = PaymentMode.None;
   String _selectedCategory = '';
-  DateTime _tentativeDeadline;
+  DateTime? _tentativeDeadline;
   final _formKey = GlobalKey<FormState>();
   TextEditingController _titleController = TextEditingController();
   TextEditingController _amountController = TextEditingController();
@@ -71,7 +71,7 @@ class _NewProjectState extends State<NewProject> {
                 child: TextFormField(
                   controller: _titleController,
                   validator: (value) {
-                    if (value.isEmpty) {
+                    if (value == null || value.isEmpty) {
                       return "Enter a title";
                     }
                   },
@@ -128,9 +128,9 @@ class _NewProjectState extends State<NewProject> {
                     leading: Radio(
                       value: PaymentMode.None,
                       groupValue: _selectedMode,
-                      onChanged: (PaymentMode mode) {
+                      onChanged: (PaymentMode? mode) {
                         setState(() {
-                          _selectedMode = mode;
+                          _selectedMode = mode ?? PaymentMode.None;
                         });
                       },
                     ),
@@ -140,9 +140,9 @@ class _NewProjectState extends State<NewProject> {
                     leading: Radio(
                       value: PaymentMode.Fixed,
                       groupValue: _selectedMode,
-                      onChanged: (PaymentMode mode) {
+                      onChanged: (PaymentMode? mode) {
                         setState(() {
-                          _selectedMode = mode;
+                          _selectedMode = mode ?? PaymentMode.None;
                         });
                       },
                     ),
@@ -153,9 +153,9 @@ class _NewProjectState extends State<NewProject> {
                     leading: Radio(
                       value: PaymentMode.Rate,
                       groupValue: _selectedMode,
-                      onChanged: (PaymentMode mode) {
+                      onChanged: (PaymentMode? mode) {
                         setState(() {
-                          _selectedMode = mode;
+                          _selectedMode = mode ?? PaymentMode.None;
                         });
                       },
                     ),
@@ -181,7 +181,7 @@ class _NewProjectState extends State<NewProject> {
                     ),
                     onPressed: (!isDisabled)
                         ? () async {
-                            if (_formKey.currentState.validate()) {
+                            if (_formKey.currentState!.validate()) {
                               showDatePicker(
                                       context: context,
                                       initialDate:
@@ -208,7 +208,7 @@ class _NewProjectState extends State<NewProject> {
                                           id: DateTime.now().toString(),
                                           name: _titleController.text,
                                           start: DateTime.now(),
-                                          deadline: _tentativeDeadline,
+                                          deadline: _tentativeDeadline!,
                                           category: _selectedCategory,
                                           paymentMode: _selectedMode,
                                           rate: 0.0,
@@ -266,7 +266,7 @@ class _NewProjectState extends State<NewProject> {
                   controller: _amountController,
                   keyboardType: TextInputType.number,
                   validator: (value) {
-                    if (value.isEmpty) {
+                    if (value == null || value.isEmpty) {
                       return "Enter a" +
                           (_selectedMode == PaymentMode.Fixed
                               ? 'n amount'
@@ -291,7 +291,7 @@ class _NewProjectState extends State<NewProject> {
                 child: TextFormField(
                   controller: _clientController,
                   validator: (value) {
-                    if (value.isEmpty) {
+                    if (value == null || value.isEmpty) {
                       return "Enter a client name";
                     }
                   },
@@ -311,13 +311,13 @@ class _NewProjectState extends State<NewProject> {
                 ),
                 onPressed: (!isDisabled)
                     ? () async {
-                        if (_formKey.currentState.validate()) {
+                        if (_formKey.currentState!.validate()) {
                           projects
                               .addProject(
                                 id: DateTime.now().toString(),
                                 name: _titleController.text,
                                 start: DateTime.now(),
-                                deadline: _tentativeDeadline,
+                                deadline: _tentativeDeadline!,
                                 category: _selectedCategory,
                                 paymentMode: _selectedMode,
                                 rate: double.parse(_amountController.text),

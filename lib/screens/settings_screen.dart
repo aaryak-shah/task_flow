@@ -34,7 +34,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     bool flag,
     String title,
     String description,
-    Function changeHandler,
+    void Function(bool) changeHandler,
   ) {
     // Arguments => flag: Value of the setting,
     //              title: Title of the setting,
@@ -48,11 +48,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       onChanged: changeHandler,
       title: Text(
         title,
-        style: TextStyle(color: Theme.of(context).textTheme.headline6.color),
+        style: TextStyle(color: Theme.of(context).textTheme.headline6!.color),
       ),
       subtitle: Text(
         description,
-        style: TextStyle(color: Theme.of(context).textTheme.headline6.color),
+        style: TextStyle(color: Theme.of(context).textTheme.headline6!.color),
       ),
       activeColor: Theme.of(context).accentColor,
     );
@@ -68,7 +68,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           backgroundColor: Theme.of(context).primaryColor,
           title: Text(
             'SETTINGS',
-            style: Theme.of(context).appBarTheme.textTheme.headline6,
+            style: Theme.of(context).appBarTheme.textTheme!.headline6,
           ),
         ),
         backgroundColor: Theme.of(context).primaryColor,

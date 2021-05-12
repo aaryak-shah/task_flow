@@ -70,7 +70,7 @@ class ChartState extends State<Chart> {
                 ),
                 barGroups: weekTasks.map((t) {
                   return BarChartGroupData(
-                    x: t['day'],
+                    x: t['day'] as int,
                     barRods: [
                       BarChartRodData(
                         y: totalTime != Duration()

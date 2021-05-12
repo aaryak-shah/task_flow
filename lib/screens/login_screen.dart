@@ -74,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
             'Welcome to'.toUpperCase(),
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Theme.of(context).textTheme.bodyText1.color,
+              color: Theme.of(context).textTheme.bodyText1!.color,
               fontSize: 18,
               fontFamily: 'Montserrat',
             ),
@@ -86,10 +86,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 new TextSpan(
                   text: 'TASK',
                   style: TextStyle(
-                      fontSize: 45,
-                      fontFamily: 'Montserrat',
-                      fontWeight: FontWeight.w300,
-                      color: Theme.of(context).textTheme.bodyText1.color),
+                    fontSize: 45,
+                    fontFamily: 'Montserrat',
+                    fontWeight: FontWeight.w300,
+                    color: Theme.of(context).textTheme.bodyText1!.color,
+                  ),
                 ),
                 new TextSpan(
                   text: 'FLOW',
@@ -118,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(30),
                     ),
                     primary: Color(0xDEFFFFFF),
-                    textStyle: TextStyle(color: Colors.black),
+                    onPrimary: Colors.black,
                   ),
                   onPressed: () async {
                     try {
@@ -126,10 +127,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           .signInWithGoogle();
                     } on PlatformException catch (error) {
                       var errorMessage = 'Authentication error';
-                      if (error.message.contains('sign_in_canceled') ||
-                          error.message.contains('sign_in_failed')) {
+                      String msg = (error.message ?? "");
+                      if ((msg.contains('sign_in_canceled')) ||
+                          msg.contains('sign_in_failed')) {
                         errorMessage = 'Sign in failed, try again later';
-                      } else if (error.message.contains('network_error')) {
+                      } else if (msg.contains('network_error')) {
                         errorMessage = 'Sign in failed due to network issue';
                       }
                       _showErrorDialog(
@@ -181,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(30),
                     ),
                     primary: Color(0xDEFFFFFF),
-                    textStyle: TextStyle(color: Colors.black),
+                    onPrimary: Colors.black,
                   ),
                   onPressed: () {
                     setState(() {

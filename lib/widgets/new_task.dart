@@ -88,7 +88,7 @@ class _NewTaskState extends State<NewTask> {
                 focusNode: _titleFocusNode,
                 controller: _titleController,
                 validator: (value) {
-                  if (value.isEmpty) {
+                  if (value == null || value.isEmpty) {
                     return "Enter a title";
                   }
                 },
@@ -132,7 +132,7 @@ class _NewTaskState extends State<NewTask> {
               ),
               onPressed: (!isDisabled)
                   ? () async {
-                      if (_formKey.currentState.validate()) {
+                      if (_formKey.currentState!.validate()) {
                         // if the form is valid
                         await tasks.addTask(
                           DateTime.now().toString(),

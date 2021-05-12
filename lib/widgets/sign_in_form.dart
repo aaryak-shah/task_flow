@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/exceptions/firebase_auth_exception_codes.dart';
 import 'package:task_flow/providers/auth_service.dart';
-import 'package:task_flow/providers/project.dart';
+import 'package:task_flow/models/project.dart';
 import 'package:task_flow/providers/projects.dart';
 import 'package:task_flow/providers/tasks.dart';
 
@@ -59,7 +59,7 @@ class _SignInFormState extends State<SignInForm> {
                 validator: (val) {
                   if (!RegExp(
                           r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                      .hasMatch(val)) {
+                      .hasMatch(val ?? "")) {
                     return "Enter a valid email address";
                   }
                 },
@@ -73,7 +73,7 @@ class _SignInFormState extends State<SignInForm> {
           actions: <Widget>[
             TextButton(
               onPressed: () async {
-                if (_formKey.currentState.validate()) {
+                if (_formKey.currentState!.validate()) {
                   try {
                     await Provider.of<AuthService>(context, listen: false)
                         .forgotPassword(_emailController.text);
@@ -103,18 +103,18 @@ class _SignInFormState extends State<SignInForm> {
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState.validate()) {
+    if (!_formKey.currentState!.validate()) {
       // Invalid!
       return;
     }
-    _formKey.currentState.save();
+    _formKey.currentState!.save();
     setState(() {
       _isLoading = true;
     });
     try {
       print(await Provider.of<AuthService>(context, listen: false).emailSignIn(
-        email: _authData['email'],
-        password: _authData['password'],
+        email: _authData['email'] ?? "",
+        password: _authData['password'] ?? "",
       ));
 
       bool isVerified = context.read<User>().emailVerified;
@@ -182,12 +182,14 @@ class _SignInFormState extends State<SignInForm> {
                     _passwordFocusNode.requestFocus();
                   },
                   validator: (value) {
-                    if (value.isEmpty || !value.contains('@')) {
+                    if (value == null ||
+                        value.isEmpty ||
+                        !value.contains('@')) {
                       return 'Invalid email';
                     }
                   },
                   onSaved: (value) {
-                    _authData['email'] = value;
+                    _authData['email'] = value ?? "";
                   },
                 ),
               ),
@@ -202,12 +204,12 @@ class _SignInFormState extends State<SignInForm> {
                   onFieldSubmitted: (_) => _submit(),
                   controller: _passwordController,
                   validator: (value) {
-                    if (value.isEmpty) {
+                    if (value == null || value.isEmpty) {
                       return 'Enter a password';
                     }
                   },
                   onSaved: (value) {
-                    _authData['password'] = value;
+                    _authData['password'] = value ?? "";
                   },
                 ),
               ),
@@ -231,7 +233,7 @@ class _SignInFormState extends State<SignInForm> {
                     padding:
                         EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
                     primary: Colors.white,
-                    textStyle: TextStyle(color: Colors.black),
+                    onPrimary: Colors.black,
                   ),
                 ),
             ],

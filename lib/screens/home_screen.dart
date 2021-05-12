@@ -49,14 +49,14 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             });
           } else if (settings.name == CurrentGoalScreen.routeName) {
-            final int index = settings.arguments;
+            final int index = settings.arguments as int;
             return MaterialPageRoute(builder: (context) {
               return CurrentGoalScreen(
                 index: index,
               );
             });
           } else if (settings.name == TabsScreen.routeName) {
-            final int selected = settings.arguments;
+            final int selected = settings.arguments as int;
             return MaterialPageRoute(builder: (context) {
               return TabsScreen(selected);
             });

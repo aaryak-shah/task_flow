@@ -14,7 +14,7 @@ Widget showAppBar(BuildContext context) {
             fontSize: 20,
             fontFamily: 'Montserrat',
             fontWeight: FontWeight.w300,
-            color: Theme.of(context).textTheme.bodyText1.color,
+            color: Theme.of(context).textTheme.bodyText1!.color,
           ),
         ),
         new TextSpan(

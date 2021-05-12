@@ -27,7 +27,7 @@ class _NewGoalState extends State<NewGoal> {
 
   TextEditingController _titleController = TextEditingController();
   final _titleFocusNode = FocusNode();
-  Duration time;
+  late Duration time;
 
   @override
   void dispose() {
@@ -98,7 +98,7 @@ class _NewGoalState extends State<NewGoal> {
                 focusNode: _titleFocusNode,
                 controller: _titleController,
                 validator: (value) {
-                  if (value.trim().isEmpty) {
+                  if (value == null || value.trim().isEmpty) {
                     return "Enter a title";
                   }
                 },
@@ -185,7 +185,7 @@ class _NewGoalState extends State<NewGoal> {
               ),
               onPressed: (!isDisabled && (time > Duration.zero))
                   ? () async {
-                      if (_formKey.currentState.validate()) {
+                      if (_formKey.currentState!.validate()) {
                         // if the form is valid
                         await goals.addGoal(
                           DateTime.now().toString(),

@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:task_flow/providers/project.dart';
+import 'package:task_flow/models/project.dart';
 import 'package:task_flow/providers/projects.dart';
 import 'package:task_flow/providers/settings.dart';
-import 'package:task_flow/providers/task.dart';
+import 'package:task_flow/models/task.dart';
 import 'package:task_flow/providers/theme_switcher.dart';
 import 'package:task_flow/screens/current_task_screen.dart';
 import 'package:task_flow/screens/tabs_screen.dart';
@@ -41,8 +41,8 @@ class CurrentProjectScreen extends StatefulWidget {
   final bool isFromClients;
 
   CurrentProjectScreen({
-    this.projectId,
-    this.index,
+    required this.projectId,
+    required this.index,
     this.isFromClients = false,
   });
 
@@ -52,7 +52,7 @@ class CurrentProjectScreen extends StatefulWidget {
 
 class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
   bool loaded = false, _isInit = true, _isCompleted = false;
-  Project project;
+  late Project project;
 
   @override
   void initState() {
@@ -106,7 +106,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                 controller: titleController,
                 autofocus: true,
                 validator: (value) {
-                  if (value.trim().isEmpty) {
+                  if (value!.trim().isEmpty) {
                     return 'Enter a Title';
                   }
                 },
@@ -118,7 +118,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
             TextButton(
               child: Text('START'),
               onPressed: () async {
-                if (key.currentState.validate()) {
+                if (key.currentState!.validate()) {
                   await project.addSubTask(
                     ctx: context,
                     id: DateTime.now().toString(),
@@ -158,7 +158,10 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
         },
         child: Scaffold(
           backgroundColor: Theme.of(context).primaryColor,
-          appBar: showAppBar(context),
+          appBar: PreferredSize(
+            preferredSize: Size.fromHeight(100),
+            child: showAppBar(context),
+          ),
           floatingActionButton: project.end == null
               ? FloatingActionButton(
                   child: Icon(
@@ -197,7 +200,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                         Text(
                           project.name,
                           style: TextStyle(
-                            color: Theme.of(context).textTheme.bodyText1.color,
+                            color: Theme.of(context).textTheme.bodyText1!.color,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                             fontFamily: 'Montserrat',
@@ -268,7 +271,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                         Text(
                           project.earnings,
                           style: TextStyle(
-                            color: Theme.of(context).textTheme.bodyText1.color,
+                            color: Theme.of(context).textTheme.bodyText1!.color,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                             fontFamily: 'Montserrat',
@@ -298,7 +301,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                         Text(
                           project.deadlineString,
                           style: TextStyle(
-                            color: Theme.of(context).textTheme.bodyText1.color,
+                            color: Theme.of(context).textTheme.bodyText1!.color,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                             fontFamily: 'Montserrat',

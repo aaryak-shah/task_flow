@@ -11,17 +11,15 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import './task.dart';
+import '../models/task.dart';
 
 class Goals with ChangeNotifier {
   BuildContext context;
-  List<Task> _goals;
+  List<Task> _goals = [];
   Goals(this.context);
 
-  List<Task> get goals {
-    // goals getter, gives a copy of _goals
-    return _goals == null ? null : [..._goals];
-  }
+  // goals getter, gives a copy of _goals
+  List<Task> get goals => [..._goals];
 
   Future<String> get _localPath async {
     // gets the AppData directory
@@ -45,6 +43,7 @@ class Goals with ChangeNotifier {
     } on SocketException catch (_) {
       return false;
     }
+    return false;
   }
 
   Future<void> loadData() async {
@@ -92,12 +91,12 @@ class Goals with ChangeNotifier {
               g.end != null
                   ? DateFormat("dd-MM-yyyy HH:mm:ss").format(g.end)
                   : "",
+              g.labels == null ? null : g.labels!.join("|"),
               g.pauses,
               g.pauseTime.inSeconds,
               g.isRunning ? 1 : 0,
               g.isPaused ? 1 : 0,
               g.category,
-              g.labels.join("|"),
               g.goalTime.inSeconds,
               g.syncStatus.index
             ])
@@ -200,11 +199,12 @@ class Goals with ChangeNotifier {
             'start':
                 DateFormat("dd-MM-yyyy HH:mm:ss").format(_goals[index].start),
             'end': DateFormat("dd-MM-yyyy HH:mm:ss").format(_goals[index].end),
+            'labels':
+                _goals[index].labels != null && _goals[index].labels!.isNotEmpty
+                    ? _goals[index].labels!.join("|")
+                    : null,
             'goalTime': _goals[index].goalTime.inSeconds,
             'category': _goals[index].category,
-            'labels': _goals[index].labels.isNotEmpty
-                ? _goals[index].labels.join("|")
-                : null,
           },
         ),
       );
@@ -227,8 +227,8 @@ class Goals with ChangeNotifier {
     // Adds 'selected' labels to the goal at 'index' in the _goals list
     // Also updates the 'AvailableLabels' key in SharedPreferences
 
-    _goals[index].labels.addAll(selected);
-    _goals[index].labels = _goals[index].labels.toSet().toList();
+    _goals[index].labels?.addAll(selected);
+    _goals[index].labels = _goals[index].labels?.toSet().toList();
     await writeCsv(_goals);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('AvailableLabels', labels);

@@ -23,11 +23,11 @@ class TabsScreen extends StatefulWidget {
 }
 
 class _TabsScreenState extends State<TabsScreen> {
-  List<dynamic> _pages;
-  int _selectedIndex;
+  late List<dynamic> _pages;
+  int _selectedIndex = 0;
   bool _isInit = true;
 
-  List<dynamic> _tabColors;
+  late List<dynamic> _tabColors;
 
   void setSelectedColor(BuildContext context) {
     // function that sets the tab of index 'selected' as the accent colour
@@ -45,7 +45,7 @@ class _TabsScreenState extends State<TabsScreen> {
     int selfIndex,
     IconData icon,
     String title,
-    Function callback,
+    void Function() callback,
   ) {
     // Arguments => selfIndex: Index of the currently selected tab
     //              icon: The icon to be used for the tab
@@ -146,7 +146,7 @@ class _TabsScreenState extends State<TabsScreen> {
                 fontSize: 20,
                 fontFamily: 'Montserrat',
                 fontWeight: FontWeight.w300,
-                color: Theme.of(context).textTheme.bodyText1.color,
+                color: Theme.of(context).textTheme.bodyText1!.color,
               ),
             ),
             new TextSpan(

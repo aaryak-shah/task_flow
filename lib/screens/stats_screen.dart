@@ -12,7 +12,10 @@ class _StatsScreenState extends State<StatsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: showAppBar(context),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(100),
+        child: showAppBar(context),
+      ),
       backgroundColor: Theme.of(context).primaryColor,
     );
   }

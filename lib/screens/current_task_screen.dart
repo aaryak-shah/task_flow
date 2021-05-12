@@ -8,7 +8,7 @@ import '../screens/tabs_screen.dart';
 import '../widgets/app_bar.dart';
 import '../widgets/new_labels.dart';
 import '../providers/tasks.dart';
-import '../providers/task.dart';
+import '../models/task.dart';
 
 // Screen which shows the stopwatch for the currently running task
 
@@ -35,7 +35,7 @@ void showLabelForm(BuildContext context, int i) {
 class DrawCircle extends CustomPainter {
   // Circle widget that surrounds the stopwatch
   BuildContext context;
-  Paint _paint;
+  late Paint _paint;
 
   DrawCircle(this.context);
 
@@ -65,11 +65,12 @@ class CurrentTaskScreen extends StatefulWidget {
   final bool wasSuspended;
   final String superProjectName;
   final String superProjectId;
-  CurrentTaskScreen(
-      {this.index,
-      this.wasSuspended,
-      this.superProjectName,
-      this.superProjectId});
+  CurrentTaskScreen({
+    required this.index,
+    required this.wasSuspended,
+    required this.superProjectName,
+    required this.superProjectId,
+  });
 
   @override
   _CurrentTaskScreenState createState() => _CurrentTaskScreenState();
@@ -77,12 +78,12 @@ class CurrentTaskScreen extends StatefulWidget {
 
 class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
   var _provider;
-  Timer _timer;
-  String _time;
-  String _category;
-  String _title;
-  List<String> _labels;
-  Duration _resumeTime;
+  late Timer _timer;
+  late String _time;
+  late String _category;
+  late String _title;
+  List<String>? _labels;
+  late Duration _resumeTime;
 
   bool _isInit = true;
 
@@ -177,7 +178,10 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: Theme.of(context).primaryColor,
-        appBar: showAppBar(context),
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(100),
+          child: showAppBar(context),
+        ),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: widget.superProjectName.isNotEmpty
@@ -191,7 +195,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                   _time,
                   style: TextStyle(
                     fontSize: 50,
-                    color: Theme.of(context).textTheme.headline6.color,
+                    color: Theme.of(context).textTheme.headline6!.color,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -220,7 +224,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 18,
-                            color: Theme.of(context).textTheme.headline6.color,
+                            color: Theme.of(context).textTheme.headline6!.color,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -229,11 +233,12 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: <Widget>[
                           IconButton(
-                            icon: Icon(
-                              paused ? Icons.play_arrow : Icons.pause,
-                              size: 35,
-                              color: Theme.of(context).textTheme.bodyText1.color
-                            ),
+                            icon: Icon(paused ? Icons.play_arrow : Icons.pause,
+                                size: 35,
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .bodyText1!
+                                    .color),
                             onPressed: () async {
                               if (paused) {
                                 watch.start();
@@ -253,7 +258,8 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                             icon: Icon(
                               Icons.stop,
                               size: 35,
-                              color: Theme.of(context).textTheme.bodyText1.color,
+                              color:
+                                  Theme.of(context).textTheme.bodyText1!.color,
                             ),
                             onPressed: () async {
                               watch.reset();
@@ -283,7 +289,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 18,
-                          color: Theme.of(context).textTheme.headline6.color,
+                          color: Theme.of(context).textTheme.headline6!.color,
                           // fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -311,7 +317,8 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                           Text(
                             _category,
                             style: TextStyle(
-                              color: Theme.of(context).textTheme.bodyText2.color,
+                              color:
+                                  Theme.of(context).textTheme.bodyText2!.color,
                               fontSize: 26,
                               fontWeight: FontWeight.bold,
                             ),
@@ -337,7 +344,8 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                               Text(
                                 'LABELS',
                                 style: TextStyle(
-                                  color: Theme.of(context).unselectedWidgetColor,
+                                  color:
+                                      Theme.of(context).unselectedWidgetColor,
                                 ),
                               ),
                               IconButton(
@@ -352,9 +360,12 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                             height: 10,
                           ),
                           Text(
-                            _labels.join(", ").replaceAll(new RegExp(r"'"), ""),
+                            (_labels ?? [])
+                                .join(", ")
+                                .replaceAll(new RegExp(r"'"), ""),
                             style: TextStyle(
-                              color: Theme.of(context).textTheme.bodyText2.color,
+                              color:
+                                  Theme.of(context).textTheme.bodyText2!.color,
                               fontSize: 26,
                               fontWeight: FontWeight.bold,
                             ),

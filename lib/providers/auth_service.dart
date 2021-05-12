@@ -22,8 +22,8 @@ class AuthService with ChangeNotifier {
     return prefs.getBool('isGuestUser') ?? false;
   }
 
-  String get displayName => FirebaseAuth.instance.currentUser?.displayName;
-  String get photoUrl => FirebaseAuth.instance.currentUser?.photoURL;
+  String? get displayName => FirebaseAuth.instance.currentUser?.displayName;
+  String? get photoUrl => FirebaseAuth.instance.currentUser?.photoURL;
 
   Future<void> signOut() async {
     await _firebaseAuth.signOut();
@@ -40,7 +40,7 @@ class AuthService with ChangeNotifier {
         await googleUser.authentication;
 
     // Create a new credential
-    final GoogleAuthCredential credential = GoogleAuthProvider.credential(
+    final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
@@ -49,7 +49,10 @@ class AuthService with ChangeNotifier {
     return await FirebaseAuth.instance.signInWithCredential(credential);
   }
 
-  Future<String> emailSignIn({String email, String password}) async {
+  Future<String> emailSignIn({
+    required String email,
+    required String password,
+  }) async {
     try {
       await _firebaseAuth.signInWithEmailAndPassword(
           email: email, password: password);
@@ -67,9 +70,9 @@ class AuthService with ChangeNotifier {
   }
 
   Future<String> emailSignUp({
-    String name,
-    String email,
-    String password,
+    required String name,
+    required String email,
+    required String password,
   }) async {
     try {
       await _firebaseAuth.createUserWithEmailAndPassword(

@@ -63,7 +63,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                             icon: Icon(
                               Icons.refresh,
                               color:
-                                  Theme.of(context).textTheme.bodyText1.color,
+                                  Theme.of(context).textTheme.bodyText1!.color,
                             ),
                             onPressed: () {
                               // opens the modal sheet to restart this goal
@@ -75,7 +75,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                             g.title,
                             style: Theme.of(context)
                                 .textTheme
-                                .bodyText1
+                                .bodyText1!
                                 .copyWith(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Text(

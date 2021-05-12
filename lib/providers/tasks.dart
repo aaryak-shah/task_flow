@@ -11,12 +11,12 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import './task.dart';
+import '../models/task.dart';
 
 class Tasks with ChangeNotifier {
   // variable that stores list of tasks
   BuildContext context;
-  List<Task> _tasks;
+  List<Task> _tasks = [];
   Tasks(this.context);
   Future<String> get _localPath async {
     // gets the AppData directory
@@ -40,6 +40,7 @@ class Tasks with ChangeNotifier {
     } on SocketException catch (_) {
       return false;
     }
+    return false;
   }
 
   DateFormat parser = DateFormat("dd-MM-yyyy HH:mm:ss");
@@ -92,7 +93,7 @@ class Tasks with ChangeNotifier {
     await loadData();
     _tasks.removeWhere((task) {
       return task.latestPause != null &&
-          task.latestPause.isBefore(
+          task.latestPause!.isBefore(
             DateTime.now().subtract(
               Duration(
                 days: 7,
@@ -106,7 +107,7 @@ class Tasks with ChangeNotifier {
 
   List<Task> get tasks {
     // tasks getter, gives a copy of _tasks
-    final t = _tasks == null ? null : [..._tasks];
+    final t = [..._tasks];
     return t;
   }
 
@@ -115,7 +116,7 @@ class Tasks with ChangeNotifier {
     final recent = tasks.where((t) {
       return t.goalTime == Duration.zero &&
           t.isPaused &&
-          t.latestPause.isAfter(DateTime.now().subtract(Duration(days: 7)));
+          t.latestPause!.isAfter(DateTime.now().subtract(Duration(days: 7)));
     }).toList();
     return recent;
   }
@@ -130,9 +131,9 @@ class Tasks with ChangeNotifier {
       Duration total = Duration();
 
       for (int i = 0; i < recentTasks.length; i++) {
-        if (recentTasks[i].latestPause.day == weekDay.day &&
-            recentTasks[i].latestPause.month == weekDay.month &&
-            recentTasks[i].latestPause.year == weekDay.year) {
+        if (recentTasks[i].latestPause!.day == weekDay.day &&
+            recentTasks[i].latestPause!.month == weekDay.month &&
+            recentTasks[i].latestPause!.year == weekDay.year) {
           total += (recentTasks[i].getRunningTime());
         }
       }
@@ -143,8 +144,8 @@ class Tasks with ChangeNotifier {
 
   Duration get totalTime {
     // getter to calculate the total cumulative time spent working on tasks in the past week
-    return weekTasks.fold(
-        Duration(), (previousSum, day) => previousSum + day['time']);
+    return weekTasks.fold(Duration(),
+        (previousSum, day) => previousSum + (day['time'] as Duration));
   }
 
   String categoryString(String cid) {
@@ -172,7 +173,7 @@ class Tasks with ChangeNotifier {
               t.isRunning ? 1 : 0,
               t.isPaused ? 1 : 0,
               t.category,
-              t.labels.isNotEmpty ? t.labels.join("|") : "",
+              t.labels != null ? t.labels!.join("|") : "",
               t.goalTime.inSeconds,
               t.syncStatus.index
             ])
@@ -266,8 +267,8 @@ class Tasks with ChangeNotifier {
     // Adds 'selected' labels to the task at 'index' in the _tasks list
     // Also updates the 'AvailableLabels' key in SharedPreferences
 
-    _tasks[index].labels.addAll(selected);
-    _tasks[index].labels = _tasks[index].labels.toSet().toList();
+    _tasks[index].labels?.addAll(selected);
+    _tasks[index].labels = _tasks[index].labels?.toSet().toList();
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('AvailableLabels', labels);
@@ -282,7 +283,7 @@ class Tasks with ChangeNotifier {
         url,
         body: json.encode(
           {
-            'labels': _tasks[index].labels.join('|'),
+            'labels': _tasks[index].labels?.join('|'),
           },
         ),
       );
@@ -314,7 +315,7 @@ class Tasks with ChangeNotifier {
     _tasks[index].isRunning = true;
     _tasks[index].isPaused = false;
     _tasks[index].pauseTime +=
-        DateTime.now().difference(_tasks[index].latestPause);
+        DateTime.now().difference(_tasks[index].latestPause!);
     final firebaseUser = context.read<User>();
 
     if (await _isConnected && firebaseUser != null) {
@@ -322,7 +323,7 @@ class Tasks with ChangeNotifier {
       String token = (await firebaseUser.getIdTokenResult()).token;
       final url =
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${_tasks[index].id}.json?auth=$token";
-     await http.patch(
+      await http.patch(
         url,
         body: json.encode(
           {
@@ -370,9 +371,9 @@ class Tasks with ChangeNotifier {
             'pauses': _tasks[index].pauses,
             'latestPause': DateFormat("dd-MM-yyyy HH:mm:ss")
                 .format(_tasks[index].latestPause),
-            'labels': _tasks[index].labels.isEmpty
+            'labels': _tasks[index].labels == null
                 ? null
-                : _tasks[index].labels.join("|")
+                : _tasks[index].labels!.join("|")
           },
         ),
       );
@@ -434,12 +435,12 @@ class Tasks with ChangeNotifier {
           {
             'isRunning': _tasks[index].isRunning,
             'isPaused': _tasks[index].isPaused,
+            'labels': _tasks[index].labels == null
+                ? null
+                : _tasks[index].labels!.join("|"),
             'latestPause': DateFormat("dd-MM-yyyy HH:mm:ss")
                 .format(_tasks[index].latestPause),
             'end': DateFormat("dd-MM-yyyy HH:mm:ss").format(_tasks[index].end),
-            'labels': _tasks[index].labels.isEmpty
-                ? null
-                : _tasks[index].labels.join("|")
           },
         ),
       );
@@ -460,7 +461,7 @@ class Tasks with ChangeNotifier {
 
   Future<void> pullFromFireBase() async {
     if (await _isConnected) {
-      Map<String, dynamic> syncedTasks;
+      Map<String, dynamic>? syncedTasks;
       final firebaseUser = context.read<User>();
 
       if (firebaseUser != null) {
@@ -471,12 +472,13 @@ class Tasks with ChangeNotifier {
         final res = await http.get(url);
         syncedTasks = json.decode(res.body);
       }
-      if (_tasks != null) {
-        _tasks.clear();
-      }
+
+      _tasks.clear();
+
       if (syncedTasks != null) {
         syncedTasks.forEach((id, data) {
-          _tasks.add(Task(
+          _tasks.add(
+            Task(
               id: id,
               title: data['title'],
               start: parser.parse(data['start']),
@@ -496,7 +498,9 @@ class Tasks with ChangeNotifier {
                   ? Duration(seconds: data['pauseTime'])
                   : Duration.zero,
               end: data.containsKey('end') ? parser.parse(data['end']) : null,
-              syncStatus: SyncStatus.FullySynced));
+              syncStatus: SyncStatus.FullySynced,
+            ),
+          );
         });
         await writeCsv(_tasks);
       }
@@ -507,7 +511,7 @@ class Tasks with ChangeNotifier {
     final firebaseUser = context.read<User>();
 
     await loadData();
-    if (_tasks != null && firebaseUser != null) {
+    if (firebaseUser != null) {
       String userId = firebaseUser.uid;
       String token = (await firebaseUser.getIdTokenResult()).token;
       for (int i = 0; i < _tasks.length; i++) {
@@ -522,12 +526,12 @@ class Tasks with ChangeNotifier {
                 {
                   'isRunning': task.isRunning,
                   'isPaused': task.isPaused,
+                  'labels': task.labels != null ? task.labels!.join("|") : null,
                   'latestPause': DateFormat("dd-MM-yyyy HH:mm:ss")
                       .format(task.latestPause),
                   'end': task.end != null
                       ? DateFormat("dd-MM-yyyy HH:mm:ss").format(task.end)
                       : null,
-                  'labels': task.labels.join("|"),
                 },
               ),
             );
@@ -547,15 +551,13 @@ class Tasks with ChangeNotifier {
                   'end': task.end != null
                       ? DateFormat("dd-MM-yyyy HH:mm:ss").format(task.end)
                       : null,
+                  'labels': task.labels != null ? task.labels!.join("|") : null,
+                  'goalTime': task.goalTime.inSeconds,
                   'pauses': task.pauses,
-                  'pauseTime':
-                      task.pauseTime != null ? task.pauseTime.inSeconds : null,
+                  'pauseTime': task.pauseTime.inSeconds,
                   'isRunning': task.isRunning,
                   'isPaused': task.isPaused,
                   'category': task.category,
-                  'labels': task.labels.join("|"),
-                  'goalTime':
-                      task.goalTime != null ? task.goalTime.inSeconds : null
                 },
               ),
             );

@@ -30,7 +30,7 @@ class _MainDrawerState extends State<MainDrawer> {
       child: ListTile(
         leading: Icon(
           icon,
-          color: Theme.of(context).textTheme.bodyText1.color,
+          color: Theme.of(context).textTheme.bodyText1!.color,
         ),
         title: Text(title),
       ),
@@ -46,7 +46,8 @@ class _MainDrawerState extends State<MainDrawer> {
   @override
   void didChangeDependencies() {
     photoUrl = Provider.of<AuthService>(context, listen: true).photoUrl ?? '';
-    String name = Provider.of<AuthService>(context, listen: true).userName ?? 'Guest';
+    String name =
+        Provider.of<AuthService>(context, listen: true).userName ?? 'Guest';
     if (name != null) userName = name;
     super.didChangeDependencies();
   }
@@ -75,11 +76,11 @@ class _MainDrawerState extends State<MainDrawer> {
                   ),
                   ListTile(
                     leading: CircleAvatar(
-                      backgroundImage: photoUrl == ''
-                          ? AssetImage(
+                      backgroundImage: (photoUrl == ''
+                          ? const AssetImage(
                               'assets/images/default_pfp.png',
                             )
-                          : NetworkImage(photoUrl),
+                          : NetworkImage(photoUrl)) as ImageProvider,
                     ),
                     title: Text(
                       userName,

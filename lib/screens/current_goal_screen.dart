@@ -6,7 +6,7 @@ import './tabs_screen.dart';
 import '../widgets/app_bar.dart';
 import '../widgets/new_labels.dart';
 import '../providers/goals.dart';
-import '../providers/task.dart';
+import '../models/task.dart';
 
 // Screen which shows the timer for the currently running goal
 
@@ -35,17 +35,17 @@ class CurrentGoalScreen extends StatefulWidget {
 
   static const routeName = '/current-goal-screen';
   final int index;
-  CurrentGoalScreen({this.index});
+  CurrentGoalScreen({required this.index});
   @override
   _CurrentGoalScreenState createState() => _CurrentGoalScreenState();
 }
 
 class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
   var _provider;
-  Duration _goalTime;
-  String _category;
-  String _title;
-  List<String> _labels;
+  late Duration _goalTime;
+  late String _category;
+  late String _title;
+  List<String>? _labels;
   bool dummy = false;
 
   @override
@@ -74,7 +74,10 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
       },
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        appBar: showAppBar(context),
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(100),
+          child: showAppBar(context),
+        ),
         backgroundColor: Theme.of(context).primaryColor,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -84,7 +87,7 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
                 color: Theme.of(context).cardColor,
                 fillColor: Theme.of(context).accentColor,
                 isReverse: true,
-                textStyle: Theme.of(context).textTheme.headline6.copyWith(
+                textStyle: Theme.of(context).textTheme.headline6!.copyWith(
                       fontWeight: FontWeight.bold,
                       fontSize: 50,
                     ),
@@ -111,7 +114,7 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
                             style: TextStyle(
                               fontSize: 18,
                               color:
-                                  Theme.of(context).textTheme.headline6.color,
+                                  Theme.of(context).textTheme.headline6!.color,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -120,7 +123,7 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
                           icon: Icon(
                             Icons.stop,
                             size: 35,
-                            color: Theme.of(context).textTheme.bodyText1.color,
+                            color: Theme.of(context).textTheme.bodyText1!.color,
                           ),
                           onPressed: () async {
                             await _provider.complete(widget.index);
@@ -155,7 +158,8 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
                           Text(
                             _category,
                             style: TextStyle(
-                              color: Theme.of(context).textTheme.bodyText2.color,
+                              color:
+                                  Theme.of(context).textTheme.bodyText2!.color,
                               fontSize: 26,
                               fontWeight: FontWeight.bold,
                             ),
@@ -180,7 +184,8 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
                               Text(
                                 'LABELS',
                                 style: TextStyle(
-                                  color: Theme.of(context).unselectedWidgetColor,
+                                  color:
+                                      Theme.of(context).unselectedWidgetColor,
                                 ),
                               ),
                               IconButton(
@@ -195,9 +200,12 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
                             height: 10,
                           ),
                           Text(
-                            _labels.join(", ").replaceAll(new RegExp(r"'"), ""),
+                            (_labels ?? [])
+                                .join(", ")
+                                .replaceAll(new RegExp(r"'"), ""),
                             style: TextStyle(
-                              color: Theme.of(context).textTheme.bodyText2.color,
+                              color:
+                                  Theme.of(context).textTheme.bodyText2!.color,
                               fontSize: 26,
                               fontWeight: FontWeight.bold,
                             ),

@@ -7,34 +7,34 @@ import 'package:path_provider/path_provider.dart';
 
 enum SyncStatus { FullySynced, NewTask, UpdatedTask }
 
-class Task with ChangeNotifier {
+class Task {
   // creating a model for Task objects
   SyncStatus syncStatus;
   String id;
   final String title;
   final DateTime start;
-  DateTime latestPause;
-  DateTime end;
+  DateTime? latestPause;
+  DateTime? end;
   int pauses;
   Duration pauseTime;
   bool isRunning;
   bool isPaused;
   final String category;
-  List<String> labels;
+  List<String>? labels;
   final Duration goalTime;
 
   Task({
     this.syncStatus = SyncStatus.NewTask,
-    @required this.id,
-    @required this.title,
-    @required this.start,
+    required this.id,
+    required this.title,
+    required this.start,
     this.latestPause,
     this.end,
     this.pauses = 0,
     this.pauseTime = Duration.zero,
     this.isRunning = true,
     this.isPaused = false,
-    this.category,
+    required this.category,
     this.labels,
     this.goalTime = Duration.zero,
   });
@@ -43,9 +43,9 @@ class Task with ChangeNotifier {
     // function to get the total time this task has been running for
     // excluding pause time
     if (end != null) {
-      return end.difference(start) - pauseTime;
+      return (end ?? DateTime.now()).difference(start) - pauseTime;
     } else if (isPaused) {
-      return latestPause.difference(start) - pauseTime;
+      return (latestPause ?? DateTime.now()).difference(start) - pauseTime;
     } else {
       return (DateTime.now().difference(start) - pauseTime);
     }

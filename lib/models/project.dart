@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:csv/csv.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -14,36 +15,36 @@ import 'task.dart';
 
 enum PaymentMode { Fixed, Rate, None }
 
-class Project with ChangeNotifier {
+class Project {
   BuildContext context;
 
   SyncStatus syncStatus;
   String id;
   final String name;
   final DateTime start;
-  DateTime end;
+  DateTime? end;
   DateTime deadline;
   final String category;
-  List<String> labels = [];
-  List<Task> subTasks = [];
-  PaymentMode paymentMode = PaymentMode.None;
-  double rate = 0;
-  String client = '';
+  List<String> labels;
+  List<Task> subTasks;
+  PaymentMode paymentMode;
+  double rate;
+  String client;
 
   Project(
     this.context, {
     this.syncStatus = SyncStatus.NewTask,
-    @required this.id,
-    @required this.name,
-    @required this.start,
+    required this.id,
+    required this.name,
+    required this.start,
     this.end,
-    @required this.deadline,
-    @required this.category,
-    this.labels,
-    this.subTasks,
-    this.paymentMode,
-    this.rate,
-    this.client,
+    required this.deadline,
+    required this.category,
+    this.labels = const [],
+    this.subTasks = const [],
+    this.paymentMode = PaymentMode.None,
+    this.rate = 0,
+    this.client = '',
   });
 
   Future<bool> get _isConnected async {
@@ -56,6 +57,7 @@ class Project with ChangeNotifier {
     } on SocketException catch (_) {
       return false;
     }
+    return false;
   }
 
   Future<String> get _localPath async {
@@ -108,7 +110,6 @@ class Project with ChangeNotifier {
         .toList());
     File f = await _localFile;
     await f.writeAsString(rows, mode: FileMode.writeOnly);
-    notifyListeners();
   }
 
   DateFormat parser = DateFormat("dd-MM-yyyy HH:mm:ss");
@@ -129,26 +130,25 @@ class Project with ChangeNotifier {
     subTasks = [];
     rowsAsListOfValues.forEach((row) {
       subTasks.add(Task(
-        id: row[0],
-        title: row[1].toString(),
-        start: parser.parse(row[2]),
-        latestPause: row[3].isNotEmpty ? parser.parse(row[3]) : null,
-        end: row[4].isNotEmpty ? parser.parse(row[4]) : null,
-        pauses: row[5],
-        pauseTime: Duration(seconds: row[6]),
-        isRunning: row[7] == 1,
-        isPaused: row[8] == 1,
-        syncStatus: SyncStatus.values[row[9]],
-      ));
+          id: row[0],
+          title: row[1].toString(),
+          start: parser.parse(row[2]),
+          latestPause: row[3].isNotEmpty ? parser.parse(row[3]) : null,
+          end: row[4].isNotEmpty ? parser.parse(row[4]) : null,
+          pauses: row[5],
+          pauseTime: Duration(seconds: row[6]),
+          isRunning: row[7] == 1,
+          isPaused: row[8] == 1,
+          syncStatus: SyncStatus.values[row[9]],
+          category: category));
     });
-    notifyListeners();
   }
 
   Future<void> addSubTask({
-    BuildContext ctx,
-    String id,
-    DateTime start,
-    String title,
+    required BuildContext ctx,
+    required String id,
+    required DateTime start,
+    required String title,
   }) async {
     var response;
     final firebaseUser = context.read<User>();
@@ -180,11 +180,11 @@ class Project with ChangeNotifier {
       isRunning: true,
       isPaused: false,
       id: response != null ? json.decode(response.body)["name"] : id,
+      category: category,
     );
 
     subTasks.add(newTask);
     await writeCsv(subTasks);
-    notifyListeners();
   }
 
   String cardTags({bool requireLabels: true}) {
@@ -197,10 +197,10 @@ class Project with ChangeNotifier {
   }
 
   DateTime get lastActive {
-    DateTime last = subTasks.isNotEmpty ? subTasks.first.latestPause : start;
+    DateTime last = subTasks.isNotEmpty ? subTasks.first.latestPause! : start;
 
     subTasks.forEach((subTask) {
-      if (subTask.latestPause.isAfter(last)) last = subTask.latestPause;
+      if (subTask.latestPause!.isAfter(last)) last = subTask.latestPause!;
     });
     return last;
   }
@@ -211,10 +211,10 @@ class Project with ChangeNotifier {
 
   Duration get workingDuration {
     Duration runningTime = Duration.zero;
-    runningTime = subTasks != null
-        ? subTasks.fold(
-            runningTime, (runningTime, st) => runningTime + st.getRunningTime())
-        : Duration.zero;
+    runningTime = subTasks.fold(
+      runningTime,
+      (runningTime, st) => runningTime + st.getRunningTime(),
+    );
 
     return runningTime;
   }
@@ -253,7 +253,7 @@ class Project with ChangeNotifier {
     subTasks[index].isRunning = true;
     subTasks[index].isPaused = false;
     subTasks[index].pauseTime +=
-        DateTime.now().difference(subTasks[index].latestPause);
+        DateTime.now().difference(subTasks[index].latestPause!);
 
     final firebaseUser = context.read<User>();
     if (await _isConnected && firebaseUser != null) {
@@ -261,7 +261,7 @@ class Project with ChangeNotifier {
       String token = (await firebaseUser.getIdTokenResult()).token;
       final url =
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks/${subTasks[index].id}.json?auth=$token";
-     await http.patch(
+      await http.patch(
         url,
         body: json.encode(
           {
@@ -283,7 +283,6 @@ class Project with ChangeNotifier {
                 : SyncStatus.NewTask))
         : SyncStatus.FullySynced;
     await writeCsv(subTasks);
-    notifyListeners();
   }
 
   Future<void> pause(int index) async {
@@ -294,12 +293,12 @@ class Project with ChangeNotifier {
     subTasks[index].pauses++;
     subTasks[index].latestPause = DateTime.now();
     final firebaseUser = context.read<User>();
-    if (await _isConnected && await firebaseUser != null) {
+    if (await _isConnected && firebaseUser != null) {
       String userId = firebaseUser.uid;
       String token = (await firebaseUser.getIdTokenResult()).token;
       final url =
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks/${subTasks[index].id}.json?auth=$token";
-     await http.patch(
+      await http.patch(
         url,
         body: json.encode(
           {
@@ -322,7 +321,6 @@ class Project with ChangeNotifier {
                 : SyncStatus.NewTask))
         : SyncStatus.FullySynced;
     await writeCsv(subTasks);
-    notifyListeners();
   }
 
   Future<void> complete(int index) async {
@@ -363,12 +361,11 @@ class Project with ChangeNotifier {
         : SyncStatus.FullySynced;
 
     await writeCsv(subTasks);
-    notifyListeners();
   }
 
   Future<void> pullFromFireBase() async {
     if (await _isConnected) {
-      Map<String, dynamic> syncedTasks;
+      late Map<String, dynamic>? syncedTasks;
       final firebaseUser = context.read<User>();
       if (firebaseUser != null) {
         String userId = firebaseUser.uid;
@@ -379,9 +376,8 @@ class Project with ChangeNotifier {
         syncedTasks = json.decode(res.body);
       }
       subTasks = [];
-      if (subTasks != null) {
-        subTasks.clear();
-      }
+      subTasks.clear();
+
       if (syncedTasks != null) {
         syncedTasks.forEach(
           (id, data) {
@@ -401,6 +397,7 @@ class Project with ChangeNotifier {
                     : Duration.zero,
                 end: data.containsKey('end') ? parser.parse(data['end']) : null,
                 syncStatus: SyncStatus.FullySynced,
+                category: category,
               ),
             );
           },
@@ -454,8 +451,7 @@ class Project with ChangeNotifier {
                       ? DateFormat("dd-MM-yyyy HH:mm:ss").format(task.end)
                       : null,
                   'pauses': task.pauses,
-                  'pauseTime':
-                      task.pauseTime != null ? task.pauseTime.inSeconds : null,
+                  'pauseTime': task.pauseTime.inSeconds,
                   'isRunning': task.isRunning,
                   'isPaused': task.isPaused,
                 },

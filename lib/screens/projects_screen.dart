@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:task_flow/providers/project.dart';
+import 'package:task_flow/models/project.dart';
 import 'package:task_flow/providers/projects.dart';
 import 'package:task_flow/providers/theme_switcher.dart';
 import 'package:task_flow/screens/current_project_screen.dart';
@@ -41,7 +41,8 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
       sortedProjects.sort(
           (prev, next) => prev.lastActive.isBefore(next.lastActive) ? 1 : 0);
       ThemeModel themeModel = Provider.of<ThemeModel>(context);
-      Project latestProject = sortedProjects.isEmpty ? null : sortedProjects[0];
+      Project? latestProject =
+          sortedProjects.isEmpty ? null : sortedProjects[0];
       return Scaffold(
         backgroundColor: Theme.of(context).primaryColor,
         body: Column(
@@ -88,17 +89,17 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                                   Text(
                                     'LAST ACTIVE: ' +
                                         DateFormat('dd MMM yy')
-                                            .format(latestProject.lastActive),
+                                            .format(latestProject?.lastActive),
                                     style:
                                         Theme.of(context).textTheme.bodyText1,
                                   ),
                                   Text(
-                                    latestProject.name,
+                                    latestProject?.name ?? "",
                                     style:
                                         Theme.of(context).textTheme.headline6,
                                   ),
                                   Text(
-                                    latestProject.cardTags(),
+                                    latestProject?.cardTags() ?? "",
                                     style:
                                         Theme.of(context).textTheme.bodyText1,
                                   ),
@@ -108,13 +109,13 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                                         MainAxisAlignment.spaceBetween,
                                     children: <Widget>[
                                       Text(
-                                        latestProject.deadlineString,
+                                        latestProject?.deadlineString ?? "",
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodyText1,
                                       ),
                                       Text(
-                                        latestProject.earnings,
+                                        latestProject?.earnings ?? "",
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodyText1,

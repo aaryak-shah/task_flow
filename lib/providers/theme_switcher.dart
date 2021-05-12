@@ -19,7 +19,7 @@ List<Color> lightAccents = [
 /*2*/ Colors.deepOrange,
 /*3*/ Colors.red,
 /*4*/ Colors.purple,
-/*5*/ Colors.blue[600],
+/*5*/ Colors.blue.shade600,
 ];
 
 class ThemeModel with ChangeNotifier {
@@ -157,7 +157,9 @@ class ThemeModel with ChangeNotifier {
     // function to load the settings stored in SharedPreferences
     final prefs = await SharedPreferences.getInstance();
     _mode = ((prefs.getBool('isDarkTheme') != null)
-        ? (prefs.getBool('isDarkTheme') ? BrightnessMode.Dark : BrightnessMode.Light)
+        ? (prefs.getBool('isDarkTheme')
+            ? BrightnessMode.Dark
+            : BrightnessMode.Light)
         : BrightnessMode.Dark);
     _accentIndex =
         (prefs.getInt('accentIndex') != null) ? prefs.getInt('accentIndex') : 0;

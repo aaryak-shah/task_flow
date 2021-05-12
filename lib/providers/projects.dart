@@ -9,10 +9,10 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:task_flow/providers/task.dart';
+import 'package:task_flow/models/task.dart';
 import 'package:http/http.dart' as http;
 
-import 'project.dart';
+import '../models/project.dart';
 
 class Projects with ChangeNotifier {
   BuildContext context;
@@ -100,6 +100,7 @@ class Projects with ChangeNotifier {
             isRunning: stRow[7] == 1,
             isPaused: stRow[8] == 1,
             syncStatus: SyncStatus.values[stRow[9]],
+            category: row[5],
           ),
         );
       });
@@ -125,15 +126,15 @@ class Projects with ChangeNotifier {
   }
 
   Future<String> addProject({
-    String id,
-    String name,
-    DateTime start,
-    DateTime deadline,
-    String category,
+    required String id,
+    required String name,
+    required DateTime start,
+    required DateTime deadline,
+    required String category,
     // List<String> labels,
-    PaymentMode paymentMode,
-    double rate,
-    String client,
+    required PaymentMode paymentMode,
+    required double rate,
+    required String client,
   }) async {
     var response;
     final firebaseUser = context.read<User>();
@@ -191,6 +192,7 @@ class Projects with ChangeNotifier {
     } on SocketException catch (_) {
       return false;
     }
+    return false;
   }
 
   Future<void> addLabels(
@@ -315,7 +317,7 @@ class Projects with ChangeNotifier {
 
   Future<void> pullFromFireBase() async {
     if (await _isConnected) {
-      Map<String, dynamic> syncedProjects;
+      late Map<String, dynamic>? syncedProjects;
 
       final firebaseUser = context.read<User>();
 
@@ -327,9 +329,9 @@ class Projects with ChangeNotifier {
         final res = await http.get(url);
         syncedProjects = json.decode(res.body);
       }
-      if (_projects != null) {
-        _projects.clear();
-      }
+
+      _projects.clear();
+
       if (syncedProjects != null) {
         for (MapEntry<String, dynamic> m in syncedProjects.entries) {
           Project p = Project(
@@ -366,7 +368,7 @@ class Projects with ChangeNotifier {
     final firebaseUser = context.read<User>();
 
     await loadData();
-    if (_projects != null && firebaseUser != null) {
+    if (firebaseUser != null) {
       String userId = firebaseUser.uid;
       String token = (await firebaseUser.getIdTokenResult()).token;
       for (int i = 0; i < _projects.length; i++) {

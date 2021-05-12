@@ -106,7 +106,7 @@ class _TasksScreenState extends State<TasksScreen> {
                   child: ListView.builder(
                     itemCount: tasks.recentTasks.reversed
                         .where((tsk) =>
-                            tsk.latestPause.day ==
+                            tsk.latestPause?.day ==
                             DateTime.now()
                                 .subtract(Duration(days: 6 - selectedDay))
                                 .day)
@@ -114,7 +114,7 @@ class _TasksScreenState extends State<TasksScreen> {
                     itemBuilder: (ctx, index) {
                       final t = tasks.recentTasks.reversed
                           .where((tsk) =>
-                              tsk.latestPause.day ==
+                              tsk.latestPause?.day ==
                               DateTime.now()
                                   .subtract(Duration(days: 6 - selectedDay))
                                   .day)
@@ -132,7 +132,7 @@ class _TasksScreenState extends State<TasksScreen> {
                                     Icons.refresh,
                                     color: Theme.of(context)
                                         .textTheme
-                                        .bodyText1
+                                        .bodyText1!
                                         .color,
                                   ),
                                 )
@@ -151,7 +151,7 @@ class _TasksScreenState extends State<TasksScreen> {
                                     Icons.play_arrow,
                                     color: Theme.of(context)
                                         .textTheme
-                                        .bodyText1
+                                        .bodyText1!
                                         .color,
                                   ),
                                 ),
@@ -161,7 +161,7 @@ class _TasksScreenState extends State<TasksScreen> {
                                 : (t.title.substring(0, 40) + '...'),
                             style: Theme.of(context)
                                 .textTheme
-                                .bodyText1
+                                .bodyText1!
                                 .copyWith(
                                   fontWeight: t.end == null
                                       ? FontWeight.bold
@@ -170,7 +170,7 @@ class _TasksScreenState extends State<TasksScreen> {
                                       ? Theme.of(context).unselectedWidgetColor
                                       : Theme.of(context)
                                           .textTheme
-                                          .bodyText1
+                                          .bodyText1!
                                           .color,
                                 ),
                           ),

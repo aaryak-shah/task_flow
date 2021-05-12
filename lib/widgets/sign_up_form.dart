@@ -37,19 +37,19 @@ class _SignUpFormState extends State<SignUpForm> {
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState.validate()) {
+    if (!_formKey.currentState!.validate()) {
       // Invalid!
       return;
     }
-    _formKey.currentState.save();
+    _formKey.currentState!.save();
     setState(() {
       _isLoading = true;
     });
     try {
       await Provider.of<AuthService>(context, listen: false).emailSignUp(
-        name: _authData['name'],
-        email: _authData['email'],
-        password: _authData['password'],
+        name: _authData['name'] ?? "",
+        email: _authData['email'] ?? "",
+        password: _authData['password'] ?? "",
       );
       _showErrorDialog("Verify your email",
           "We have just sent you a verification email. Please verify your email before continuing");
@@ -102,12 +102,12 @@ class _SignUpFormState extends State<SignUpForm> {
                     _emailFocusNode.requestFocus();
                   },
                   validator: (value) {
-                    if (value.isEmpty) {
+                    if (value == null || value.isEmpty) {
                       return 'Enter a name';
                     }
                   },
                   onSaved: (value) {
-                    _authData['name'] = value;
+                    _authData['name'] = value ?? "";
                   },
                 ),
               ),
@@ -123,12 +123,14 @@ class _SignUpFormState extends State<SignUpForm> {
                     _passwordFocusNode.requestFocus();
                   },
                   validator: (value) {
-                    if (value.isEmpty || !value.contains('@')) {
+                    if (value == null ||
+                        value.isEmpty ||
+                        !value.contains('@')) {
                       return 'Invalid email!';
                     }
                   },
                   onSaved: (value) {
-                    _authData['email'] = value;
+                    _authData['email'] = value ?? "";
                   },
                 ),
               ),
@@ -145,12 +147,12 @@ class _SignUpFormState extends State<SignUpForm> {
                   },
                   controller: _passwordController,
                   validator: (value) {
-                    if (value.isEmpty || value.length < 5) {
+                    if (value == null || value.isEmpty || value.length < 5) {
                       return 'Password is too short!';
                     }
                   },
                   onSaved: (value) {
-                    _authData['password'] = value;
+                    _authData['password'] = value ?? "";
                   },
                 ),
               ),
@@ -181,7 +183,7 @@ class _SignUpFormState extends State<SignUpForm> {
                     padding:
                         EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
                     primary: Colors.white,
-                    textStyle: TextStyle(color: Colors.black),
+                    onPrimary: Colors.black,
                   ),
                   child: Text('SIGN UP'),
                   onPressed: _submit,
