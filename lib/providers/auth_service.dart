@@ -9,7 +9,7 @@ class AuthService with ChangeNotifier {
   AuthService(this._firebaseAuth);
 
   /// Changed to idTokenChanges as it updates depending on more cases.
-  Stream<User> get authStateChanges => _firebaseAuth.idTokenChanges();
+  Stream<User?> get authStateChanges => _firebaseAuth.idTokenChanges();
 
   Future<void> setGuestValue(bool value) async {
     final prefs = await SharedPreferences.getInstance();
@@ -18,8 +18,9 @@ class AuthService with ChangeNotifier {
 
   Future<bool> get isGuest async {
     final prefs = await SharedPreferences.getInstance();
+    bool isGuestUser = prefs.getBool('isGuestUser') ?? false;
     notifyListeners();
-    return prefs.getBool('isGuestUser') ?? false;
+    return isGuestUser;
   }
 
   String? get displayName => FirebaseAuth.instance.currentUser?.displayName;
@@ -33,16 +34,16 @@ class AuthService with ChangeNotifier {
   Future<UserCredential> signInWithGoogle() async {
     // Trigger the authentication flow
     print("sign in with google");
-    final GoogleSignInAccount googleUser = await GoogleSignIn().signIn();
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
     // Obtain the auth details from the request
-    final GoogleSignInAuthentication googleAuth =
-        await googleUser.authentication;
+    final GoogleSignInAuthentication? googleAuth =
+        await googleUser?.authentication;
 
     // Create a new credential
     final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
+      accessToken: googleAuth?.accessToken,
+      idToken: googleAuth?.idToken,
     );
 
     // Once signed in, return the UserCredential
@@ -56,12 +57,12 @@ class AuthService with ChangeNotifier {
     try {
       await _firebaseAuth.signInWithEmailAndPassword(
           email: email, password: password);
-      User user = FirebaseAuth.instance.currentUser;
-      if (user.emailVerified) {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null && user.emailVerified) {
         await setGuestValue(false);
         return "Signed in";
       } else {
-        await user.sendEmailVerification();
+        await user?.sendEmailVerification();
         return "not verified";
       }
     } on FirebaseAuthException catch (e) {
@@ -79,29 +80,34 @@ class AuthService with ChangeNotifier {
         email: email,
         password: password,
       );
-      User user = FirebaseAuth.instance.currentUser;
-      if (!user.emailVerified) {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null && !user.emailVerified) {
         await user.sendEmailVerification();
       }
-      user.updateProfile(displayName: name);
+      user?.updateProfile(displayName: name);
       return "Signed up";
     } on FirebaseAuthException catch (e) {
       throw e;
     }
   }
 
-  Future<bool> get isGoogleUser async {
-    return await GoogleSignIn().isSignedIn();
-  }
+  bool get isAuth => FirebaseAuth.instance.currentUser != null;
 
-  String get userName {
-    User user = FirebaseAuth.instance.currentUser;
+  bool get isGoogleUser =>
+      FirebaseAuth.instance.currentUser?.providerData[0].providerId ==
+      "google.com";
+
+  Stream<GoogleSignInAccount?> get googleUserStream =>
+      GoogleSignIn().onCurrentUserChanged;
+
+  String? get userName {
+    User? user = FirebaseAuth.instance.currentUser;
     return user != null ? user.displayName : 'Guest';
   }
 
   Future<void> updateName(String name) async {
-    User user = FirebaseAuth.instance.currentUser;
-    await user.updateProfile(displayName: name);
+    User? user = FirebaseAuth.instance.currentUser;
+    await user?.updateProfile(displayName: name);
   }
 
   Future<void> forgotPassword(String email) async {

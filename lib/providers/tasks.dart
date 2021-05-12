@@ -163,10 +163,10 @@ class Tasks with ChangeNotifier {
               t.title,
               DateFormat("dd-MM-yyyy HH:mm:ss").format(t.start),
               t.latestPause != null
-                  ? DateFormat("dd-MM-yyyy HH:mm:ss").format(t.latestPause)
+                  ? DateFormat("dd-MM-yyyy HH:mm:ss").format(t.latestPause!)
                   : "",
               t.end != null
-                  ? DateFormat("dd-MM-yyyy HH:mm:ss").format(t.end)
+                  ? DateFormat("dd-MM-yyyy HH:mm:ss").format(t.end!)
                   : "",
               t.pauses,
               t.pauseTime.inSeconds,
@@ -200,13 +200,13 @@ class Tasks with ChangeNotifier {
     // and also to the tasks.csv file
 
     var response;
-    final firebaseUser = context.read<User>();
+    final firebaseUser = context.read<User?>();
 
     if (await _isConnected && firebaseUser != null) {
-      String userId = firebaseUser.uid;
-      String token = (await firebaseUser.getIdTokenResult()).token;
-      final url =
-          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token";
+      String? userId = firebaseUser.uid;
+      String? token = (await firebaseUser.getIdTokenResult()).token;
+      Uri url = Uri.parse(
+          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token");
       response = await http.post(
         url,
         body: json.encode(
@@ -272,13 +272,13 @@ class Tasks with ChangeNotifier {
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('AvailableLabels', labels);
-    final firebaseUser = context.read<User>();
+    final firebaseUser = context.read<User?>();
 
     if (await _isConnected && firebaseUser != null) {
-      String userId = firebaseUser.uid;
-      String token = (await firebaseUser.getIdTokenResult()).token;
-      final url =
-          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${_tasks[index].id}.json?auth=$token";
+      String? userId = firebaseUser.uid;
+      String? token = (await firebaseUser.getIdTokenResult()).token;
+      Uri url = Uri.parse(
+          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${_tasks[index].id}.json?auth=$token");
       await http.patch(
         url,
         body: json.encode(
@@ -316,13 +316,13 @@ class Tasks with ChangeNotifier {
     _tasks[index].isPaused = false;
     _tasks[index].pauseTime +=
         DateTime.now().difference(_tasks[index].latestPause!);
-    final firebaseUser = context.read<User>();
+    final firebaseUser = context.read<User?>();
 
     if (await _isConnected && firebaseUser != null) {
-      String userId = firebaseUser.uid;
-      String token = (await firebaseUser.getIdTokenResult()).token;
-      final url =
-          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${_tasks[index].id}.json?auth=$token";
+      String? userId = firebaseUser.uid;
+      String? token = (await firebaseUser.getIdTokenResult()).token;
+      Uri url = Uri.parse(
+          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${_tasks[index].id}.json?auth=$token");
       await http.patch(
         url,
         body: json.encode(
@@ -355,13 +355,13 @@ class Tasks with ChangeNotifier {
     _tasks[index].isPaused = true;
     _tasks[index].pauses++;
     _tasks[index].latestPause = DateTime.now();
-    final firebaseUser = context.read<User>();
+    final firebaseUser = context.read<User?>();
 
     if (await _isConnected && firebaseUser != null) {
-      String userId = firebaseUser.uid;
-      String token = (await firebaseUser.getIdTokenResult()).token;
-      final url =
-          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${_tasks[index].id}.json?auth=$token";
+      String? userId = firebaseUser.uid;
+      String? token = (await firebaseUser.getIdTokenResult()).token;
+      Uri url = Uri.parse(
+          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${_tasks[index].id}.json?auth=$token");
       await http.patch(
         url,
         body: json.encode(
@@ -370,7 +370,7 @@ class Tasks with ChangeNotifier {
             'isPaused': true,
             'pauses': _tasks[index].pauses,
             'latestPause': DateFormat("dd-MM-yyyy HH:mm:ss")
-                .format(_tasks[index].latestPause),
+                .format(_tasks[index].latestPause!),
             'labels': _tasks[index].labels == null
                 ? null
                 : _tasks[index].labels!.join("|")
@@ -423,12 +423,12 @@ class Tasks with ChangeNotifier {
     _tasks[index].end = DateTime.now();
     _tasks[index].latestPause = _tasks[index].end;
 
-    final firebaseUser = context.read<User>();
+    final firebaseUser = context.read<User?>();
     if (await _isConnected && firebaseUser != null) {
-      String userId = firebaseUser.uid;
-      String token = (await firebaseUser.getIdTokenResult()).token;
-      final url =
-          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${_tasks[index].id}.json?auth=$token";
+      String? userId = firebaseUser.uid;
+      String? token = (await firebaseUser.getIdTokenResult()).token;
+      Uri url = Uri.parse(
+          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${_tasks[index].id}.json?auth=$token");
       await http.patch(
         url,
         body: json.encode(
@@ -439,8 +439,8 @@ class Tasks with ChangeNotifier {
                 ? null
                 : _tasks[index].labels!.join("|"),
             'latestPause': DateFormat("dd-MM-yyyy HH:mm:ss")
-                .format(_tasks[index].latestPause),
-            'end': DateFormat("dd-MM-yyyy HH:mm:ss").format(_tasks[index].end),
+                .format(_tasks[index].latestPause!),
+            'end': DateFormat("dd-MM-yyyy HH:mm:ss").format(_tasks[index].end!),
           },
         ),
       );
@@ -462,13 +462,13 @@ class Tasks with ChangeNotifier {
   Future<void> pullFromFireBase() async {
     if (await _isConnected) {
       Map<String, dynamic>? syncedTasks;
-      final firebaseUser = context.read<User>();
+      final firebaseUser = context.read<User?>();
 
       if (firebaseUser != null) {
-        String userId = firebaseUser.uid;
-        String token = (await firebaseUser.getIdTokenResult()).token;
-        final url =
-            "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token";
+        String? userId = firebaseUser.uid;
+        String? token = (await firebaseUser.getIdTokenResult()).token;
+        Uri url = Uri.parse(
+            "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token");
         final res = await http.get(url);
         syncedTasks = json.decode(res.body);
       }
@@ -508,18 +508,18 @@ class Tasks with ChangeNotifier {
   }
 
   Future<void> syncEngine() async {
-    final firebaseUser = context.read<User>();
+    final firebaseUser = context.read<User?>();
 
     await loadData();
     if (firebaseUser != null) {
-      String userId = firebaseUser.uid;
-      String token = (await firebaseUser.getIdTokenResult()).token;
+      String? userId = firebaseUser.uid;
+      String? token = (await firebaseUser.getIdTokenResult()).token;
       for (int i = 0; i < _tasks.length; i++) {
         Task task = _tasks[i];
         if (await _isConnected) {
           if (task.syncStatus == SyncStatus.UpdatedTask) {
-            final url =
-                "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${task.id}.json?auth=$token";
+            Uri url = Uri.parse(
+                "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${task.id}.json?auth=$token");
             await http.patch(
               url,
               body: json.encode(
@@ -527,17 +527,19 @@ class Tasks with ChangeNotifier {
                   'isRunning': task.isRunning,
                   'isPaused': task.isPaused,
                   'labels': task.labels != null ? task.labels!.join("|") : null,
-                  'latestPause': DateFormat("dd-MM-yyyy HH:mm:ss")
-                      .format(task.latestPause),
+                  'latestPause': task.latestPause != null
+                      ? DateFormat("dd-MM-yyyy HH:mm:ss")
+                          .format(task.latestPause!)
+                      : null,
                   'end': task.end != null
-                      ? DateFormat("dd-MM-yyyy HH:mm:ss").format(task.end)
+                      ? DateFormat("dd-MM-yyyy HH:mm:ss").format(task.end!)
                       : null,
                 },
               ),
             );
           } else if (task.syncStatus == SyncStatus.NewTask) {
-            final url =
-                "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token";
+            Uri url = Uri.parse(
+                "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token");
             final res = await http.post(
               url,
               body: json.encode(
@@ -546,10 +548,10 @@ class Tasks with ChangeNotifier {
                   'start': DateFormat("dd-MM-yyyy HH:mm:ss").format(task.start),
                   'latestPause': task.latestPause != null
                       ? DateFormat("dd-MM-yyyy HH:mm:ss")
-                          .format(task.latestPause)
+                          .format(task.latestPause!)
                       : null,
                   'end': task.end != null
-                      ? DateFormat("dd-MM-yyyy HH:mm:ss").format(task.end)
+                      ? DateFormat("dd-MM-yyyy HH:mm:ss").format(task.end!)
                       : null,
                   'labels': task.labels != null ? task.labels!.join("|") : null,
                   'goalTime': task.goalTime.inSeconds,

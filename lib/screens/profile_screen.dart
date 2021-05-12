@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/providers/auth_service.dart';
 import 'package:task_flow/models/project.dart';
@@ -12,6 +13,8 @@ import '../widgets/sign_up_form.dart';
 import '../widgets/app_bar.dart';
 
 class ProfileScreen extends StatefulWidget {
+  final User? user;
+  ProfileScreen(this.user);
   static const routeName = '/profile-screen';
 
   @override
@@ -28,7 +31,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String userName = 'Guest';
   String photoUrl = '';
   String email = '';
-  User? provider;
+  // User? provider;
 
   void _showFormDialog(BuildContext context) {
     showDialog(
@@ -81,7 +84,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _showUpdatePasswordDialog() async {
     var email = context.read<User>().email;
     try {
-      await Provider.of<AuthService>(context).forgotPassword(email);
+      await Provider.of<AuthService>(context).forgotPassword(email!);
 
       showDialog(
         context: context,
@@ -108,7 +111,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } on FirebaseAuthException catch (error) {
       Navigator.of(context).pop();
       var errorMessage = 'An error occurred';
-      if (error.message.contains('ERROR_TOO_MANY_REQUESTS')) {
+      if ((error.message ?? "").contains('ERROR_TOO_MANY_REQUESTS')) {
         errorMessage = 'Please try again later';
       }
       _showErrorDialog("Something went wrong", errorMessage);
@@ -121,27 +124,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   void didChangeDependencies() {
-    provider = context.read<User>();
+    // provider = context.read<User>();
     setState(() {
-      photoUrl = provider?.photoURL ?? '';
+      photoUrl = widget.user?.photoURL ?? '';
+      _isAuthenticated = Provider.of<AuthService>(context).isAuth;
+      _usingGoogle = Provider.of<AuthService>(context).isGoogleUser;
+      email = widget.user?.email ?? '';
     });
-
-    setState(() {
-      _isAuthenticated = provider != null;
-    });
-
-    Provider.of<AuthService>(context).isGoogleUser.then((value) {
-      setState(() {
-        _usingGoogle = value;
-      });
-    });
-
-    String name = Provider.of<AuthService>(context).userName;
+    String? name = Provider.of<AuthService>(context).userName;
     if (name != null) userName = name;
-
-    setState(() {
-      email = provider?.email ?? '';
-    });
     super.didChangeDependencies();
   }
 

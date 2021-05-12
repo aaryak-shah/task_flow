@@ -44,7 +44,7 @@ class Projects with ChangeNotifier {
               p.name,
               DateFormat("dd-MM-yyyy HH:mm:ss").format(p.start),
               p.end != null
-                  ? DateFormat("dd-MM-yyyy HH:mm:ss").format(p.end)
+                  ? DateFormat("dd-MM-yyyy HH:mm:ss").format(p.end!)
                   : "",
               DateFormat("dd-MM-yyyy HH:mm:ss").format(p.deadline),
               p.category,
@@ -137,12 +137,12 @@ class Projects with ChangeNotifier {
     required String client,
   }) async {
     var response;
-    final firebaseUser = context.read<User>();
+    final firebaseUser = context.read<User?>();
     if (await _isConnected && firebaseUser != null) {
-      String userId = firebaseUser.uid;
-      String token = (await firebaseUser.getIdTokenResult()).token;
-      final url =
-          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects.json?auth=$token";
+      String? userId = firebaseUser.uid;
+      String? token = (await firebaseUser.getIdTokenResult()).token;
+      Uri url = Uri.parse(
+          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects.json?auth=$token");
       response = await http.post(
         url,
         body: json.encode(
@@ -212,12 +212,12 @@ class Projects with ChangeNotifier {
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('AvailableLabels', labels);
-    final firebaseUser = context.read<User>();
+    final firebaseUser = context.read<User?>();
     if (await _isConnected && firebaseUser != null) {
-      String userId = firebaseUser.uid;
-      String token = (await firebaseUser.getIdTokenResult()).token;
-      final url =
-          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/${_projects[index].id}.json?auth=$token";
+      String? userId = firebaseUser.uid;
+      String? token = (await firebaseUser.getIdTokenResult()).token;
+      Uri url = Uri.parse(
+          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/${_projects[index].id}.json?auth=$token");
       await http.patch(
         url,
         body: json.encode(
@@ -243,18 +243,18 @@ class Projects with ChangeNotifier {
 
   Future<void> complete(int index) async {
     _projects[index].end = DateTime.now();
-    final firebaseUser = context.read<User>();
+    final firebaseUser = context.read<User?>();
     if (await _isConnected && firebaseUser != null) {
-      String userId = firebaseUser.uid;
-      String token = (await firebaseUser.getIdTokenResult()).token;
-      final url =
-          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/${_projects[index].id}.json?auth=$token";
+      String? userId = firebaseUser.uid;
+      String? token = (await firebaseUser.getIdTokenResult()).token;
+      Uri url = Uri.parse(
+          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/${_projects[index].id}.json?auth=$token");
       await http.patch(
         url,
         body: json.encode(
           {
             'end':
-                DateFormat("dd-MM-yyyy HH:mm:ss").format(_projects[index].end),
+                DateFormat("dd-MM-yyyy HH:mm:ss").format(_projects[index].end!),
           },
         ),
       );
@@ -319,13 +319,13 @@ class Projects with ChangeNotifier {
     if (await _isConnected) {
       late Map<String, dynamic>? syncedProjects;
 
-      final firebaseUser = context.read<User>();
+      final firebaseUser = context.read<User?>();
 
       if (firebaseUser != null) {
-        String userId = firebaseUser.uid;
-        String token = (await firebaseUser.getIdTokenResult()).token;
-        final url =
-            "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects.json?auth=$token";
+        String? userId = firebaseUser.uid;
+        String? token = (await firebaseUser.getIdTokenResult()).token;
+        Uri url = Uri.parse(
+            "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects.json?auth=$token");
         final res = await http.get(url);
         syncedProjects = json.decode(res.body);
       }
@@ -365,32 +365,32 @@ class Projects with ChangeNotifier {
   }
 
   Future<void> syncEngine() async {
-    final firebaseUser = context.read<User>();
+    final firebaseUser = context.read<User?>();
 
     await loadData();
     if (firebaseUser != null) {
-      String userId = firebaseUser.uid;
-      String token = (await firebaseUser.getIdTokenResult()).token;
+      String? userId = firebaseUser.uid;
+      String? token = (await firebaseUser.getIdTokenResult()).token;
       for (int i = 0; i < _projects.length; i++) {
         Project project = _projects[i];
         if (await _isConnected) {
           if (project.syncStatus == SyncStatus.UpdatedTask) {
-            final url =
-                "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/${project.id}.json?auth=$token";
+            Uri url = Uri.parse(
+                "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/${project.id}.json?auth=$token");
             await http.patch(
               url,
               body: json.encode(
                 {
                   'end': project.end != null
-                      ? DateFormat("dd-MM-yyyy HH:mm:ss").format(project.end)
+                      ? DateFormat("dd-MM-yyyy HH:mm:ss").format(project.end!)
                       : null,
                   'labels': project.labels.join("|"),
                 },
               ),
             );
           } else if (project.syncStatus == SyncStatus.NewTask) {
-            final url =
-                "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects.json?auth=$token";
+            Uri url = Uri.parse(
+                "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects.json?auth=$token");
             final res = await http.post(
               url,
               body: json.encode(
@@ -405,7 +405,7 @@ class Projects with ChangeNotifier {
                   'rate': project.rate,
                   'client': project.client,
                   'end': project.end != null
-                      ? DateFormat("dd-MM-yyyy HH:mm:ss").format(project.end)
+                      ? DateFormat("dd-MM-yyyy HH:mm:ss").format(project.end!)
                       : null,
                   'labels': project.labels.join("|"),
                 },

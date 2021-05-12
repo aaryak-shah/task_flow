@@ -56,12 +56,13 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(
           create: (_) => AuthService(FirebaseAuth.instance),
         ),
-        StreamProvider(
-          create: (context) => context.read<AuthService>().authStateChanges,
-        ),
         // ChangeNotifierProvider(
         //   create: (context) => Auth(),
         // ),
+        StreamProvider(
+          initialData: null,
+          create: (context) => context.read<AuthService>().authStateChanges,
+        ),
         ChangeNotifierProvider(
           create: (context) => Tasks(
             context,
@@ -81,14 +82,16 @@ class _MyAppState extends State<MyApp> {
         ),
         ChangeNotifierProvider(
           create: (context) => Settings(),
-        )
+        ),
       ],
-      child: AuthenticationWrapper(),
+      builder: (context, _) => AuthenticationWrapper(context),
     );
   }
 }
 
 class AuthenticationWrapper extends StatefulWidget {
+  final BuildContext ctx;
+  AuthenticationWrapper(this.ctx);
   @override
   _AuthenticationWrapperState createState() => _AuthenticationWrapperState();
 }
@@ -98,14 +101,14 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    final firebaseUser = context.watch<User>();
+    final firebaseUser = Provider.of<User?>(widget.ctx);
     return FutureBuilder<bool>(
-      future: Provider.of<AuthService>(context).isGuest,
+      future: Provider.of<AuthService>(widget.ctx).isGuest,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Login();
         } else {
-          if ((snapshot.hasData) || (firebaseUser.emailVerified)) {
+          if ((snapshot.data!) || (firebaseUser != null && firebaseUser.emailVerified)) {
             return HomeScreen();
           } else {
             return Login();

@@ -89,17 +89,17 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                                   Text(
                                     'LAST ACTIVE: ' +
                                         DateFormat('dd MMM yy')
-                                            .format(latestProject?.lastActive),
+                                            .format(latestProject!.lastActive),
                                     style:
                                         Theme.of(context).textTheme.bodyText1,
                                   ),
                                   Text(
-                                    latestProject?.name ?? "",
+                                    latestProject.name,
                                     style:
                                         Theme.of(context).textTheme.headline6,
                                   ),
                                   Text(
-                                    latestProject?.cardTags() ?? "",
+                                    latestProject.cardTags(),
                                     style:
                                         Theme.of(context).textTheme.bodyText1,
                                   ),
@@ -109,13 +109,13 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                                         MainAxisAlignment.spaceBetween,
                                     children: <Widget>[
                                       Text(
-                                        latestProject?.deadlineString ?? "",
+                                        latestProject.deadlineString,
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodyText1,
                                       ),
                                       Text(
-                                        latestProject?.earnings ?? "",
+                                        latestProject.earnings,
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodyText1,

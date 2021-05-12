@@ -86,10 +86,10 @@ class Goals with ChangeNotifier {
               g.title,
               DateFormat("dd-MM-yyyy HH:mm:ss").format(g.start),
               g.latestPause != null
-                  ? DateFormat("dd-MM-yyyy HH:mm:ss").format(g.latestPause)
+                  ? DateFormat("dd-MM-yyyy HH:mm:ss").format(g.latestPause!)
                   : "",
               g.end != null
-                  ? DateFormat("dd-MM-yyyy HH:mm:ss").format(g.end)
+                  ? DateFormat("dd-MM-yyyy HH:mm:ss").format(g.end!)
                   : "",
               g.labels == null ? null : g.labels!.join("|"),
               g.pauses,
@@ -184,12 +184,12 @@ class Goals with ChangeNotifier {
     _goals[index].isPaused = true;
     _goals[index].end = DateTime.now();
 
-    final firebaseUser = context.read<User>();
+    final firebaseUser = context.read<User?>();
     if (await _isConnected && firebaseUser != null) {
-      String userId = firebaseUser.uid;
-      String token = (await firebaseUser.getIdTokenResult()).token;
-      final url =
-          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token";
+      String? userId = firebaseUser.uid;
+      String? token = (await firebaseUser.getIdTokenResult()).token;
+      Uri url = Uri.parse(
+          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token");
       await http.post(
         url,
         body: json.encode(
@@ -198,7 +198,7 @@ class Goals with ChangeNotifier {
             'title': _goals[index].title,
             'start':
                 DateFormat("dd-MM-yyyy HH:mm:ss").format(_goals[index].start),
-            'end': DateFormat("dd-MM-yyyy HH:mm:ss").format(_goals[index].end),
+            'end': DateFormat("dd-MM-yyyy HH:mm:ss").format(_goals[index].end!),
             'labels':
                 _goals[index].labels != null && _goals[index].labels!.isNotEmpty
                     ? _goals[index].labels!.join("|")

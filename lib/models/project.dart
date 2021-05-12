@@ -96,10 +96,10 @@ class Project {
               t.title,
               DateFormat("dd-MM-yyyy HH:mm:ss").format(t.start),
               t.latestPause != null
-                  ? DateFormat("dd-MM-yyyy HH:mm:ss").format(t.latestPause)
+                  ? DateFormat("dd-MM-yyyy HH:mm:ss").format(t.latestPause!)
                   : "",
               t.end != null
-                  ? DateFormat("dd-MM-yyyy HH:mm:ss").format(t.end)
+                  ? DateFormat("dd-MM-yyyy HH:mm:ss").format(t.end!)
                   : "",
               t.pauses,
               t.pauseTime.inSeconds,
@@ -151,13 +151,13 @@ class Project {
     required String title,
   }) async {
     var response;
-    final firebaseUser = context.read<User>();
+    final firebaseUser = context.read<User?>();
 
     if (await _isConnected && firebaseUser != null) {
-      String userId = firebaseUser.uid;
-      String token = (await firebaseUser.getIdTokenResult()).token;
-      final url =
-          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/${this.id}/subtasks.json?auth=$token";
+      String? userId = firebaseUser.uid;
+      String? token = (await firebaseUser.getIdTokenResult()).token;
+      Uri url = Uri.parse(
+          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/${this.id}/subtasks.json?auth=$token");
       response = await http.post(
         url,
         body: json.encode(
@@ -255,12 +255,12 @@ class Project {
     subTasks[index].pauseTime +=
         DateTime.now().difference(subTasks[index].latestPause!);
 
-    final firebaseUser = context.read<User>();
+    final firebaseUser = context.read<User?>();
     if (await _isConnected && firebaseUser != null) {
-      String userId = firebaseUser.uid;
-      String token = (await firebaseUser.getIdTokenResult()).token;
-      final url =
-          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks/${subTasks[index].id}.json?auth=$token";
+      String? userId = firebaseUser.uid;
+      String? token = (await firebaseUser.getIdTokenResult()).token;
+      Uri url = Uri.parse(
+          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks/${subTasks[index].id}.json?auth=$token");
       await http.patch(
         url,
         body: json.encode(
@@ -292,12 +292,12 @@ class Project {
     subTasks[index].isPaused = true;
     subTasks[index].pauses++;
     subTasks[index].latestPause = DateTime.now();
-    final firebaseUser = context.read<User>();
+    final firebaseUser = context.read<User?>();
     if (await _isConnected && firebaseUser != null) {
-      String userId = firebaseUser.uid;
-      String token = (await firebaseUser.getIdTokenResult()).token;
-      final url =
-          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks/${subTasks[index].id}.json?auth=$token";
+      String? userId = firebaseUser.uid;
+      String? token = (await firebaseUser.getIdTokenResult()).token;
+      Uri url = Uri.parse(
+          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks/${subTasks[index].id}.json?auth=$token");
       await http.patch(
         url,
         body: json.encode(
@@ -306,7 +306,7 @@ class Project {
             'isPaused': true,
             'pauses': subTasks[index].pauses,
             'latestPause': DateFormat("dd-MM-yyyy HH:mm:ss")
-                .format(subTasks[index].latestPause),
+                .format(subTasks[index].latestPause!),
           },
         ),
       );
@@ -329,12 +329,12 @@ class Project {
     subTasks[index].end = DateTime.now();
     subTasks[index].latestPause = subTasks[index].end;
 
-    final firebaseUser = context.read<User>();
+    final firebaseUser = context.read<User?>();
     if (await _isConnected && firebaseUser != null) {
-      String userId = firebaseUser.uid;
-      String token = (await firebaseUser.getIdTokenResult()).token;
-      final url =
-          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks/${subTasks[index].id}.json?auth=$token";
+      String? userId = firebaseUser.uid;
+      String? token = (await firebaseUser.getIdTokenResult()).token;
+      Uri url = Uri.parse(
+          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks/${subTasks[index].id}.json?auth=$token");
       await http.patch(
         url,
         body: json.encode(
@@ -342,9 +342,9 @@ class Project {
             'isRunning': subTasks[index].isRunning,
             'isPaused': subTasks[index].isPaused,
             'latestPause': DateFormat("dd-MM-yyyy HH:mm:ss")
-                .format(subTasks[index].latestPause),
+                .format(subTasks[index].latestPause!),
             'end':
-                DateFormat("dd-MM-yyyy HH:mm:ss").format(subTasks[index].end),
+                DateFormat("dd-MM-yyyy HH:mm:ss").format(subTasks[index].end!),
           },
         ),
       );
@@ -366,12 +366,12 @@ class Project {
   Future<void> pullFromFireBase() async {
     if (await _isConnected) {
       late Map<String, dynamic>? syncedTasks;
-      final firebaseUser = context.read<User>();
+      final firebaseUser = context.read<User?>();
       if (firebaseUser != null) {
-        String userId = firebaseUser.uid;
-        String token = (await firebaseUser.getIdTokenResult()).token;
-        final url =
-            "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks.json?auth=$token";
+        String? userId = firebaseUser.uid;
+        String? token = (await firebaseUser.getIdTokenResult()).token;
+        Uri url = Uri.parse(
+            "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks.json?auth=$token");
         final res = await http.get(url);
         syncedTasks = json.decode(res.body);
       }
@@ -409,34 +409,36 @@ class Project {
 
   Future<void> syncEngine() async {
     if (await _isConnected) {
-      final firebaseUser = context.read<User>();
+      final firebaseUser = context.read<User?>();
       await loadData();
-      if (subTasks != null && firebaseUser != null) {
-        String userId = firebaseUser.uid;
-        String token = (await firebaseUser.getIdTokenResult()).token;
+      if (firebaseUser != null) {
+        String? userId = firebaseUser.uid;
+        String? token = (await firebaseUser.getIdTokenResult()).token;
         print("Token $token");
         for (int i = 0; i < subTasks.length; i++) {
           Task task = subTasks[i];
           if (task.syncStatus == SyncStatus.UpdatedTask) {
-            final url =
-                "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks/${task.id}.json?auth=$token";
+            Uri url = Uri.parse(
+                "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks/${task.id}.json?auth=$token");
             await http.patch(
               url,
               body: json.encode(
                 {
                   'isRunning': task.isRunning,
                   'isPaused': task.isPaused,
-                  'latestPause': DateFormat("dd-MM-yyyy HH:mm:ss")
-                      .format(task.latestPause),
+                  'latestPause': task.latestPause != null
+                      ? DateFormat("dd-MM-yyyy HH:mm:ss")
+                          .format(task.latestPause!)
+                      : null,
                   'end': task.end != null
-                      ? DateFormat("dd-MM-yyyy HH:mm:ss").format(task.end)
+                      ? DateFormat("dd-MM-yyyy HH:mm:ss").format(task.end!)
                       : null,
                 },
               ),
             );
           } else if (task.syncStatus == SyncStatus.NewTask) {
-            final url =
-                "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks.json?auth=$token";
+            Uri url = Uri.parse(
+                "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks.json?auth=$token");
             final res = await http.post(
               url,
               body: json.encode(
@@ -445,10 +447,10 @@ class Project {
                   'start': DateFormat("dd-MM-yyyy HH:mm:ss").format(task.start),
                   'latestPause': task.latestPause != null
                       ? DateFormat("dd-MM-yyyy HH:mm:ss")
-                          .format(task.latestPause)
+                          .format(task.latestPause!)
                       : null,
                   'end': task.end != null
-                      ? DateFormat("dd-MM-yyyy HH:mm:ss").format(task.end)
+                      ? DateFormat("dd-MM-yyyy HH:mm:ss").format(task.end!)
                       : null,
                   'pauses': task.pauses,
                   'pauseTime': task.pauseTime.inSeconds,

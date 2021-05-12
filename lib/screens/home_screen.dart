@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:task_flow/providers/auth_service.dart';
 import 'package:task_flow/providers/theme_switcher.dart';
 import 'package:task_flow/screens/clients_screen.dart';
 import 'package:task_flow/screens/current_goal_screen.dart';
@@ -9,6 +10,7 @@ import 'package:task_flow/screens/profile_screen.dart';
 import 'package:task_flow/screens/settings_screen.dart';
 import 'package:task_flow/screens/stats_screen.dart';
 import 'package:task_flow/screens/tabs_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -18,8 +20,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeModel>(
-      builder: (context, themeModel, _) => MaterialApp(
+    return Consumer2<User?, ThemeModel>(
+      builder: (context, user, themeModel, _) => MaterialApp(
         title: 'Task Flow',
         theme: themeModel.currentTheme,
         // setting home screen as tasks screen
@@ -27,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
         routes: {
           SettingsScreen.routeName: (_) => SettingsScreen(),
           StatsScreen.routeName: (_) => StatsScreen(),
-          ProfileScreen.routeName: (_) => ProfileScreen(),
+          ProfileScreen.routeName: (_) => ProfileScreen(user),
           ClientsScreen.routeName: (_) => ClientsScreen(),
         },
         onGenerateRoute: (settings) {

@@ -7,7 +7,7 @@ import '../providers/tasks.dart';
 
 class Chart extends StatefulWidget {
   // Arguments => selectedDay: the day on the chart selected by the user, to be highlighted in the accent colour
-  // 
+  //
   // Creates a chart widget showing the fraction of time spent working on tasks on a particular day
   // in the past week compared to the total time spent working in the week
 
@@ -47,11 +47,11 @@ class ChartState extends State<Chart> {
                   show: true,
                   bottomTitles: SideTitles(
                     showTitles: true,
-                    textStyle: TextStyle(
-                        // color: const Color(0xff7589a2),
-                        color: Theme.of(context).unselectedWidgetColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14),
+                    getTextStyles: (_) => TextStyle(
+                      color: Theme.of(context).unselectedWidgetColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
                     margin: 20,
                     getTitles: (value) {
                       return DateFormat.E().format(
@@ -77,9 +77,11 @@ class ChartState extends State<Chart> {
                             ? (t['time'] as Duration).inSeconds /
                                 totalTime.inSeconds
                             : 0,
-                        color: t['day'] != 6 - widget.selectedDay
-                            ? Theme.of(context).unselectedWidgetColor
-                            : Theme.of(context).accentColor,
+                        colors: [
+                          (t['day'] != 6 - widget.selectedDay
+                              ? Theme.of(context).unselectedWidgetColor
+                              : Theme.of(context).accentColor),
+                        ],
                       )
                     ],
                   );

@@ -84,7 +84,7 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
           children: <Widget>[
             Expanded(
               child: CircularCountDownTimer(
-                color: Theme.of(context).cardColor,
+                ringColor: Theme.of(context).cardColor,
                 fillColor: Theme.of(context).accentColor,
                 isReverse: true,
                 textStyle: Theme.of(context).textTheme.headline6!.copyWith(
