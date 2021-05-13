@@ -12,7 +12,7 @@ class SignUpForm extends StatefulWidget {
 class _SignUpFormState extends State<SignUpForm> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   var _isLoading = false;
-  Map<String, String> _authData = {
+  final Map<String, String> _authData = {
     'name': '',
     'email': '',
     'password': '',
@@ -28,7 +28,7 @@ class _SignUpFormState extends State<SignUpForm> {
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('OK'),
+              child: const Text('OK'),
             )
           ],
         );
@@ -54,7 +54,7 @@ class _SignUpFormState extends State<SignUpForm> {
       _showErrorDialog("Verify your email",
           "We have just sent you a verification email. Please verify your email before continuing");
     } on FirebaseAuthException catch (error) {
-      String errorMessage = getMessageFromErrorCode(error);
+      final String errorMessage = getMessageFromErrorCode(error);
       _showErrorDialog("Something went wrong", errorMessage);
     }
     setState(() {
@@ -81,9 +81,9 @@ class _SignUpFormState extends State<SignUpForm> {
     final deviceSize = MediaQuery.of(context).size;
     return Container(
       height: 360,
-      constraints: BoxConstraints(minHeight: 360),
+      constraints: const BoxConstraints(minHeight: 360),
       width: deviceSize.width * 0.85,
-      padding: EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16.0),
       child: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -94,7 +94,7 @@ class _SignUpFormState extends State<SignUpForm> {
                 data: Theme.of(context)
                     .copyWith(primaryColor: Theme.of(context).accentColor),
                 child: TextFormField(
-                  decoration: InputDecoration(labelText: 'Name'),
+                  decoration: const InputDecoration(labelText: 'Name'),
                   autofocus: true,
                   keyboardType: TextInputType.text,
                   textInputAction: TextInputAction.next,
@@ -115,7 +115,7 @@ class _SignUpFormState extends State<SignUpForm> {
                 data: Theme.of(context)
                     .copyWith(primaryColor: Theme.of(context).accentColor),
                 child: TextFormField(
-                  decoration: InputDecoration(labelText: 'E-Mail'),
+                  decoration: const InputDecoration(labelText: 'E-Mail'),
                   keyboardType: TextInputType.emailAddress,
                   focusNode: _emailFocusNode,
                   textInputAction: TextInputAction.next,
@@ -138,7 +138,7 @@ class _SignUpFormState extends State<SignUpForm> {
                 data: Theme.of(context)
                     .copyWith(primaryColor: Theme.of(context).accentColor),
                 child: TextFormField(
-                  decoration: InputDecoration(labelText: 'Password'),
+                  decoration: const InputDecoration(labelText: 'Password'),
                   obscureText: true,
                   focusNode: _passwordFocusNode,
                   textInputAction: TextInputAction.next,
@@ -161,7 +161,7 @@ class _SignUpFormState extends State<SignUpForm> {
                     .copyWith(primaryColor: Theme.of(context).accentColor),
                 child: TextFormField(
                     focusNode: _confirmPasswordFocusNode,
-                    decoration: InputDecoration(labelText: 'Confirm Password'),
+                    decoration: const InputDecoration(labelText: 'Confirm Password'),
                     obscureText: true,
                     validator: (value) {
                       if (value != _passwordController.text) {
@@ -169,11 +169,11 @@ class _SignUpFormState extends State<SignUpForm> {
                       }
                     }),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 20,
               ),
               if (_isLoading)
-                CircularProgressIndicator()
+                const CircularProgressIndicator()
               else
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -181,12 +181,12 @@ class _SignUpFormState extends State<SignUpForm> {
                       borderRadius: BorderRadius.circular(30),
                     ),
                     padding:
-                        EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
+                        const EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
                     primary: Colors.white,
                     onPrimary: Colors.black,
                   ),
-                  child: Text('SIGN UP'),
                   onPressed: _submit,
+                  child: const Text('SIGN UP'),
                 ),
             ],
           ),

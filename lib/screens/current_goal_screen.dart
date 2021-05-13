@@ -2,11 +2,11 @@ import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import './tabs_screen.dart';
+import '../models/task.dart';
+import '../providers/goals.dart';
 import '../widgets/app_bar.dart';
 import '../widgets/new_labels.dart';
-import '../providers/goals.dart';
-import '../models/task.dart';
+import './tabs_screen.dart';
 
 // Screen which shows the timer for the currently running goal
 
@@ -23,8 +23,8 @@ void showLabelForm(BuildContext context, int i) {
     builder: (_) {
       return GestureDetector(
         onTap: () {},
-        child: NewLabels('goal', i),
         behavior: HitTestBehavior.opaque,
+        child: NewLabels('goal', i),
       );
     },
   );
@@ -35,13 +35,13 @@ class CurrentGoalScreen extends StatefulWidget {
 
   static const routeName = '/current-goal-screen';
   final int index;
-  CurrentGoalScreen({required this.index});
+  const CurrentGoalScreen({required this.index});
   @override
   _CurrentGoalScreenState createState() => _CurrentGoalScreenState();
 }
 
 class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
-  var _provider;
+  late Goals _provider;
   late Duration _goalTime;
   late String _category;
   late String _title;
@@ -50,8 +50,8 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
 
   @override
   void didChangeDependencies() {
-    var _provider = Provider.of<Goals>(context, listen: true);
-    Task _goal = _provider.goals[widget.index];
+    _provider = Provider.of<Goals>(context, listen: true);
+    final Task _goal = _provider.goals[widget.index];
     _category = _goal.category;
     _labels = _goal.labels;
     _title = _goal.title;
@@ -75,12 +75,11 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(100),
+          preferredSize: const Size.fromHeight(100),
           child: showAppBar(context),
         ),
         backgroundColor: Theme.of(context).primaryColor,
         body: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Expanded(
               child: CircularCountDownTimer(
@@ -105,7 +104,6 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
                     margin: const EdgeInsets.only(bottom: 10),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
                         Flexible(
                           child: Text(
@@ -138,7 +136,8 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
                     ),
                   ),
                   Card(
-                    margin: EdgeInsets.only(left: 15, right: 15, bottom: 15),
+                    margin:
+                        const EdgeInsets.only(left: 15, right: 15, bottom: 15),
                     color: Theme.of(context).cardColor,
                     child: Container(
                       width: double.infinity,
@@ -152,7 +151,7 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
                               color: Theme.of(context).unselectedWidgetColor,
                             ),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 10,
                           ),
                           Text(
@@ -169,7 +168,7 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
                     ),
                   ),
                   Card(
-                    margin: EdgeInsets.symmetric(horizontal: 15),
+                    margin: const EdgeInsets.symmetric(horizontal: 15),
                     color: Theme.of(context).cardColor,
                     child: Container(
                       width: double.infinity,
@@ -189,20 +188,20 @@ class _CurrentGoalScreenState extends State<CurrentGoalScreen> {
                                 ),
                               ),
                               IconButton(
-                                icon: Icon(Icons.add_box),
+                                icon: const Icon(Icons.add_box),
                                 onPressed: () async {
                                   showLabelForm(context, widget.index);
                                 },
                               )
                             ],
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 10,
                           ),
                           Text(
                             (_labels ?? [])
                                 .join(", ")
-                                .replaceAll(new RegExp(r"'"), ""),
+                                .replaceAll(RegExp("'"), ""),
                             style: TextStyle(
                               color:
                                   Theme.of(context).textTheme.bodyText2!.color,

@@ -7,8 +7,8 @@ Widget showAppBar(BuildContext context) {
     elevation: 0.0,
     backgroundColor: Theme.of(context).primaryColor,
     title: RichText(
-      text: new TextSpan(children: <TextSpan>[
-        new TextSpan(
+      text: TextSpan(children: <TextSpan>[
+        TextSpan(
           text: 'TASK',
           style: TextStyle(
             fontSize: 20,
@@ -17,7 +17,7 @@ Widget showAppBar(BuildContext context) {
             color: Theme.of(context).textTheme.bodyText1!.color,
           ),
         ),
-        new TextSpan(
+        TextSpan(
           text: 'FLOW',
           style: TextStyle(
             fontSize: 20,

@@ -22,9 +22,8 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
       setState(() {
         loaded = false;
       });
-
-      Projects projects = Provider.of<Projects>(context, listen: false);
-      for (Project project in projects.projects) {
+      final Projects projects = Provider.of<Projects>(context, listen: false);
+      for (final Project project in projects.projects) {
         await project.loadData();
       }
       setState(() {
@@ -36,12 +35,12 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
   @override
   Widget build(BuildContext context) {
     if (loaded) {
-      Projects projects = Provider.of<Projects>(context, listen: false);
-      List<Project> sortedProjects = projects.projects;
+      final Projects projects = Provider.of<Projects>(context, listen: false);
+      final List<Project> sortedProjects = projects.projects;
       sortedProjects.sort(
           (prev, next) => prev.lastActive.isBefore(next.lastActive) ? 1 : 0);
-      ThemeModel themeModel = Provider.of<ThemeModel>(context);
-      Project? latestProject =
+      final ThemeModel themeModel = Provider.of<ThemeModel>(context);
+      final Project? latestProject =
           sortedProjects.isEmpty ? null : sortedProjects[0];
       return Scaffold(
         backgroundColor: Theme.of(context).primaryColor,
@@ -54,9 +53,9 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                   if (index == 0) {
                     return Container(
                       height: 200,
-                      margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        image: DecorationImage(
+                        image: const DecorationImage(
                           image: AssetImage('assets/images/card_bg.png'),
                           fit: BoxFit.cover,
                         ),
@@ -87,9 +86,8 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'LAST ACTIVE: ' +
-                                        DateFormat('dd MMM yy')
-                                            .format(latestProject!.lastActive),
+                                    'LAST ACTIVE: ${DateFormat('dd MMM yy')
+                                            .format(latestProject!.lastActive)}',
                                     style:
                                         Theme.of(context).textTheme.bodyText1,
                                   ),
@@ -103,7 +101,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                                     style:
                                         Theme.of(context).textTheme.bodyText1,
                                   ),
-                                  Spacer(),
+                                  const Spacer(),
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
@@ -137,7 +135,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                         borderRadius: BorderRadius.circular(10),
                         boxShadow: [themeModel.cardShadows],
                       ),
-                      margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         child: Material(
@@ -160,9 +158,8 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'LAST ACTIVE: ' +
-                                        DateFormat('dd MMM yy').format(
-                                            sortedProjects[index].lastActive),
+                                    'LAST ACTIVE: ${DateFormat('dd MMM yy').format(
+                                            sortedProjects[index].lastActive)}',
                                     style:
                                         Theme.of(context).textTheme.bodyText1,
                                   ),
@@ -171,7 +168,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                                     style:
                                         Theme.of(context).textTheme.headline6,
                                   ),
-                                  Spacer(),
+                                  const Spacer(),
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
@@ -206,7 +203,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
         ),
       );
     } else {
-      return Center(
+      return const Center(
         child: CircularProgressIndicator(),
       );
     }

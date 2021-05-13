@@ -18,8 +18,8 @@ void showNewTaskForm(BuildContext context) {
     builder: (_) {
       return GestureDetector(
         onTap: () {},
-        child: NewTask([]),
         behavior: HitTestBehavior.opaque,
+        child: const NewTask([]),
       );
     },
   );
@@ -39,8 +39,8 @@ void showEditTaskForm(BuildContext context, List<dynamic> data) {
     builder: (_) {
       return GestureDetector(
         onTap: () {},
-        child: NewTask(data),
         behavior: HitTestBehavior.opaque,
+        child: NewTask(data),
       );
     },
   );
@@ -59,8 +59,8 @@ void showNewGoalForm(BuildContext context) {
     builder: (_) {
       return GestureDetector(
         onTap: () {},
-        child: NewGoal([]),
         behavior: HitTestBehavior.opaque,
+        child: const NewGoal([]),
       );
     },
   );
@@ -79,8 +79,8 @@ void showEditGoalForm(BuildContext context, List<dynamic> data) {
     builder: (_) {
       return GestureDetector(
         onTap: () {},
-        child: NewGoal(data),
         behavior: HitTestBehavior.opaque,
+        child: NewGoal(data),
       );
     },
   );
@@ -99,8 +99,8 @@ void showNewProjectForm(BuildContext context) {
     builder: (_) {
       return GestureDetector(
         onTap: () {},
-        child: NewProject(),
         behavior: HitTestBehavior.opaque,
+        child: NewProject(),
       );
     },
   );

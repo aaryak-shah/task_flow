@@ -12,7 +12,7 @@ class Chart extends StatefulWidget {
   // in the past week compared to the total time spent working in the week
 
   final int selectedDay;
-  Chart(this.selectedDay);
+  const Chart(this.selectedDay);
 
   @override
   State<StatefulWidget> createState() => ChartState();
@@ -30,7 +30,7 @@ class ChartState extends State<Chart> {
     return AspectRatio(
       aspectRatio: 2.5,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 15),
+        padding: const EdgeInsets.symmetric(horizontal: 15),
         child: Card(
           elevation: 0,
           // shape:
@@ -70,17 +70,18 @@ class ChartState extends State<Chart> {
                 ),
                 barGroups: weekTasks.map((t) {
                   return BarChartGroupData(
-                    x: t['day'] as int,
+                    x: t['day']! as int,
                     barRods: [
                       BarChartRodData(
-                        y: totalTime != Duration()
-                            ? (t['time'] as Duration).inSeconds /
+                        y: totalTime != const Duration()
+                            ? (t['time']! as Duration).inSeconds /
                                 totalTime.inSeconds
                             : 0,
                         colors: [
-                          (t['day'] != 6 - widget.selectedDay
-                              ? Theme.of(context).unselectedWidgetColor
-                              : Theme.of(context).accentColor),
+                          if (t['day'] != 6 - widget.selectedDay)
+                            Theme.of(context).unselectedWidgetColor
+                          else
+                            Theme.of(context).accentColor
                         ],
                       )
                     ],

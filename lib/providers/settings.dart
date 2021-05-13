@@ -8,7 +8,7 @@ class Settings with ChangeNotifier {
   int? _accentIndex;
 
   Future<SharedPreferences> get preferences async {
-    return await SharedPreferences.getInstance();
+    return SharedPreferences.getInstance();
   }
 
   Settings() {
@@ -26,6 +26,7 @@ class Settings with ChangeNotifier {
     notifyListeners();
   }
 
+  // ignore: avoid_positional_boolean_parameters
   Future<void> setShortTaskChart(bool value) async {
     final prefs = await preferences;
     prefs.setBool('shortTaskChart', value);
@@ -33,6 +34,7 @@ class Settings with ChangeNotifier {
     notifyListeners();
   }
 
+  // ignore: avoid_positional_boolean_parameters
   Future<void> setIsDarkTheme(bool value) async {
     final prefs = await preferences;
     prefs.setBool('isDarkTheme', value);
@@ -40,6 +42,7 @@ class Settings with ChangeNotifier {
     notifyListeners();
   }
 
+  // ignore: avoid_positional_boolean_parameters
   Future<void> setShowSeconds(bool value) async {
     final prefs = await preferences;
     prefs.setBool('showSeconds', value);

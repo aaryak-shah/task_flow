@@ -1,11 +1,11 @@
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
 
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:http/http.dart' as http;
 import 'package:csv/csv.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -50,29 +50,33 @@ class Goals with ChangeNotifier {
     // function to load the data from the tasks.csv file into Task
     // models which are then put into the _goals list
 
-    String csvPath = await _localPath;
-    String csvString = await File('$csvPath/tasks.csv').readAsString();
+    final String csvPath = await _localPath;
+    final String csvString = await File('$csvPath/tasks.csv').readAsString();
     // String csvString = await rootBundle.loadString('assets/data/tasks.csv');
-    List<List<dynamic>> rowsAsListOfValues =
+    final List<List<dynamic>> rowsAsListOfValues =
         const CsvToListConverter().convert(csvString);
 
-    DateFormat parser = DateFormat("dd-MM-yyyy HH:mm:ss");
+    final DateFormat parser = DateFormat("dd-MM-yyyy HH:mm:ss");
 
     _goals = rowsAsListOfValues.map((row) {
       return Task(
-          id: row[0],
+          id: row[0] as String,
           title: row[1].toString(),
-          start: parser.parse(row[2]),
-          latestPause: row[3].isNotEmpty ? parser.parse(row[3]) : null,
-          end: row[4].isNotEmpty ? parser.parse(row[4]) : null,
-          pauses: row[5],
-          pauseTime: Duration(seconds: row[6]),
+          start: parser.parse(row[2] as String),
+          latestPause: (row[3] as String).isNotEmpty
+              ? parser.parse(row[3] as String)
+              : null,
+          end: (row[4] as String).isNotEmpty
+              ? parser.parse(row[4] as String)
+              : null,
+          pauses: row[5] as int,
+          pauseTime: Duration(seconds: row[6] as int),
           isRunning: row[7] == 1,
           isPaused: row[8] == 1,
-          category: row[9],
-          labels: row[10].split("|"),
-          goalTime: Duration(seconds: row[11]),
-          syncStatus: SyncStatus.values[row[12]]);
+          category: row[9] as String,
+          labels: (row[10] as String).split("|"),
+          goalTime: Duration(seconds: row[11] as int),
+          syncStatus: SyncStatus.values[row[12] as int]);
     }).toList();
     notifyListeners();
   }
@@ -80,28 +84,30 @@ class Goals with ChangeNotifier {
   Future<void> writeCsv(List<Task> goals) async {
     // Arguments => goals: a list of Task objects to be written to the tasks.csv file
 
-    final rows = ListToCsvConverter().convert(goals
+    final rows = const ListToCsvConverter().convert(goals
         .map((g) => [
               g.id,
               g.title,
               DateFormat("dd-MM-yyyy HH:mm:ss").format(g.start),
-              g.latestPause != null
-                  ? DateFormat("dd-MM-yyyy HH:mm:ss").format(g.latestPause!)
-                  : "",
-              g.end != null
-                  ? DateFormat("dd-MM-yyyy HH:mm:ss").format(g.end!)
-                  : "",
-              g.labels == null ? null : g.labels!.join("|"),
+              if (g.latestPause != null)
+                DateFormat("dd-MM-yyyy HH:mm:ss").format(g.latestPause!)
+              else
+                "",
+              if (g.end != null)
+                DateFormat("dd-MM-yyyy HH:mm:ss").format(g.end!)
+              else
+                "",
+              if (g.labels == null) null else g.labels!.join("|"),
               g.pauses,
               g.pauseTime.inSeconds,
-              g.isRunning ? 1 : 0,
-              g.isPaused ? 1 : 0,
+              if (g.isRunning) 1 else 0,
+              if (g.isPaused) 1 else 0,
               g.category,
               g.goalTime.inSeconds,
               g.syncStatus.index
             ])
         .toList());
-    File f = await _localFile;
+    final File f = await _localFile;
     await f.writeAsString(rows, mode: FileMode.writeOnly);
     notifyListeners();
   }
@@ -149,11 +155,11 @@ class Goals with ChangeNotifier {
           labels.join("|"),
           "",
           0,
-          SyncStatus.NewTask.index
+          SyncStatus.newTask.index
         ],
       ],
     );
-    File f = await _localFile;
+    final File f = await _localFile;
     await f.writeAsString(row, mode: FileMode.append, flush: true);
     _goals.add(goal);
     notifyListeners();
@@ -165,7 +171,7 @@ class Goals with ChangeNotifier {
     final recent = goals.where((g) {
       return g.goalTime > Duration.zero &&
           g.end != null &&
-          g.start.isAfter(DateTime.now().subtract(Duration(days: 7)));
+          g.start.isAfter(DateTime.now().subtract(const Duration(days: 7)));
     });
     return recent.toList();
   }
@@ -186,9 +192,9 @@ class Goals with ChangeNotifier {
 
     final firebaseUser = context.read<User?>();
     if (await _isConnected && firebaseUser != null) {
-      String? userId = firebaseUser.uid;
-      String? token = (await firebaseUser.getIdTokenResult()).token;
-      Uri url = Uri.parse(
+      final userId = firebaseUser.uid;
+      final String? token = (await firebaseUser.getIdTokenResult()).token;
+      final Uri url = Uri.parse(
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token");
       await http.post(
         url,
@@ -209,7 +215,7 @@ class Goals with ChangeNotifier {
         ),
       );
     } else if (!await _isConnected) {
-      _goals[index].syncStatus = SyncStatus.NewTask;
+      _goals[index].syncStatus = SyncStatus.newTask;
     }
     await writeCsv(_goals);
     notifyListeners();
@@ -249,7 +255,7 @@ class Goals with ChangeNotifier {
     _goals.removeWhere((goal) {
       return goal.start.isBefore(
         DateTime.now().subtract(
-          Duration(
+          const Duration(
             days: 7,
           ),
         ),

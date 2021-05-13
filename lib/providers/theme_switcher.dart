@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum BrightnessMode {
-  Dark,
-  Light,
+  dark,
+  light,
 }
 
 List<Color> darkAccents = [
@@ -23,21 +23,21 @@ List<Color> lightAccents = [
 ];
 
 class ThemeModel with ChangeNotifier {
-  BrightnessMode _mode = BrightnessMode.Dark;
+  BrightnessMode _mode = BrightnessMode.dark;
   int _accentIndex = 0;
 
   ThemeData get currentTheme {
     loadSettings();
-    return _mode == BrightnessMode.Dark
+    return _mode == BrightnessMode.dark
         ? ThemeData(
             // dark theme
             brightness: Brightness.dark,
-            primaryColor: Color(0xFF121212),
-            cardColor: Color(0xFF252525),
+            primaryColor: const Color(0xFF121212),
+            cardColor: const Color(0xFF252525),
             errorColor: Colors.redAccent,
             accentColor: darkAccents[_accentIndex],
             unselectedWidgetColor: Colors.grey,
-            appBarTheme: AppBarTheme(
+            appBarTheme: const AppBarTheme(
               textTheme: TextTheme(
                 headline6: TextStyle(
                   fontFamily: 'Montserrat',
@@ -49,7 +49,7 @@ class ThemeModel with ChangeNotifier {
                 ),
               ),
             ),
-            textTheme: TextTheme(
+            textTheme: const TextTheme(
               bodyText1: TextStyle(
                 color: Colors.white,
               ),
@@ -64,12 +64,12 @@ class ThemeModel with ChangeNotifier {
         : ThemeData(
             // dark theme
             brightness: Brightness.light,
-            primaryColor: Color(0xFFFAFAFA),
+            primaryColor: const Color(0xFFFAFAFA),
             cardColor: Colors.white,
             errorColor: Colors.red,
             accentColor: lightAccents[_accentIndex],
-            unselectedWidgetColor: Color(0xFF4F4F4F),
-            appBarTheme: AppBarTheme(
+            unselectedWidgetColor: const Color(0xFF4F4F4F),
+            appBarTheme: const AppBarTheme(
               textTheme: TextTheme(
                 headline6: TextStyle(
                   fontFamily: 'Montserrat',
@@ -81,7 +81,7 @@ class ThemeModel with ChangeNotifier {
                 ),
               ),
             ),
-            textTheme: TextTheme(
+            textTheme: const TextTheme(
               bodyText1: TextStyle(
                 color: Colors.black,
               ),
@@ -108,14 +108,14 @@ class ThemeModel with ChangeNotifier {
   }
 
   BoxShadow get bottomFallingShadow {
-    return (_mode == BrightnessMode.Dark)
-        ? BoxShadow(
+    return (_mode == BrightnessMode.dark)
+        ? const BoxShadow(
             color: Colors.black26,
             blurRadius: 60,
             spreadRadius: 60,
             offset: Offset(0, 60),
           )
-        : BoxShadow(
+        : const BoxShadow(
             color: Colors.black12,
             blurRadius: 60,
             spreadRadius: 10,
@@ -124,13 +124,13 @@ class ThemeModel with ChangeNotifier {
   }
 
   BoxShadow get topFallingShadow {
-    return (_mode == BrightnessMode.Dark)
-        ? BoxShadow(
+    return (_mode == BrightnessMode.dark)
+        ? const BoxShadow(
             blurRadius: 30,
             spreadRadius: 30,
             color: Colors.black26,
           )
-        : BoxShadow(
+        : const BoxShadow(
             blurRadius: 30,
             spreadRadius: 30,
             color: Colors.black12,
@@ -138,14 +138,14 @@ class ThemeModel with ChangeNotifier {
   }
 
   BoxShadow get cardShadows {
-    return (_mode == BrightnessMode.Dark)
-        ? BoxShadow(
+    return (_mode == BrightnessMode.dark)
+        ? const BoxShadow(
             color: Colors.black26,
             blurRadius: 10,
             spreadRadius: 3,
             offset: Offset(5, 5),
           )
-        : BoxShadow(
+        : const BoxShadow(
             color: Colors.black12,
             blurRadius: 10,
             spreadRadius: 1,
@@ -156,15 +156,15 @@ class ThemeModel with ChangeNotifier {
   Future<void> loadSettings() async {
     // function to load the settings stored in SharedPreferences
     final prefs = await SharedPreferences.getInstance();
-    _mode = ((prefs.getBool('isDarkTheme') != null)
+    _mode = (prefs.getBool('isDarkTheme') != null)
         ? ((prefs.getBool('isDarkTheme') ?? true)
-            ? BrightnessMode.Dark
-            : BrightnessMode.Light)
-        : BrightnessMode.Dark);
+            ? BrightnessMode.dark
+            : BrightnessMode.light)
+        : BrightnessMode.dark;
     _accentIndex = prefs.getInt('accentIndex') ?? 0;
   }
 
   List<Color> availableAccents() {
-    return _mode == BrightnessMode.Dark ? darkAccents : lightAccents;
+    return _mode == BrightnessMode.dark ? darkAccents : lightAccents;
   }
 }

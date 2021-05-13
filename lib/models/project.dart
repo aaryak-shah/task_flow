@@ -1,10 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:csv/csv.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -13,7 +11,7 @@ import 'package:http/http.dart' as http;
 
 import 'task.dart';
 
-enum PaymentMode { Fixed, Rate, None }
+enum PaymentMode { fixed, rate, none }
 
 class Project {
   BuildContext context;
@@ -33,7 +31,7 @@ class Project {
 
   Project(
     this.context, {
-    this.syncStatus = SyncStatus.NewTask,
+    this.syncStatus = SyncStatus.newTask,
     required this.id,
     required this.name,
     required this.start,
@@ -42,7 +40,7 @@ class Project {
     required this.category,
     this.labels = const [],
     this.subTasks = const [],
-    this.paymentMode = PaymentMode.None,
+    this.paymentMode = PaymentMode.none,
     this.rate = 0,
     this.client = '',
   });
@@ -69,46 +67,45 @@ class Project {
   Future<File> get _localFile async {
     // gets the st_projectid.csv file from the AppData directory
     final path = await _localPath;
-    return File('$path/st_${id.replaceAll(new RegExp(r'[:. \-]'), "")}.csv');
+    return File('$path/st_${id.replaceAll(RegExp(r'[:. \-]'), "")}.csv');
   }
 
   Duration get totalPauseTime {
     Duration total = Duration.zero;
-    total = subTasks.fold(total, (total, element) {
-      return total + element.pauseTime;
-    });
-    return total;
+    return total =
+        subTasks.fold(total, (total, element) => total + element.pauseTime);
   }
 
   int get totalPauses {
     int total = 0;
-    total = subTasks.fold(total, (total, element) {
+    return total = subTasks.fold(total, (total, element) {
       return total + element.pauses;
     });
-    return total;
   }
 
   Future<void> writeCsv(List<Task> tasks) async {
     // Arguments => tasks: a list of Task objects to be written to the tasks.csv file
-    final rows = ListToCsvConverter().convert(tasks
+    final rows = const ListToCsvConverter().convert(tasks
         .map((t) => [
               t.id,
               t.title,
               DateFormat("dd-MM-yyyy HH:mm:ss").format(t.start),
-              t.latestPause != null
-                  ? DateFormat("dd-MM-yyyy HH:mm:ss").format(t.latestPause!)
-                  : "",
-              t.end != null
-                  ? DateFormat("dd-MM-yyyy HH:mm:ss").format(t.end!)
-                  : "",
+              if (t.latestPause != null)
+                DateFormat("dd-MM-yyyy HH:mm:ss").format(t.latestPause!)
+              else
+                "",
+              if (t.end != null)
+                DateFormat("dd-MM-yyyy HH:mm:ss").format(t.end!)
+              else
+                "",
               t.pauses,
               t.pauseTime.inSeconds,
-              t.isRunning ? 1 : 0,
-              t.isPaused ? 1 : 0,
+              if (t.isRunning) 1 else 0,
+              if (t.isPaused) 1 else 0,
               t.syncStatus.index,
             ])
         .toList());
-    File f = await _localFile;
+    final File f = await _localFile;
     await f.writeAsString(rows, mode: FileMode.writeOnly);
   }
 
@@ -118,30 +115,37 @@ class Project {
     // function to load the data from the tasks.csv file into Task
     // models which are then put into the subTasks list
 
-    String csvPath = await _localPath;
-    String csvString = await File(
-            '$csvPath/st_${id.replaceAll(new RegExp(r'[:. \-]'), "")}.csv')
-        .readAsString();
+    final String csvPath = await _localPath;
+    final String csvString =
+        await File('$csvPath/st_${id.replaceAll(RegExp(r'[:. \-]'), "")}.csv')
+            .readAsString();
 
     // String csvString = await rootBundle.loadString('assets/data/tasks.csv');
-    List<List<dynamic>> rowsAsListOfValues =
+    final List<List<dynamic>> rowsAsListOfValues =
         const CsvToListConverter().convert(csvString);
 
     subTasks = [];
-    rowsAsListOfValues.forEach((row) {
-      subTasks.add(Task(
-          id: row[0],
+    for (final List<dynamic> row in rowsAsListOfValues) {
+      subTasks.add(
+        Task(
+          id: row[0] as String,
           title: row[1].toString(),
-          start: parser.parse(row[2]),
-          latestPause: row[3].isNotEmpty ? parser.parse(row[3]) : null,
-          end: row[4].isNotEmpty ? parser.parse(row[4]) : null,
-          pauses: row[5],
-          pauseTime: Duration(seconds: row[6]),
+          start: parser.parse(row[2] as String),
+          latestPause: (row[3] as String).isNotEmpty
+              ? parser.parse(row[3] as String)
+              : null,
+          end: (row[4] as String).isNotEmpty
+              ? parser.parse(row[4] as String)
+              : null,
+          pauses: row[5] as int,
+          pauseTime: Duration(seconds: row[6] as int),
           isRunning: row[7] == 1,
           isPaused: row[8] == 1,
-          syncStatus: SyncStatus.values[row[9]],
-          category: category));
-    });
+          syncStatus: SyncStatus.values[row[9] as int],
+          category: category,
+        ),
+      );
+    }
   }
 
   Future<void> addSubTask({
@@ -150,13 +154,13 @@ class Project {
     required DateTime start,
     required String title,
   }) async {
-    var response;
+    http.Response? response;
     final firebaseUser = context.read<User?>();
 
     if (await _isConnected && firebaseUser != null) {
-      String? userId = firebaseUser.uid;
-      String? token = (await firebaseUser.getIdTokenResult()).token;
-      Uri url = Uri.parse(
+      final userId = firebaseUser.uid;
+      final String? token = (await firebaseUser.getIdTokenResult()).token;
+      final Uri url = Uri.parse(
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/${this.id}/subtasks.json?auth=$token");
       response = await http.post(
         url,
@@ -171,37 +175,32 @@ class Project {
       );
     }
 
-    Task newTask = Task(
+    final Task newTask = Task(
       syncStatus: (firebaseUser != null)
-          ? (await _isConnected ? SyncStatus.FullySynced : SyncStatus.NewTask)
-          : SyncStatus.FullySynced,
+          ? (await _isConnected ? SyncStatus.fullySynced : SyncStatus.newTask)
+          : SyncStatus.fullySynced,
       start: start,
       title: title,
-      isRunning: true,
-      isPaused: false,
-      id: response != null ? json.decode(response.body)["name"] : id,
+      id: response != null ? json.decode(response.body)["name"] as String : id,
       category: category,
     );
-
     subTasks.add(newTask);
     await writeCsv(subTasks);
   }
 
-  String cardTags({bool requireLabels: true}) {
-    if (paymentMode != PaymentMode.None) {
-      return 'Paid, ' +
-          category +
-          (requireLabels ? (', ' + labels.join(', ')) : '');
+  String cardTags({bool requireLabels = true}) {
+    if (paymentMode != PaymentMode.none) {
+      return 'Paid, $category${requireLabels ? (', ${labels.join(', ')}') : ''}';
     }
-    return category + ', ' + labels.join(', ');
+    return '$category, ${labels.join(', ')}';
   }
 
   DateTime get lastActive {
     DateTime last = subTasks.isNotEmpty ? subTasks.first.latestPause! : start;
 
-    subTasks.forEach((subTask) {
+    for (final Task subTask in subTasks) {
       if (subTask.latestPause!.isAfter(last)) last = subTask.latestPause!;
-    });
+    }
     return last;
   }
 
@@ -211,38 +210,33 @@ class Project {
 
   Duration get workingDuration {
     Duration runningTime = Duration.zero;
-    runningTime = subTasks.fold(
+    return runningTime = subTasks.fold(
       runningTime,
       (runningTime, st) => runningTime + st.getRunningTime(),
     );
-
-    return runningTime;
   }
 
   String get deadlineString {
-    return DateTime.now().difference(start).inDays.toString() +
-        'd / ' +
-        deadline.difference(start).inDays.toString() +
-        'd';
+    return '${DateTime.now().difference(start).inDays}d / ${deadline.difference(start).inDays}d';
   }
 
   String get earnings {
-    if (paymentMode == PaymentMode.None) {
+    if (paymentMode == PaymentMode.none) {
       return '-';
-    } else if (paymentMode == PaymentMode.Fixed) {
-      return '₹' + rate.toStringAsFixed(2);
+    } else if (paymentMode == PaymentMode.fixed) {
+      return '₹${rate.toStringAsFixed(2)}';
     } else {
-      return '₹' + (rate * workingDuration.inHours).toStringAsFixed(2);
+      return '₹${(rate * workingDuration.inHours).toStringAsFixed(2)}';
     }
   }
 
   double get earningsAsNum {
-    if (paymentMode == PaymentMode.None) {
+    if (paymentMode == PaymentMode.none) {
       return 0;
-    } else if (paymentMode == PaymentMode.Fixed) {
+    } else if (paymentMode == PaymentMode.fixed) {
       return rate;
     } else {
-      return (rate * workingDuration.inHours);
+      return rate * workingDuration.inHours;
     }
   }
 
@@ -257,9 +251,9 @@ class Project {
 
     final firebaseUser = context.read<User?>();
     if (await _isConnected && firebaseUser != null) {
-      String? userId = firebaseUser.uid;
-      String? token = (await firebaseUser.getIdTokenResult()).token;
-      Uri url = Uri.parse(
+      final userId = firebaseUser.uid;
+      final String? token = (await firebaseUser.getIdTokenResult()).token;
+      final Uri url = Uri.parse(
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks/${subTasks[index].id}.json?auth=$token");
       await http.patch(
         url,
@@ -275,13 +269,13 @@ class Project {
 
     subTasks[index].syncStatus = (firebaseUser != null)
         ? (await _isConnected
-            ? (subTasks[index].syncStatus == SyncStatus.UpdatedTask
-                ? SyncStatus.FullySynced
+            ? (subTasks[index].syncStatus == SyncStatus.updatedTask
+                ? SyncStatus.fullySynced
                 : subTasks[index].syncStatus)
-            : (subTasks[index].syncStatus != SyncStatus.NewTask
-                ? SyncStatus.UpdatedTask
-                : SyncStatus.NewTask))
-        : SyncStatus.FullySynced;
+            : (subTasks[index].syncStatus != SyncStatus.newTask
+                ? SyncStatus.updatedTask
+                : SyncStatus.newTask))
+        : SyncStatus.fullySynced;
     await writeCsv(subTasks);
   }
 
@@ -294,9 +288,9 @@ class Project {
     subTasks[index].latestPause = DateTime.now();
     final firebaseUser = context.read<User?>();
     if (await _isConnected && firebaseUser != null) {
-      String? userId = firebaseUser.uid;
-      String? token = (await firebaseUser.getIdTokenResult()).token;
-      Uri url = Uri.parse(
+      final userId = firebaseUser.uid;
+      final String? token = (await firebaseUser.getIdTokenResult()).token;
+      final Uri url = Uri.parse(
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks/${subTasks[index].id}.json?auth=$token");
       await http.patch(
         url,
@@ -313,13 +307,13 @@ class Project {
     }
     subTasks[index].syncStatus = (firebaseUser != null)
         ? (await _isConnected
-            ? (subTasks[index].syncStatus == SyncStatus.UpdatedTask
-                ? SyncStatus.FullySynced
+            ? (subTasks[index].syncStatus == SyncStatus.updatedTask
+                ? SyncStatus.fullySynced
                 : subTasks[index].syncStatus)
-            : (subTasks[index].syncStatus != SyncStatus.NewTask
-                ? SyncStatus.UpdatedTask
-                : SyncStatus.NewTask))
-        : SyncStatus.FullySynced;
+            : (subTasks[index].syncStatus != SyncStatus.newTask
+                ? SyncStatus.updatedTask
+                : SyncStatus.newTask))
+        : SyncStatus.fullySynced;
     await writeCsv(subTasks);
   }
 
@@ -331,9 +325,9 @@ class Project {
 
     final firebaseUser = context.read<User?>();
     if (await _isConnected && firebaseUser != null) {
-      String? userId = firebaseUser.uid;
-      String? token = (await firebaseUser.getIdTokenResult()).token;
-      Uri url = Uri.parse(
+      final userId = firebaseUser.uid;
+      final String? token = (await firebaseUser.getIdTokenResult()).token;
+      final Uri url = Uri.parse(
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks/${subTasks[index].id}.json?auth=$token");
       await http.patch(
         url,
@@ -352,13 +346,13 @@ class Project {
 
     subTasks[index].syncStatus = (firebaseUser != null)
         ? (await _isConnected
-            ? (subTasks[index].syncStatus == SyncStatus.UpdatedTask
-                ? SyncStatus.FullySynced
+            ? (subTasks[index].syncStatus == SyncStatus.updatedTask
+                ? SyncStatus.fullySynced
                 : subTasks[index].syncStatus)
-            : (subTasks[index].syncStatus != SyncStatus.NewTask
-                ? SyncStatus.UpdatedTask
-                : SyncStatus.NewTask))
-        : SyncStatus.FullySynced;
+            : (subTasks[index].syncStatus != SyncStatus.newTask
+                ? SyncStatus.updatedTask
+                : SyncStatus.newTask))
+        : SyncStatus.fullySynced;
 
     await writeCsv(subTasks);
   }
@@ -368,12 +362,12 @@ class Project {
       late Map<String, dynamic>? syncedTasks;
       final firebaseUser = context.read<User?>();
       if (firebaseUser != null) {
-        String? userId = firebaseUser.uid;
-        String? token = (await firebaseUser.getIdTokenResult()).token;
-        Uri url = Uri.parse(
+        final userId = firebaseUser.uid;
+        final String? token = (await firebaseUser.getIdTokenResult()).token;
+        final Uri url = Uri.parse(
             "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks.json?auth=$token");
         final res = await http.get(url);
-        syncedTasks = json.decode(res.body);
+        syncedTasks = json.decode(res.body) as Map<String, dynamic>?;
       }
       subTasks = [];
       subTasks.clear();
@@ -383,20 +377,24 @@ class Project {
           (id, data) {
             subTasks.add(
               Task(
+                //T_T
                 id: id,
-                title: data['title'],
-                start: parser.parse(data['start']),
-                isRunning: data['isRunning'],
-                isPaused: data['isPaused'],
-                latestPause: data.containsKey('latestPause')
-                    ? parser.parse(data['latestPause'])
-                    : null,
-                pauses: data.containsKey('pauses') ? data['pauses'] : 0,
+                title: data['title'] as String,
+                start: parser.parse(data['start'] as String),
+                isRunning: data['isRunning'] as bool,
+                isPaused: data['isPaused'] as bool,
+                latestPause:
+                    (data as Map<String, dynamic>).containsKey('latestPause')
+                        ? parser.parse(data['latestPause'] as String)
+                        : null,
+                pauses: data.containsKey('pauses') ? data['pauses'] as int : 0,
                 pauseTime: data.containsKey('pauseTime')
-                    ? Duration(seconds: data['pauseTime'])
+                    ? Duration(seconds: data['pauseTime'] as int)
                     : Duration.zero,
-                end: data.containsKey('end') ? parser.parse(data['end']) : null,
-                syncStatus: SyncStatus.FullySynced,
+                end: data.containsKey('end')
+                    ? parser.parse(data['end'] as String)
+                    : null,
+                syncStatus: SyncStatus.fullySynced,
                 category: category,
               ),
             );
@@ -412,13 +410,13 @@ class Project {
       final firebaseUser = context.read<User?>();
       await loadData();
       if (firebaseUser != null) {
-        String? userId = firebaseUser.uid;
-        String? token = (await firebaseUser.getIdTokenResult()).token;
-        print("Token $token");
+        final userId = firebaseUser.uid;
+        final String? token = (await firebaseUser.getIdTokenResult()).token;
+        debugPrint("Token $token");
         for (int i = 0; i < subTasks.length; i++) {
-          Task task = subTasks[i];
-          if (task.syncStatus == SyncStatus.UpdatedTask) {
-            Uri url = Uri.parse(
+          final Task task = subTasks[i];
+          if (task.syncStatus == SyncStatus.updatedTask) {
+            final Uri url = Uri.parse(
                 "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks/${task.id}.json?auth=$token");
             await http.patch(
               url,
@@ -436,8 +434,8 @@ class Project {
                 },
               ),
             );
-          } else if (task.syncStatus == SyncStatus.NewTask) {
-            Uri url = Uri.parse(
+          } else if (task.syncStatus == SyncStatus.newTask) {
+            final Uri url = Uri.parse(
                 "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks.json?auth=$token");
             final res = await http.post(
               url,
@@ -459,10 +457,10 @@ class Project {
                 },
               ),
             );
-            print(json.decode(res.body));
-            subTasks[i].id = json.decode(res.body)['name'];
+            debugPrint('${json.decode(res.body)}');
+            subTasks[i].id = json.decode(res.body)['name'] as String;
           }
-          subTasks[i].syncStatus = SyncStatus.FullySynced;
+          subTasks[i].syncStatus = SyncStatus.fullySynced;
         }
         await writeCsv(subTasks);
       }
@@ -470,7 +468,7 @@ class Project {
   }
 
   Future<void> purgeSubTasks() async {
-    File subTaskFile = await _localFile;
+    final File subTaskFile = await _localFile;
     await subTaskFile.delete();
   }
 }

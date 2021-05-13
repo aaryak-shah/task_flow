@@ -1,20 +1,19 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
-import 'package:task_flow/providers/auth_service.dart';
 import 'package:task_flow/models/project.dart';
+import 'package:task_flow/providers/auth_service.dart';
 import 'package:task_flow/providers/projects.dart';
 import 'package:task_flow/providers/tasks.dart';
 
+import '../widgets/app_bar.dart';
 import '../widgets/sign_in_form.dart';
 import '../widgets/sign_up_form.dart';
-import '../widgets/app_bar.dart';
 
 class ProfileScreen extends StatefulWidget {
   final User? user;
-  ProfileScreen(this.user);
+  const ProfileScreen(this.user);
   static const routeName = '/profile-screen';
 
   @override
@@ -38,10 +37,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (context) => AlertDialog(
         //dialog window for authentication forms
-        titlePadding: EdgeInsets.fromLTRB(20, 20, 0, 0),
-        contentPadding: EdgeInsets.symmetric(horizontal: 5),
+        titlePadding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 5),
         title: Text(isSigningIn ? 'Sign In' : 'Sign Up'),
-        actionsPadding: EdgeInsets.only(right: 15, bottom: 5),
+        actionsPadding: const EdgeInsets.only(right: 15, bottom: 5),
         content: isSigningIn ? SignInForm() : SignUpForm(),
         actions: <Widget>[
           GestureDetector(
@@ -53,7 +52,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             },
             child: Text(
               isSigningIn ? 'Sign Up instead' : 'Sign In instead',
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
               ),
             ),
@@ -73,7 +72,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('OK'),
+              child: const Text('OK'),
             )
           ],
         );
@@ -82,7 +81,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _showUpdatePasswordDialog() async {
-    var email = context.read<User>().email;
+    final email = context.read<User>().email;
     try {
       await Provider.of<AuthService>(context).forgotPassword(email!);
 
@@ -90,21 +89,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: Text("Password update email sent"),
-            content: Text("Login using your new password"),
+            title: const Text("Password update email sent"),
+            content: const Text("Login using your new password"),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text("OK"),
+                child: const Text("OK"),
               )
             ],
           );
         },
       );
       await Provider.of<Tasks>(context).syncEngine();
-      Projects projects = Provider.of<Projects>(context);
+      final Projects projects = Provider.of<Projects>(context);
       await projects.syncEngine();
-      for (Project project in projects.projects) {
+      for (final Project project in projects.projects) {
         await project.syncEngine();
       }
       await Provider.of<AuthService>(context, listen: false).signOut();
@@ -131,7 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _usingGoogle = Provider.of<AuthService>(context).isGoogleUser;
       email = widget.user?.email ?? '';
     });
-    String? name = Provider.of<AuthService>(context).userName;
+    final String? name = Provider.of<AuthService>(context).userName;
     if (name != null) userName = name;
     super.didChangeDependencies();
   }
@@ -141,7 +140,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return !_isLoading
         ? Scaffold(
             appBar: PreferredSize(
-              preferredSize: Size.fromHeight(100),
+              preferredSize: const Size.fromHeight(100),
               child: showAppBar(context),
             ),
             backgroundColor: Theme.of(context).primaryColor,
@@ -182,7 +181,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         subtitle: Text(email),
                         trailing: !_usingGoogle
                             ? IconButton(
-                                icon: Icon(Icons.edit),
+                                icon: const Icon(Icons.edit),
                                 onPressed: () {
                                   setState(() {
                                     isEditingName = true;
@@ -191,7 +190,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               )
                             : null,
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 30,
                       ),
                       InkWell(
@@ -203,10 +202,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               .syncEngine();
                           await Provider.of<Tasks>(context, listen: false)
                               .writeCsv([]);
-                          Projects projects =
+                          final Projects projects =
                               Provider.of<Projects>(context, listen: false);
                           await projects.syncEngine();
-                          for (Project project in projects.projects) {
+                          for (final Project project in projects.projects) {
                             await project.syncEngine();
                             await project.purgeSubTasks();
                           }
@@ -214,7 +213,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           await Provider.of<AuthService>(context, listen: false)
                               .signOut();
                         },
-                        child: ListTile(
+                        child: const ListTile(
                           leading: Icon(
                             Icons.exit_to_app,
                           ),
@@ -224,7 +223,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       if (!_usingGoogle)
                         InkWell(
                           onTap: _showUpdatePasswordDialog,
-                          child: ListTile(
+                          child: const ListTile(
                             leading: Icon(Icons.lock_outline),
                             title: Text('Change Password'),
                           ),
@@ -239,7 +238,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               .then((_) async {
                             await Provider.of<Projects>(context, listen: false)
                                 .pullFromFireBase();
-                            for (Project project
+                            for (final Project project
                                 in Provider.of<Projects>(context, listen: false)
                                     .projects) {
                               await project.pullFromFireBase();
@@ -251,11 +250,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         },
                         child: ListTile(
                           leading: _isSyncing
-                              ? CircularProgressIndicator(
+                              ? const CircularProgressIndicator(
                                   strokeWidth: 1,
                                 )
-                              : Icon(Icons.sync),
-                          title: Text('Sync My Data'),
+                              : const Icon(Icons.sync),
+                          title: const Text('Sync My Data'),
                         ),
                       ),
                     ],
@@ -267,15 +266,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           //Sign in with google button
-                          Container(
+                          SizedBox(
                             width: MediaQuery.of(context).size.width * 0.6,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                padding: EdgeInsets.symmetric(
+                                padding: const EdgeInsets.symmetric(
                                     vertical: 8, horizontal: 15),
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(30)),
-                                primary: Color(0xDEFFFFFF),
+                                primary: const Color(0xDEFFFFFF),
                                 onPrimary: Colors.black,
                               ),
                               onPressed: () async {
@@ -291,7 +290,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   await Provider.of<Projects>(context,
                                           listen: false)
                                       .pullFromFireBase();
-                                  for (Project project in Provider.of<Projects>(
+                                  for (final Project project in Provider.of<Projects>(
                                           context,
                                           listen: false)
                                       .projects) {
@@ -302,7 +301,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   });
                                 } on PlatformException catch (error) {
                                   var errorMessage = 'Authentication error';
-                                  var msg = error.message ?? '';
+                                  final msg = error.message ?? '';
                                   if (msg.contains('sign_in_canceled') ||
                                       msg.contains('sign_in_failed')) {
                                     errorMessage =
@@ -319,7 +318,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       'Could not sign you in, please try again later.';
                                   _showErrorDialog(
                                       "Something went wrong", errorMessage);
-                                  throw error;
+                                  rethrow;
                                 }
                               },
                               child: Row(
@@ -329,10 +328,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     "assets/images/google_logo.png",
                                     scale: 20,
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     width: 10,
                                   ),
-                                  Text(
+                                  const Text(
                                     'Sign In With Google',
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
@@ -345,22 +344,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ],
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 10,
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           //Sign in with email button
-                          Container(
+                          SizedBox(
                             width: MediaQuery.of(context).size.width * 0.6,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                padding: EdgeInsets.symmetric(
+                                padding: const EdgeInsets.symmetric(
                                     vertical: 8, horizontal: 10),
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(30)),
-                                primary: Color(0xDEFFFFFF),
+                                primary: const Color(0xDEFFFFFF),
                                 onPrimary: Colors.black,
                               ),
                               onPressed: () {
@@ -371,7 +370,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               },
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
+                                children: const <Widget>[
                                   Icon(Icons.email),
                                   SizedBox(
                                     width: 10,
@@ -394,7 +393,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           )
         : Scaffold(
             backgroundColor: Theme.of(context).primaryColor,
-            body: Center(
+            body: const Center(
               child: CircularProgressIndicator(),
             ),
           );

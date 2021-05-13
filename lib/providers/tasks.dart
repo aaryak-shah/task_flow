@@ -1,11 +1,11 @@
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:csv/csv.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:http/http.dart' as http;
-import 'package:csv/csv.dart';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -49,29 +49,33 @@ class Tasks with ChangeNotifier {
     // function to load the data from the tasks.csv file into Task
     // models which are then put into the _tasks list
 
-    String csvPath = await _localPath;
+    final String csvPath = await _localPath;
 
-    String csvString = await File('$csvPath/tasks.csv').readAsString();
+    final String csvString = await File('$csvPath/tasks.csv').readAsString();
 
     // String csvString = await rootBundle.loadString('assets/data/tasks.csv');
-    List<List<dynamic>> rowsAsListOfValues =
+    final List<List<dynamic>> rowsAsListOfValues =
         const CsvToListConverter().convert(csvString);
 
     _tasks = rowsAsListOfValues.map((row) {
       return Task(
-        id: row[0],
+        id: row[0] as String,
         title: row[1].toString(),
-        start: parser.parse(row[2]),
-        latestPause: row[3].isNotEmpty ? parser.parse(row[3]) : null,
-        end: row[4].isNotEmpty ? parser.parse(row[4]) : null,
-        pauses: row[5],
-        pauseTime: Duration(seconds: row[6]),
+        start: parser.parse(row[2] as String),
+        latestPause: (row[3] as String).isNotEmpty
+            ? parser.parse(row[3] as String)
+            : null,
+        end: (row[4] as String).isNotEmpty
+            ? parser.parse(row[4] as String)
+            : null,
+        pauses: row[5] as int,
+        pauseTime: Duration(seconds: row[6] as int),
         isRunning: row[7] == 1,
         isPaused: row[8] == 1,
-        category: row[9],
-        labels: row[10] != "" ? row[10].split("|") : [],
-        goalTime: Duration(seconds: row[11]),
-        syncStatus: SyncStatus.values[row[12]],
+        category: row[9] as String,
+        labels: (row[10] as String) != "" ? (row[10] as String).split("|") : [],
+        goalTime: Duration(seconds: row[11] as int),
+        syncStatus: SyncStatus.values[row[12] as int],
       );
     }).toList();
     notifyListeners();
@@ -95,7 +99,7 @@ class Tasks with ChangeNotifier {
       return task.latestPause != null &&
           task.latestPause!.isBefore(
             DateTime.now().subtract(
-              Duration(
+              const Duration(
                 days: 7,
               ),
             ),
@@ -116,7 +120,7 @@ class Tasks with ChangeNotifier {
     final recent = tasks.where((t) {
       return t.goalTime == Duration.zero &&
           t.isPaused &&
-          t.latestPause!.isAfter(DateTime.now().subtract(Duration(days: 7)));
+          t.latestPause!.isAfter(DateTime.now().subtract(const Duration(days: 7)));
     }).toList();
     return recent;
   }
@@ -128,13 +132,13 @@ class Tasks with ChangeNotifier {
 
     return List.generate(7, (index) {
       final weekDay = DateTime.now().subtract(Duration(days: index));
-      Duration total = Duration();
+      Duration total = const Duration();
 
       for (int i = 0; i < recentTasks.length; i++) {
         if (recentTasks[i].latestPause!.day == weekDay.day &&
             recentTasks[i].latestPause!.month == weekDay.month &&
             recentTasks[i].latestPause!.year == weekDay.year) {
-          total += (recentTasks[i].getRunningTime());
+          total += recentTasks[i].getRunningTime();
         }
       }
 
@@ -144,8 +148,8 @@ class Tasks with ChangeNotifier {
 
   Duration get totalTime {
     // getter to calculate the total cumulative time spent working on tasks in the past week
-    return weekTasks.fold(Duration(),
-        (previousSum, day) => previousSum + (day['time'] as Duration));
+    return weekTasks.fold(const Duration(),
+        (previousSum, day) => previousSum + (day['time']! as Duration));
   }
 
   String categoryString(String cid) {
@@ -157,28 +161,30 @@ class Tasks with ChangeNotifier {
 
   Future<void> writeCsv(List<Task> tasks) async {
     // Arguments => tasks: a list of Task objects to be written to the tasks.csv file
-    final rows = ListToCsvConverter().convert(tasks
+    final rows = const ListToCsvConverter().convert(tasks
         .map((t) => [
               t.id,
               t.title,
               DateFormat("dd-MM-yyyy HH:mm:ss").format(t.start),
-              t.latestPause != null
-                  ? DateFormat("dd-MM-yyyy HH:mm:ss").format(t.latestPause!)
-                  : "",
-              t.end != null
-                  ? DateFormat("dd-MM-yyyy HH:mm:ss").format(t.end!)
-                  : "",
+              if (t.latestPause != null)
+                DateFormat("dd-MM-yyyy HH:mm:ss").format(t.latestPause!)
+              else
+                "",
+              if (t.end != null)
+                DateFormat("dd-MM-yyyy HH:mm:ss").format(t.end!)
+              else
+                "",
               t.pauses,
               t.pauseTime.inSeconds,
-              t.isRunning ? 1 : 0,
-              t.isPaused ? 1 : 0,
+              if (t.isRunning) 1 else 0,
+              if (t.isPaused) 1 else 0,
               t.category,
-              t.labels != null ? t.labels!.join("|") : "",
+              if (t.labels != null) t.labels!.join("|") else "",
               t.goalTime.inSeconds,
               t.syncStatus.index
             ])
         .toList());
-    File f = await _localFile;
+    final File f = await _localFile;
     await f.writeAsString(rows, mode: FileMode.writeOnly);
     notifyListeners();
   }
@@ -199,13 +205,13 @@ class Tasks with ChangeNotifier {
     // Adds the Task object with the above arguments to the _tasks list
     // and also to the tasks.csv file
 
-    var response;
+    http.Response? response;
     final firebaseUser = context.read<User?>();
 
     if (await _isConnected && firebaseUser != null) {
-      String? userId = firebaseUser.uid;
-      String? token = (await firebaseUser.getIdTokenResult()).token;
-      Uri url = Uri.parse(
+      final userId = firebaseUser.uid;
+      final String? token = (await firebaseUser.getIdTokenResult()).token;
+      final Uri url = Uri.parse(
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token");
       response = await http.post(
         url,
@@ -222,14 +228,16 @@ class Tasks with ChangeNotifier {
     }
 
     final task = Task(
-        id: response != null ? json.decode(response.body)['name'] : id,
+        id: response != null
+            ? json.decode(response.body)['name'] as String
+            : id,
         title: title,
         start: start,
         category: category,
         labels: labels,
         syncStatus: (firebaseUser != null)
-            ? (await _isConnected ? SyncStatus.FullySynced : SyncStatus.NewTask)
-            : SyncStatus.FullySynced);
+            ? (await _isConnected ? SyncStatus.fullySynced : SyncStatus.newTask)
+            : SyncStatus.fullySynced);
     final row = const ListToCsvConverter().convert(
       [
         [
@@ -249,7 +257,7 @@ class Tasks with ChangeNotifier {
         ],
       ],
     );
-    File f = await _localFile;
+    final File f = await _localFile;
     await f.writeAsString(row, mode: FileMode.append, flush: true);
     _tasks.add(task);
     notifyListeners();
@@ -275,9 +283,9 @@ class Tasks with ChangeNotifier {
     final firebaseUser = context.read<User?>();
 
     if (await _isConnected && firebaseUser != null) {
-      String? userId = firebaseUser.uid;
-      String? token = (await firebaseUser.getIdTokenResult()).token;
-      Uri url = Uri.parse(
+      final userId = firebaseUser.uid;
+      final String? token = (await firebaseUser.getIdTokenResult()).token;
+      final Uri url = Uri.parse(
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${_tasks[index].id}.json?auth=$token");
       await http.patch(
         url,
@@ -291,13 +299,13 @@ class Tasks with ChangeNotifier {
 
     _tasks[index].syncStatus = (firebaseUser != null)
         ? (await _isConnected
-            ? (_tasks[index].syncStatus == SyncStatus.UpdatedTask
-                ? SyncStatus.FullySynced
+            ? (_tasks[index].syncStatus == SyncStatus.updatedTask
+                ? SyncStatus.fullySynced
                 : _tasks[index].syncStatus)
-            : (_tasks[index].syncStatus != SyncStatus.NewTask
-                ? SyncStatus.UpdatedTask
-                : SyncStatus.NewTask))
-        : SyncStatus.FullySynced;
+            : (_tasks[index].syncStatus != SyncStatus.newTask
+                ? SyncStatus.updatedTask
+                : SyncStatus.newTask))
+        : SyncStatus.fullySynced;
     await writeCsv(_tasks);
     notifyListeners();
   }
@@ -319,9 +327,9 @@ class Tasks with ChangeNotifier {
     final firebaseUser = context.read<User?>();
 
     if (await _isConnected && firebaseUser != null) {
-      String? userId = firebaseUser.uid;
-      String? token = (await firebaseUser.getIdTokenResult()).token;
-      Uri url = Uri.parse(
+      final userId = firebaseUser.uid;
+      final String? token = (await firebaseUser.getIdTokenResult()).token;
+      final Uri url = Uri.parse(
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${_tasks[index].id}.json?auth=$token");
       await http.patch(
         url,
@@ -337,13 +345,13 @@ class Tasks with ChangeNotifier {
 
     _tasks[index].syncStatus = (firebaseUser != null)
         ? (await _isConnected
-            ? (_tasks[index].syncStatus == SyncStatus.UpdatedTask
-                ? SyncStatus.FullySynced
+            ? (_tasks[index].syncStatus == SyncStatus.updatedTask
+                ? SyncStatus.fullySynced
                 : _tasks[index].syncStatus)
-            : (_tasks[index].syncStatus != SyncStatus.NewTask
-                ? SyncStatus.UpdatedTask
-                : SyncStatus.NewTask))
-        : SyncStatus.FullySynced;
+            : (_tasks[index].syncStatus != SyncStatus.newTask
+                ? SyncStatus.updatedTask
+                : SyncStatus.newTask))
+        : SyncStatus.fullySynced;
     await writeCsv(_tasks);
     notifyListeners();
   }
@@ -358,9 +366,9 @@ class Tasks with ChangeNotifier {
     final firebaseUser = context.read<User?>();
 
     if (await _isConnected && firebaseUser != null) {
-      String? userId = firebaseUser.uid;
-      String? token = (await firebaseUser.getIdTokenResult()).token;
-      Uri url = Uri.parse(
+      final userId = firebaseUser.uid;
+      final String? token = (await firebaseUser.getIdTokenResult()).token;
+      final Uri url = Uri.parse(
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${_tasks[index].id}.json?auth=$token");
       await http.patch(
         url,
@@ -381,13 +389,13 @@ class Tasks with ChangeNotifier {
 
     _tasks[index].syncStatus = (firebaseUser != null)
         ? (await _isConnected
-            ? (_tasks[index].syncStatus == SyncStatus.UpdatedTask
-                ? SyncStatus.FullySynced
+            ? (_tasks[index].syncStatus == SyncStatus.updatedTask
+                ? SyncStatus.fullySynced
                 : _tasks[index].syncStatus)
-            : (_tasks[index].syncStatus != SyncStatus.NewTask
-                ? SyncStatus.UpdatedTask
-                : SyncStatus.NewTask))
-        : SyncStatus.FullySynced;
+            : (_tasks[index].syncStatus != SyncStatus.newTask
+                ? SyncStatus.updatedTask
+                : SyncStatus.newTask))
+        : SyncStatus.fullySynced;
     await writeCsv(_tasks);
     notifyListeners();
   }
@@ -425,9 +433,9 @@ class Tasks with ChangeNotifier {
 
     final firebaseUser = context.read<User?>();
     if (await _isConnected && firebaseUser != null) {
-      String? userId = firebaseUser.uid;
-      String? token = (await firebaseUser.getIdTokenResult()).token;
-      Uri url = Uri.parse(
+      final userId = firebaseUser.uid;
+      final String? token = (await firebaseUser.getIdTokenResult()).token;
+      final Uri url = Uri.parse(
           "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${_tasks[index].id}.json?auth=$token");
       await http.patch(
         url,
@@ -448,13 +456,13 @@ class Tasks with ChangeNotifier {
 
     _tasks[index].syncStatus = (firebaseUser != null)
         ? (await _isConnected
-            ? (_tasks[index].syncStatus == SyncStatus.UpdatedTask
-                ? SyncStatus.FullySynced
+            ? (_tasks[index].syncStatus == SyncStatus.updatedTask
+                ? SyncStatus.fullySynced
                 : _tasks[index].syncStatus)
-            : (_tasks[index].syncStatus != SyncStatus.NewTask
-                ? SyncStatus.UpdatedTask
-                : SyncStatus.NewTask))
-        : SyncStatus.FullySynced;
+            : (_tasks[index].syncStatus != SyncStatus.newTask
+                ? SyncStatus.updatedTask
+                : SyncStatus.newTask))
+        : SyncStatus.fullySynced;
     await writeCsv(_tasks);
     notifyListeners();
   }
@@ -465,12 +473,12 @@ class Tasks with ChangeNotifier {
       final firebaseUser = context.read<User?>();
 
       if (firebaseUser != null) {
-        String? userId = firebaseUser.uid;
-        String? token = (await firebaseUser.getIdTokenResult()).token;
-        Uri url = Uri.parse(
+        final userId = firebaseUser.uid;
+        final String? token = (await firebaseUser.getIdTokenResult()).token;
+        final Uri url = Uri.parse(
             "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token");
         final res = await http.get(url);
-        syncedTasks = json.decode(res.body);
+        syncedTasks = json.decode(res.body) as Map<String, dynamic>?;
       }
 
       _tasks.clear();
@@ -480,25 +488,29 @@ class Tasks with ChangeNotifier {
           _tasks.add(
             Task(
               id: id,
-              title: data['title'],
-              start: parser.parse(data['start']),
-              category: data['category'],
-              isRunning: data['isRunning'],
-              isPaused: data['isPaused'],
-              latestPause: data.containsKey('latestPause')
-                  ? parser.parse(data['latestPause'])
-                  : null,
-              labels:
-                  data.containsKey('labels') ? data['labels'].split('|') : [],
+              title: data['title'] as String,
+              start: parser.parse(data['start'] as String),
+              category: data['category'] as String,
+              isRunning: data['isRunning'] as bool,
+              isPaused: data['isPaused'] as bool,
+              latestPause:
+                  (data as Map<String, dynamic>).containsKey('latestPause')
+                      ? parser.parse(data['latestPause'] as String)
+                      : null,
+              labels: data.containsKey('labels')
+                  ? (data['labels'] as String).split('|')
+                  : [],
               goalTime: data.containsKey('goalTime')
-                  ? Duration(seconds: data['goalTime'])
+                  ? Duration(seconds: data['goalTime'] as int)
                   : Duration.zero,
-              pauses: data.containsKey('pauses') ? data['pauses'] : 0,
+              pauses: data.containsKey('pauses') ? data['pauses'] as int : 0,
               pauseTime: data.containsKey('pauseTime')
-                  ? Duration(seconds: data['pauseTime'])
+                  ? Duration(seconds: data['pauseTime'] as int)
                   : Duration.zero,
-              end: data.containsKey('end') ? parser.parse(data['end']) : null,
-              syncStatus: SyncStatus.FullySynced,
+              end: data.containsKey('end')
+                  ? parser.parse(data['end'] as String)
+                  : null,
+              syncStatus: SyncStatus.fullySynced,
             ),
           );
         });
@@ -512,13 +524,13 @@ class Tasks with ChangeNotifier {
 
     await loadData();
     if (firebaseUser != null) {
-      String? userId = firebaseUser.uid;
-      String? token = (await firebaseUser.getIdTokenResult()).token;
+      final userId = firebaseUser.uid;
+      final String? token = (await firebaseUser.getIdTokenResult()).token;
       for (int i = 0; i < _tasks.length; i++) {
-        Task task = _tasks[i];
+        final Task task = _tasks[i];
         if (await _isConnected) {
-          if (task.syncStatus == SyncStatus.UpdatedTask) {
-            Uri url = Uri.parse(
+          if (task.syncStatus == SyncStatus.updatedTask) {
+            final Uri url = Uri.parse(
                 "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks/${task.id}.json?auth=$token");
             await http.patch(
               url,
@@ -537,8 +549,8 @@ class Tasks with ChangeNotifier {
                 },
               ),
             );
-          } else if (task.syncStatus == SyncStatus.NewTask) {
-            Uri url = Uri.parse(
+          } else if (task.syncStatus == SyncStatus.newTask) {
+            final Uri url = Uri.parse(
                 "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token");
             final res = await http.post(
               url,
@@ -563,9 +575,9 @@ class Tasks with ChangeNotifier {
                 },
               ),
             );
-            _tasks[i].id = json.decode(res.body)['name'];
+            _tasks[i].id = json.decode(res.body)['name'] as String;
           }
-          _tasks[i].syncStatus = SyncStatus.FullySynced;
+          _tasks[i].syncStatus = SyncStatus.fullySynced;
         }
       }
 

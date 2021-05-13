@@ -10,7 +10,7 @@ class ClientDetails extends StatelessWidget {
   final double earning;
   final String time;
 
-  ClientDetails({
+  const ClientDetails({
     required this.clientName,
     required this.earning,
     required this.time,
@@ -18,14 +18,14 @@ class ClientDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Project> projects = Provider.of<Projects>(context, listen: false)
+    final List<Project> projects = Provider.of<Projects>(context, listen: false)
         .projectsByClient(clientName);
-    return Container(
+    return SizedBox(
       height: MediaQuery.of(context).size.height * 0.75,
       child: Column(
         children: [
           Text(clientName),
-          Text("₹" + earning.toStringAsFixed(2) + " | " + time),
+          Text("₹${earning.toStringAsFixed(2)} | $time"),
           Expanded(
             child: ListView.builder(
               itemCount: projects.length,
@@ -47,9 +47,8 @@ class ClientDetails extends StatelessWidget {
                       projects[index].name,
                     ),
                     subtitle: Text(
-                      "Last Active: " +
-                          DateFormat('dd MMM yy')
-                              .format(projects[index].lastActive),
+                      "Last Active: ${DateFormat('dd MMM yy')
+                              .format(projects[index].lastActive)}",
                     ),
                     trailing: Text(
                       projects[index].earnings,

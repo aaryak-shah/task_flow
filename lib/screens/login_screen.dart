@@ -17,10 +17,10 @@ class _LoginScreenState extends State<LoginScreen> {
       context: context,
       builder: (context) => AlertDialog(
         //dialog window for authentication forms
-        titlePadding: EdgeInsets.fromLTRB(20, 20, 0, 0),
-        contentPadding: EdgeInsets.symmetric(horizontal: 5),
+        titlePadding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 5),
         title: Text(isSigningIn ? 'Sign In' : 'Sign Up'),
-        actionsPadding: EdgeInsets.only(right: 15, bottom: 5),
+        actionsPadding: const EdgeInsets.only(right: 15, bottom: 5),
         content: isSigningIn ? SignInForm() : SignUpForm(),
         actions: <Widget>[
           GestureDetector(
@@ -32,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
             },
             child: Text(
               isSigningIn ? 'Sign Up instead' : 'Sign In instead',
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
               ),
             ),
@@ -52,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('OK'),
+              child: const Text('OK'),
             )
           ],
         );
@@ -68,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Spacer(),
+          const Spacer(),
           //auth screen title...
           Text(
             'Welcome to'.toUpperCase(),
@@ -81,9 +81,9 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           RichText(
             textAlign: TextAlign.center,
-            text: new TextSpan(
+            text: TextSpan(
               children: <TextSpan>[
-                new TextSpan(
+                TextSpan(
                   text: 'TASK',
                   style: TextStyle(
                     fontSize: 45,
@@ -92,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     color: Theme.of(context).textTheme.bodyText1!.color,
                   ),
                 ),
-                new TextSpan(
+                TextSpan(
                   text: 'FLOW',
                   style: TextStyle(
                     fontSize: 45,
@@ -104,21 +104,22 @@ class _LoginScreenState extends State<LoginScreen> {
               ],
             ),
           ),
-          Spacer(),
+          const Spacer(),
           //auth functionality...
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               //Sign in with google button
-              Container(
+              SizedBox(
                 width: MediaQuery.of(context).size.width * 0.6,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 15),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
-                    primary: Color(0xDEFFFFFF),
+                    primary: const Color(0xDEFFFFFF),
                     onPrimary: Colors.black,
                   ),
                   onPressed: () async {
@@ -127,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           .signInWithGoogle();
                     } on PlatformException catch (error) {
                       var errorMessage = 'Authentication error';
-                      String msg = (error.message ?? "");
+                      final String msg = error.message ?? "";
                       if ((msg.contains('sign_in_canceled')) ||
                           msg.contains('sign_in_failed')) {
                         errorMessage = 'Sign in failed, try again later';
@@ -151,10 +152,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         "assets/images/google_logo.png",
                         scale: 20,
                       ),
-                      SizedBox(
+                      const SizedBox(
                         width: 10,
                       ),
-                      Text(
+                      const Text(
                         'Sign In With Google',
                         textAlign: TextAlign.center,
                         style: TextStyle(
@@ -167,22 +168,23 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ],
           ),
-          SizedBox(
+          const SizedBox(
             height: 10,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               //Sign in with email button
-              Container(
+              SizedBox(
                 width: MediaQuery.of(context).size.width * 0.6,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
-                    primary: Color(0xDEFFFFFF),
+                    primary: const Color(0xDEFFFFFF),
                     onPrimary: Colors.black,
                   ),
                   onPressed: () {
@@ -193,7 +195,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
+                    children: const <Widget>[
                       Icon(Icons.email),
                       SizedBox(
                         width: 10,
@@ -211,7 +213,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ],
           ),
-          SizedBox(
+          const SizedBox(
             height: 10,
           ),
           Row(
@@ -234,7 +236,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ],
           ),
-          SizedBox(
+          const SizedBox(
             height: 80,
           )
         ],

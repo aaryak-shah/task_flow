@@ -18,7 +18,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
   Widget build(BuildContext context) {
     final goals = Provider.of<Goals>(context);
 
-    return goals.goals == null
+    return goals.goals.isEmpty
         ? Scaffold(
             backgroundColor: Theme.of(context).primaryColor,
           )
@@ -84,7 +84,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                           ),
                           trailing: Consumer<Settings>(
                             builder: (context, settings, _) => Text(
-                              g.getTimeString('goal', settings.showSeconds),
+                              g.getTimeString('goal', showSeconds: settings.showSeconds),
                             ),
                           ),
                         ),

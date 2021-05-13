@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:task_flow/providers/projects.dart';
 
+import '../models/task.dart';
+import '../providers/tasks.dart';
 import '../screens/tabs_screen.dart';
 import '../widgets/app_bar.dart';
 import '../widgets/new_labels.dart';
-import '../providers/tasks.dart';
-import '../models/task.dart';
 
 // Screen which shows the stopwatch for the currently running task
 
@@ -25,8 +25,8 @@ void showLabelForm(BuildContext context, int i) {
     builder: (_) {
       return GestureDetector(
         onTap: () {},
-        child: NewLabels('task', i),
         behavior: HitTestBehavior.opaque,
+        child: NewLabels('task', i),
       );
     },
   );
@@ -65,7 +65,7 @@ class CurrentTaskScreen extends StatefulWidget {
   final bool wasSuspended;
   final String superProjectName;
   final String superProjectId;
-  CurrentTaskScreen({
+  const CurrentTaskScreen({
     required this.index,
     required this.wasSuspended,
     required this.superProjectName,
@@ -77,7 +77,7 @@ class CurrentTaskScreen extends StatefulWidget {
 }
 
 class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
-  var _provider;
+  dynamic _provider;
   late Timer _timer;
   late String _time;
   late String _category;
@@ -89,25 +89,22 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
 
   @override
   void didChangeDependencies() {
-    dynamic _provider = widget.superProjectName.isEmpty
+    final dynamic _provider = widget.superProjectName.isEmpty
         ? Provider.of<Tasks>(context, listen: true)
         : Provider.of<Projects>(context, listen: true)
             .projects
             .firstWhere((project) => project.id == widget.superProjectId);
-    Task _task = widget.superProjectName.isEmpty
+    final Task _task = (widget.superProjectName.isEmpty
         ? _provider.tasks[widget.index]
-        : _provider.subTasks[widget.index];
+        : _provider.subTasks[widget.index]) as Task;
     _timer = Timer(const Duration(seconds: 1), () {});
     _category = _task.category;
     _labels = _task.labels;
     _title = _task.title;
     if (_isInit) {
       _resumeTime = _task.getRunningTime();
-      _time = _resumeTime.inHours.toString().padLeft(2, "0") +
-          ":" +
-          _resumeTime.inMinutes.remainder(60).toString().padLeft(2, "0") +
-          ":" +
-          _resumeTime.inSeconds.remainder(60).toString().padLeft(2, "0");
+      _time =
+          "${_resumeTime.inHours.toString().padLeft(2, "0")}:${_resumeTime.inMinutes.remainder(60).toString().padLeft(2, "0")}:${_resumeTime.inSeconds.remainder(60).toString().padLeft(2, "0")}";
       startTimer();
       watch.start();
       if (_task.latestPause != null) {
@@ -120,28 +117,16 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
     super.didChangeDependencies();
   }
 
-  var watch = Stopwatch();
+  Stopwatch watch = Stopwatch();
   bool paused = false;
 
   void startTimer() {
-    const oneSec = const Duration(seconds: 1);
-    _timer = new Timer.periodic(oneSec, (timer) {
+    const oneSec = Duration(seconds: 1);
+    _timer = Timer.periodic(oneSec, (timer) {
       if (!paused) {
         setState(() {
           _time =
-              (watch.elapsed + _resumeTime).inHours.toString().padLeft(2, "0") +
-                  ":" +
-                  (watch.elapsed + _resumeTime)
-                      .inMinutes
-                      .remainder(60)
-                      .toString()
-                      .padLeft(2, "0") +
-                  ":" +
-                  (watch.elapsed + _resumeTime)
-                      .inSeconds
-                      .remainder(60)
-                      .toString()
-                      .padLeft(2, "0");
+              "${(watch.elapsed + _resumeTime).inHours.toString().padLeft(2, "0")}:${(watch.elapsed + _resumeTime).inMinutes.remainder(60).toString().padLeft(2, "0")}:${(watch.elapsed + _resumeTime).inSeconds.remainder(60).toString().padLeft(2, "0")}";
         });
       } else {
         timer.cancel();
@@ -179,11 +164,10 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
         resizeToAvoidBottomInset: false,
         backgroundColor: Theme.of(context).primaryColor,
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(100),
+          preferredSize: const Size.fromHeight(100),
           child: showAppBar(context),
         ),
         body: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: widget.superProjectName.isNotEmpty
               ? MainAxisAlignment.spaceEvenly
               : MainAxisAlignment.start,
@@ -199,7 +183,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Container(
+                SizedBox(
                   width: MediaQuery.of(context).size.width / 1.65,
                   height: MediaQuery.of(context).size.width / 1.45,
                   child: CustomPaint(
@@ -216,7 +200,6 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                       bottom: widget.superProjectName.isEmpty ? 10 : 0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       Flexible(
                         child: Text(
@@ -297,7 +280,8 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                   ]),
                 if (widget.superProjectName.isEmpty)
                   Card(
-                    margin: EdgeInsets.only(left: 15, right: 15, bottom: 15),
+                    margin:
+                        const EdgeInsets.only(left: 15, right: 15, bottom: 15),
                     color: Theme.of(context).cardColor,
                     child: Container(
                       width: double.infinity,
@@ -311,7 +295,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                               color: Theme.of(context).unselectedWidgetColor,
                             ),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 10,
                           ),
                           Text(
@@ -329,7 +313,7 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                   ),
                 if (widget.superProjectName.isEmpty)
                   Card(
-                    margin: EdgeInsets.symmetric(horizontal: 15),
+                    margin: const EdgeInsets.symmetric(horizontal: 15),
                     color: Theme.of(context).cardColor,
                     child: Container(
                       width: double.infinity,
@@ -349,20 +333,20 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
                                 ),
                               ),
                               IconButton(
-                                icon: Icon(Icons.add_box),
+                                icon: const Icon(Icons.add_box),
                                 onPressed: () async {
                                   showLabelForm(context, widget.index);
                                 },
                               )
                             ],
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 10,
                           ),
                           Text(
                             (_labels ?? [])
                                 .join(", ")
-                                .replaceAll(new RegExp(r"'"), ""),
+                                .replaceAll(RegExp("'"), ""),
                             style: TextStyle(
                               color:
                                   Theme.of(context).textTheme.bodyText2!.color,

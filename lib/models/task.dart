@@ -1,11 +1,10 @@
 import 'dart:io';
 
 import 'package:csv/csv.dart';
-import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 
-enum SyncStatus { FullySynced, NewTask, UpdatedTask }
+enum SyncStatus { fullySynced, newTask, updatedTask }
 
 class Task {
   // creating a model for Task objects
@@ -24,7 +23,7 @@ class Task {
   final Duration goalTime;
 
   Task({
-    this.syncStatus = SyncStatus.NewTask,
+    this.syncStatus = SyncStatus.newTask,
     required this.id,
     required this.title,
     required this.start,
@@ -47,35 +46,31 @@ class Task {
     } else if (isPaused) {
       return (latestPause ?? DateTime.now()).difference(start) - pauseTime;
     } else {
-      return (DateTime.now().difference(start) - pauseTime);
+      return DateTime.now().difference(start) - pauseTime;
     }
   }
 
-  String getTimeString(String mode, bool showSeconds) {
+  String getTimeString(String mode, {required bool showSeconds}) {
     // Arguments => mode: Mode in which the function runs, either 'run' or 'goal'
     //
     // returns the time as a formatted string
     // if mode is 'run', it gets the running time for the task
     // if mode is 'goal', it returns zero
 
-    Duration getTime = mode == 'run'
+    final Duration getTime = mode == 'run'
         ? getRunningTime()
         : mode == 'goal'
             ? goalTime
             : Duration.zero;
     String h, m, s;
-    int time = getTime.inSeconds;
-    int hrs = (time / 3600).floor();
-    int mins = (time / 60).floor();
-    int seconds = time % 60;
-    (hrs / 10).floor() == 0
-        ? h = '0' + hrs.toString() + ':'
-        : h = hrs.toString() + ':';
-    (mins / 10).floor() == 0 ? m = '0' + mins.toString() : m = mins.toString();
-    (seconds / 10).floor() == 0
-        ? s = ':0' + seconds.toString()
-        : s = ':' + seconds.toString();
-    return (h + m + (showSeconds ? s : ''));
+    final int time = getTime.inSeconds;
+    final int hrs = (time / 3600).floor();
+    final int mins = ((time / 60).floor()) % 60;
+    final int seconds = time % 60;
+    (hrs / 10).floor() == 0 ? h = '0$hrs:' : h = '$hrs:';
+    (mins / 10).floor() == 0 ? m = '0$mins' : m = mins.toString();
+    (seconds / 10).floor() == 0 ? s = ':0$seconds' : s = ':$seconds';
+    return h + m + (showSeconds ? s : '');
   }
 
   Future<String> get _localPath async {
@@ -92,34 +87,38 @@ class Task {
 
   Future<List<Task>> get tasks async {
     // getter to read the tasks.csv file and get a list of Task objects
-    File csvFile = await _localFile;
-    String csvString = await csvFile.readAsString();
-    List<List<dynamic>> rowsAsListOfValues =
+    final File csvFile = await _localFile;
+    final String csvString = await csvFile.readAsString();
+    final List<List<dynamic>> rowsAsListOfValues =
         const CsvToListConverter().convert(csvString);
 
-    DateFormat parser = DateFormat("dd-MM-yyyy HH:mm:ss");
-    var rows = rowsAsListOfValues.map((row) {
+    final DateFormat parser = DateFormat("dd-MM-yyyy HH:mm:ss");
+    final rows = rowsAsListOfValues.map((row) {
       return Task(
-          id: row[0],
-          title: row[1],
-          start: parser.parse(row[2]),
-          latestPause: row[3].isNotEmpty ? parser.parse(row[3]) : null,
-          end: row[4].isNotEmpty ? parser.parse(row[4]) : null,
-          pauses: row[5],
-          pauseTime: Duration(seconds: row[6]),
+          id: row[0] as String,
+          title: row[1] as String,
+          start: parser.parse(row[2] as String),
+          latestPause: (row[3] as String).isNotEmpty
+              ? parser.parse(row[3] as String)
+              : null,
+          end: (row[4] as String).isNotEmpty
+              ? parser.parse(row[4] as String)
+              : null,
+          pauses: row[5] as int,
+          pauseTime: Duration(seconds: row[6] as int),
           isRunning: row[7] == 1,
           isPaused: row[8] == 1,
-          category: row[9],
-          labels: row[10].split(" "),
-          goalTime: Duration(seconds: row[11]),
-          syncStatus: SyncStatus.values[row[12]]);
+          category: row[9] as String,
+          labels: (row[10] as String).split(" "),
+          goalTime: Duration(seconds: row[11] as int),
+          syncStatus: SyncStatus.values[row[12] as int]);
     }).toList();
     return rows;
   }
 
   Future<int> get getIndex async {
     // getter that gets the index of this task in the tasks list
-    var t = await tasks;
+    final t = await tasks;
     return t.indexWhere((t) => t.id == id);
   }
 }

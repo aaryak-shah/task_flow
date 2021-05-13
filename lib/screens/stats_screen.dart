@@ -13,7 +13,7 @@ class _StatsScreenState extends State<StatsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(100),
+        preferredSize: const Size.fromHeight(100),
         child: showAppBar(context),
       ),
       backgroundColor: Theme.of(context).primaryColor,

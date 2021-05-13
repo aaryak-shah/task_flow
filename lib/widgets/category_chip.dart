@@ -17,7 +17,7 @@ class CategoryChips extends StatefulWidget {
 class _CategoryChipsState extends State<CategoryChips> {
   String selectedChoice = '';
 
-@override
+  @override
   void initState() {
     selectedChoice = widget.sel;
     super.initState();
@@ -35,15 +35,20 @@ class _CategoryChipsState extends State<CategoryChips> {
 
   List<Widget> _buildChoiceList() {
     // function to build a list of Category chip widgets
-    List<Widget> choices = [];
-    categories.forEach((item) {
+    final List<Widget> choices = [];
+    for (final String item in categories) {
       choices.add(ChoiceChip(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(6),
         ),
         selectedColor: Theme.of(context).accentColor,
-        padding: EdgeInsets.all(6),
-        label: Text(item),
+        padding: const EdgeInsets.all(6),
+        label: Text(
+          item,
+          style: const TextStyle(
+            color: Colors.white,
+          ),
+        ),
         selected: selectedChoice == item,
         onSelected: (selected) {
           setState(() {
@@ -52,14 +57,13 @@ class _CategoryChipsState extends State<CategoryChips> {
           });
         },
       ));
-    });
+    }
     return choices;
   }
 
   @override
   Widget build(BuildContext context) {
     return Wrap(
-      alignment: WrapAlignment.start,
       spacing: 10,
       runSpacing: -6,
       children: _buildChoiceList(),

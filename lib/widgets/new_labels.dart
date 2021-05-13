@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../providers/goals.dart';
 import '../providers/projects.dart';
 import '../providers/tasks.dart';
-import '../providers/goals.dart';
 
 List<String> _labels = [];
 
@@ -16,7 +16,7 @@ class NewLabels extends StatefulWidget {
 
   final String mode;
   final int taskIndex;
-  NewLabels(this.mode, this.taskIndex);
+  const NewLabels(this.mode, this.taskIndex);
 
   @override
   _NewLabelsState createState() => _NewLabelsState();
@@ -32,14 +32,14 @@ class _NewLabelsState extends State<NewLabels> {
     final List<String> labels = _labels;
     List<Widget> _buildChoiceList() {
       // function to create a list of label chips
-      List<Widget> choices = [];
-      labels.forEach((item) {
+      final List<Widget> choices = [];
+      for (final String item in labels) {
         choices.add(ChoiceChip(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(6),
           ),
           selectedColor: Theme.of(context).accentColor,
-          padding: EdgeInsets.all(6),
+          padding: const EdgeInsets.all(6),
           label: Text(item),
           selected: _selectedLabels.contains(item),
           onSelected: (selected) {
@@ -53,12 +53,11 @@ class _NewLabelsState extends State<NewLabels> {
             });
           },
         ));
-      });
+      }
       return choices;
     }
 
     return Wrap(
-      alignment: WrapAlignment.start,
       spacing: 10,
       runSpacing: -6,
       children: _buildChoiceList(),
@@ -128,7 +127,7 @@ class _NewLabelsState extends State<NewLabels> {
       // height: 460,
       decoration: BoxDecoration(
         color: Theme.of(context).primaryColor,
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Colors.black26,
             blurRadius: 100,
@@ -158,19 +157,19 @@ class _NewLabelsState extends State<NewLabels> {
                   });
                 },
                 controller: _titleController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Add a New Label',
                 ),
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 50,
             ),
             Container(
               height: 20,
-              margin: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+              margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
               child: Row(
-                children: <Widget>[
+                children: const <Widget>[
                   Text(
                     'Your Labels',
                     style: TextStyle(
@@ -187,10 +186,9 @@ class _NewLabelsState extends State<NewLabels> {
                 child: returnLabelChips(),
               ),
             ),
-            Spacer(),
+            const Spacer(),
             ElevatedButton(
-              child: Text('ADD'),
-               style: ElevatedButton.styleFrom(
+              style: ElevatedButton.styleFrom(
                 primary: Theme.of(context).accentColor,
                 textStyle: TextStyle(
                   color: Theme.of(context).primaryColor,
@@ -219,6 +217,7 @@ class _NewLabelsState extends State<NewLabels> {
                 }
                 Navigator.of(context).pop();
               },
+              child: const Text('ADD'),
             ),
           ],
         ),

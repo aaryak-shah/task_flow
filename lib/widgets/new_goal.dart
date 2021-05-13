@@ -2,9 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:task_flow/providers/goals.dart';
 
 import '../screens/current_goal_screen.dart';
-import '../providers/goals.dart';
 import './category_chip.dart';
 
 class NewGoal extends StatefulWidget {
@@ -14,7 +14,7 @@ class NewGoal extends StatefulWidget {
   // Form to add a new goal
 
   final List<dynamic> data;
-  NewGoal(this.data);
+  const NewGoal(this.data);
 
   @override
   _NewGoalState createState() => _NewGoalState();
@@ -22,7 +22,7 @@ class NewGoal extends StatefulWidget {
 
 class _NewGoalState extends State<NewGoal> {
   String _selectedCategory = '';
-  Duration _initTime = Duration(hours: 1);
+  Duration _initTime = const Duration(hours: 1);
   final _formKey = GlobalKey<FormState>();
 
   TextEditingController _titleController = TextEditingController();
@@ -41,11 +41,11 @@ class _NewGoalState extends State<NewGoal> {
     _titleFocusNode.requestFocus();
     if (widget.data.isNotEmpty) {
       // to populate form with data of existing goal in case the existing goal is restarted
-      _titleController = TextEditingController(text: widget.data[0]);
-      _selectedCategory = widget.data[1];
-      _initTime = widget.data[2];
+      _titleController = TextEditingController(text: widget.data[0] as String?);
+      _selectedCategory = widget.data[1] as String;
+      _initTime = widget.data[2] as Duration;
     } else {
-      _initTime = Duration(hours: 1);
+      _initTime = const Duration(hours: 1);
     }
     time = _initTime;
     super.initState();
@@ -54,14 +54,14 @@ class _NewGoalState extends State<NewGoal> {
   @override
   Widget build(BuildContext context) {
     bool isDisabled = true;
-    var goals = Provider.of<Goals>(context);
+    final goals = Provider.of<Goals>(context);
     Widget returnCatChips() {
       // function to return Category chips in the modal sheet
       setState(() {
         isDisabled = _selectedCategory.isEmpty;
       });
       return CategoryChips(
-        widget.data.isEmpty ? '' : widget.data[1],
+        (widget.data.isEmpty ? '' : widget.data[1]) as String,
         (selectedCategory) {
           setState(() {
             _selectedCategory = selectedCategory;
@@ -75,7 +75,7 @@ class _NewGoalState extends State<NewGoal> {
       // height: 460,
       decoration: BoxDecoration(
         color: Theme.of(context).primaryColor,
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Colors.black26,
             blurRadius: 100,
@@ -102,19 +102,19 @@ class _NewGoalState extends State<NewGoal> {
                     return "Enter a title";
                   }
                 },
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Title',
                 ),
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 50,
             ),
             Container(
               height: 20,
-              margin: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+              margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
               child: Row(
-                children: <Widget>[
+                children: const <Widget>[
                   Text(
                     'Categories',
                     style: TextStyle(
@@ -131,14 +131,14 @@ class _NewGoalState extends State<NewGoal> {
                 child: returnCatChips(),
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 50,
             ),
             Container(
               height: 20,
-              margin: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+              margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
               child: Row(
-                children: <Widget>[
+                children: const <Widget>[
                   Text(
                     'Set Goal Time',
                     style: TextStyle(
@@ -149,10 +149,10 @@ class _NewGoalState extends State<NewGoal> {
                 ],
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 50,
             ),
-            Container(
+            SizedBox(
               // timer picker spinner widget
               height: 150,
               child: CupertinoTheme(
@@ -174,9 +174,8 @@ class _NewGoalState extends State<NewGoal> {
                 ),
               ),
             ),
-            Spacer(),
+            const Spacer(),
             ElevatedButton(
-              child: Text('START'),
               style: ElevatedButton.styleFrom(
                 primary: Theme.of(context).accentColor,
                 textStyle: TextStyle(
@@ -203,6 +202,7 @@ class _NewGoalState extends State<NewGoal> {
                       }
                     }
                   : null,
+              child: const Text('START'),
             ),
           ],
         ),

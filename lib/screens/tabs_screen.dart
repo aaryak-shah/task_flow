@@ -4,10 +4,10 @@ import 'package:task_flow/providers/projects.dart';
 import 'package:task_flow/providers/theme_switcher.dart';
 
 import '../providers/goals.dart';
-import './goals_screen.dart';
-import '../widgets/plus_btn_controllers.dart';
 import '../providers/tasks.dart';
 import '../widgets/main_drawer.dart';
+import '../widgets/plus_btn_controllers.dart';
+import './goals_screen.dart';
 import './projects_screen.dart';
 import './stats_screen.dart';
 import './tasks_screen.dart';
@@ -17,7 +17,7 @@ class TabsScreen extends StatefulWidget {
   // Arguments => selected: The index of the selected tab to be highlighted
   static const routeName = '/tabs-screen';
   final int selected;
-  TabsScreen(this.selected);
+  const TabsScreen(this.selected);
   @override
   _TabsScreenState createState() => _TabsScreenState();
 }
@@ -67,13 +67,13 @@ class _TabsScreenState extends State<TabsScreen> {
             children: <Widget>[
               Icon(
                 icon,
-                color: _tabColors[selfIndex],
+                color: _tabColors[selfIndex] as Color?,
                 size: selfIndex == _selectedIndex ? 28 : 24,
               ),
               Text(
                 title,
                 style: TextStyle(
-                  color: _tabColors[selfIndex],
+                  color: _tabColors[selfIndex] as Color?,
                   fontWeight: selfIndex == _selectedIndex
                       ? FontWeight.bold
                       : FontWeight.normal,
@@ -139,8 +139,8 @@ class _TabsScreenState extends State<TabsScreen> {
         elevation: 0.0,
         backgroundColor: Theme.of(context).primaryColor,
         title: RichText(
-          text: new TextSpan(children: <TextSpan>[
-            new TextSpan(
+          text: TextSpan(children: <TextSpan>[
+            TextSpan(
               text: 'TASK',
               style: TextStyle(
                 fontSize: 20,
@@ -149,7 +149,7 @@ class _TabsScreenState extends State<TabsScreen> {
                 color: Theme.of(context).textTheme.bodyText1!.color,
               ),
             ),
-            new TextSpan(
+            TextSpan(
               text: 'FLOW',
               style: TextStyle(
                 fontSize: 20,
@@ -162,7 +162,7 @@ class _TabsScreenState extends State<TabsScreen> {
         ),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.equalizer),
+            icon: const Icon(Icons.equalizer),
             onPressed: () {
               Navigator.of(context).pushNamed(StatsScreen.routeName);
             },
@@ -170,7 +170,7 @@ class _TabsScreenState extends State<TabsScreen> {
           ),
         ],
       ),
-      body: _pages[_selectedIndex],
+      body: _pages[_selectedIndex] as Widget,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [
@@ -178,16 +178,13 @@ class _TabsScreenState extends State<TabsScreen> {
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(0), topRight: Radius.circular(0)),
           child: BottomAppBar(
             color: Theme.of(context).brightness == Brightness.dark
                 ? Theme.of(context).cardColor
                 : Theme.of(context).accentColor,
             notchMargin: -22,
+            shape: const CircularNotchedRectangle(),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 navBtn(0, Icons.timer, 'Tasks', () {
@@ -208,12 +205,11 @@ class _TabsScreenState extends State<TabsScreen> {
                     setSelectedColor(context);
                   });
                 }),
-                SizedBox(
+                const SizedBox(
                   width: 75,
                 ),
               ],
             ),
-            shape: CircularNotchedRectangle(),
           ),
         ),
       ),
@@ -222,10 +218,6 @@ class _TabsScreenState extends State<TabsScreen> {
       floatingActionButton: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30),
         child: FloatingActionButton(
-          child: Icon(
-            Icons.add,
-            size: 35,
-          ),
           backgroundColor: Theme.of(context).brightness == Brightness.dark
               ? Theme.of(context).cardColor
               : Theme.of(context).accentColor,
@@ -237,6 +229,10 @@ class _TabsScreenState extends State<TabsScreen> {
               : _selectedIndex == 1
                   ? showNewGoalForm(context)
                   : showNewProjectForm(context),
+          child: const Icon(
+            Icons.add,
+            size: 35,
+          ),
         ),
       ),
     );

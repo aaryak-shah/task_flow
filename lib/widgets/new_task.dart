@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../screens/current_task_screen.dart';
 import '../providers/tasks.dart';
+import '../screens/current_task_screen.dart';
 import './category_chip.dart';
 
 class NewTask extends StatefulWidget {
@@ -12,7 +12,7 @@ class NewTask extends StatefulWidget {
   // Form to add a new task
 
   final List<dynamic> data;
-  NewTask(this.data);
+  const NewTask(this.data);
   @override
   _NewTaskState createState() => _NewTaskState();
 }
@@ -34,8 +34,8 @@ class _NewTaskState extends State<NewTask> {
   void initState() {
     if (widget.data.isNotEmpty) {
       // to populate form with data of existing task in case the existing task is restarted
-      _titleController = TextEditingController(text: widget.data[0]);
-      _selectedCategory = widget.data[1];
+      _titleController = TextEditingController(text: widget.data[0] as String?);
+      _selectedCategory = widget.data[1] as String;
     }
     _titleFocusNode.requestFocus();
     super.initState();
@@ -44,14 +44,14 @@ class _NewTaskState extends State<NewTask> {
   @override
   Widget build(BuildContext context) {
     bool isDisabled = true;
-    var tasks = Provider.of<Tasks>(context);
+    final tasks = Provider.of<Tasks>(context);
     Widget returnCatChips() {
       // function to return Category chips in the modal sheet
       setState(() {
         _selectedCategory.isNotEmpty ? isDisabled = false : isDisabled = true;
       });
       return CategoryChips(
-        widget.data.isEmpty ? '' : widget.data[1],
+        widget.data.isEmpty ? '' : widget.data[1] as String,
         (selectedCategory) {
           setState(() {
             _selectedCategory = selectedCategory;
@@ -65,7 +65,7 @@ class _NewTaskState extends State<NewTask> {
       // height: 460,
       decoration: BoxDecoration(
         color: Theme.of(context).primaryColor,
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Colors.black26,
             blurRadius: 100,
@@ -92,19 +92,19 @@ class _NewTaskState extends State<NewTask> {
                     return "Enter a title";
                   }
                 },
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Title',
                 ),
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 50,
             ),
             Container(
               height: 20,
-              margin: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+              margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
               child: Row(
-                children: <Widget>[
+                children: const <Widget>[
                   Text(
                     'Categories',
                     style: TextStyle(
@@ -121,9 +121,8 @@ class _NewTaskState extends State<NewTask> {
                 child: returnCatChips(),
               ),
             ),
-            Spacer(),
+            const Spacer(),
             ElevatedButton(
-              child: Text('START'),
               style: ElevatedButton.styleFrom(
                 primary: Theme.of(context).accentColor,
                 textStyle: TextStyle(
@@ -153,6 +152,7 @@ class _NewTaskState extends State<NewTask> {
                       }
                     }
                   : null,
+              child: const Text('START'),
             ),
           ],
         ),

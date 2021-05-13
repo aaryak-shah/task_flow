@@ -27,6 +27,9 @@ class _MainDrawerState extends State<MainDrawer> {
     // Creates a tile in the drawer
 
     return InkWell(
+      onTap: () {
+        Navigator.of(context).pushNamed(route);
+      },
       child: ListTile(
         leading: Icon(
           icon,
@@ -34,9 +37,6 @@ class _MainDrawerState extends State<MainDrawer> {
         ),
         title: Text(title),
       ),
-      onTap: () {
-        Navigator.of(context).pushNamed(route);
-      },
     );
   }
 
@@ -46,9 +46,9 @@ class _MainDrawerState extends State<MainDrawer> {
   @override
   void didChangeDependencies() {
     photoUrl = Provider.of<AuthService>(context, listen: true).photoUrl ?? '';
-    String name =
+    final String name =
         Provider.of<AuthService>(context, listen: true).userName ?? 'Guest';
-    if (name != null) userName = name;
+    userName = name;
     super.didChangeDependencies();
   }
 
@@ -68,7 +68,7 @@ class _MainDrawerState extends State<MainDrawer> {
                 children: <Widget>[
                   Container(
                     height: 200,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       image: DecorationImage(
                         image: AssetImage('assets/images/drawer_bg.png'),
                         fit: BoxFit.cover,
@@ -85,11 +85,11 @@ class _MainDrawerState extends State<MainDrawer> {
                     ),
                     title: Text(
                       userName,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                       ),
                     ),
-                    subtitle: Text(
+                    subtitle: const Text(
                       'profile',
                       style: TextStyle(
                         color: Colors.white,
@@ -99,7 +99,7 @@ class _MainDrawerState extends State<MainDrawer> {
                 ],
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 30,
             ),
             // Drawer tiles
@@ -127,14 +127,14 @@ class _MainDrawerState extends State<MainDrawer> {
               'Feedback',
               "/",
             ),
-            Spacer(),
+            const Spacer(),
             buildDrawerTile(
               context,
               Icons.settings,
               'Settings',
               SettingsScreen.routeName,
             ),
-            SizedBox(
+            const SizedBox(
               height: 30,
             ),
           ],

@@ -11,17 +11,17 @@ class NewProject extends StatefulWidget {
   _NewProjectState createState() => _NewProjectState();
 }
 
-enum Pages { P1, P2 }
+enum Pages { p1, p2 }
 
 class _NewProjectState extends State<NewProject> {
-  Pages _currentPage = Pages.P1;
-  PaymentMode _selectedMode = PaymentMode.None;
+  Pages _currentPage = Pages.p1;
+  PaymentMode _selectedMode = PaymentMode.none;
   String _selectedCategory = '';
-  DateTime? _tentativeDeadline;
+  late DateTime? _tentativeDeadline;
   final _formKey = GlobalKey<FormState>();
-  TextEditingController _titleController = TextEditingController();
-  TextEditingController _amountController = TextEditingController();
-  TextEditingController _clientController = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _clientController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -41,15 +41,15 @@ class _NewProjectState extends State<NewProject> {
       );
     }
 
-    var projects = Provider.of<Projects>(context);
+    final projects = Provider.of<Projects>(context);
 
-    List<Widget> _pageWidgets = [
+    final List<Widget> _pageWidgets = [
       Container(
         height: MediaQuery.of(context).size.height * 0.9,
         // height: 460,
         decoration: BoxDecoration(
           color: Theme.of(context).primaryColor,
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
               color: Colors.black26,
               blurRadius: 100,
@@ -75,19 +75,19 @@ class _NewProjectState extends State<NewProject> {
                       return "Enter a title";
                     }
                   },
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Title',
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 50,
               ),
               Container(
                 height: 20,
-                margin: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+                margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
                 child: Row(
-                  children: <Widget>[
+                  children: const <Widget>[
                     Text(
                       'Categories',
                       style: TextStyle(
@@ -104,14 +104,14 @@ class _NewProjectState extends State<NewProject> {
                   child: returnCatChips(),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 50,
               ),
               Container(
                 height: 20,
-                margin: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+                margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
                 child: Row(
-                  children: <Widget>[
+                  children: const <Widget>[
                     Text(
                       'Is This A Paid Project?',
                       style: TextStyle(
@@ -126,53 +126,54 @@ class _NewProjectState extends State<NewProject> {
                 children: [
                   ListTile(
                     leading: Radio(
-                      value: PaymentMode.None,
+                      value: PaymentMode.none,
                       groupValue: _selectedMode,
                       onChanged: (PaymentMode? mode) {
                         setState(() {
-                          _selectedMode = mode ?? PaymentMode.None;
+                          _selectedMode = mode ?? PaymentMode.none;
                         });
                       },
                     ),
-                    title: Text('No, this is not a paid project'),
+                    title: const Text('No, this is not a paid project'),
                   ),
                   ListTile(
                     leading: Radio(
-                      value: PaymentMode.Fixed,
+                      value: PaymentMode.fixed,
                       groupValue: _selectedMode,
                       onChanged: (PaymentMode? mode) {
                         setState(() {
-                          _selectedMode = mode ?? PaymentMode.None;
+                          _selectedMode = mode ?? PaymentMode.none;
                         });
                       },
                     ),
-                    title:
-                        Text('Yes, I am paid a fixed amount for this project'),
+                    title: const Text(
+                        'Yes, I am paid a fixed amount for this project'),
                   ),
                   ListTile(
                     leading: Radio(
-                      value: PaymentMode.Rate,
+                      value: PaymentMode.rate,
                       groupValue: _selectedMode,
                       onChanged: (PaymentMode? mode) {
                         setState(() {
-                          _selectedMode = mode ?? PaymentMode.None;
+                          _selectedMode = mode ?? PaymentMode.none;
                         });
                       },
                     ),
-                    title: Text('Yes, I am paid every hour for this project'),
+                    title: const Text(
+                        'Yes, I am paid every hour for this project'),
                   ),
                 ],
               ),
-              Spacer(),
+              const Spacer(),
               Theme(
                 data: Theme.of(context).copyWith(
-                    textTheme: TextTheme(
-                  overline:
-                      TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                )),
+                  textTheme: const TextTheme(
+                    overline:
+                        TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
+                ),
                 child: Builder(
                   builder: (context) => ElevatedButton(
-                    child: Text('NEXT'),
                     style: ElevatedButton.styleFrom(
                       primary: Theme.of(context).accentColor,
                       textStyle: TextStyle(
@@ -184,23 +185,23 @@ class _NewProjectState extends State<NewProject> {
                             if (_formKey.currentState!.validate()) {
                               showDatePicker(
                                       context: context,
-                                      initialDate:
-                                          DateTime.now().add(Duration(days: 1)),
-                                      firstDate:
-                                          DateTime.now().add(Duration(days: 1)),
+                                      initialDate: DateTime.now()
+                                          .add(const Duration(days: 1)),
+                                      firstDate: DateTime.now()
+                                          .add(const Duration(days: 1)),
                                       lastDate: DateTime.now()
-                                          .add(Duration(days: 1000)),
+                                          .add(const Duration(days: 1000)),
                                       helpText: "ADD TENTATIVE DEADLINE",
                                       confirmText:
-                                          _selectedMode == PaymentMode.None
+                                          _selectedMode == PaymentMode.none
                                               ? 'CREATE PROJECT'
                                               : 'CONTINUE')
                                   .then((_deadline) {
                                 if (_deadline != null) {
                                   _tentativeDeadline = _deadline;
-                                  if (_selectedMode != PaymentMode.None) {
+                                  if (_selectedMode != PaymentMode.none) {
                                     setState(() {
-                                      _currentPage = Pages.P2;
+                                      _currentPage = Pages.p2;
                                     });
                                   } else {
                                     projects
@@ -231,6 +232,7 @@ class _NewProjectState extends State<NewProject> {
                             }
                           }
                         : null,
+                    child: const Text('NEXT'),
                   ),
                 ),
               ),
@@ -243,7 +245,7 @@ class _NewProjectState extends State<NewProject> {
         // height: 460,
         decoration: BoxDecoration(
           color: Theme.of(context).primaryColor,
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
               color: Colors.black26,
               blurRadius: 100,
@@ -267,22 +269,20 @@ class _NewProjectState extends State<NewProject> {
                   keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return "Enter a" +
-                          (_selectedMode == PaymentMode.Fixed
+                      return "Enter a${_selectedMode == PaymentMode.fixed
                               ? 'n amount'
-                              : ' rate');
+                              : ' rate'}";
                     }
                   },
                   decoration: InputDecoration(
-                    labelText: 'Payment ' +
-                        (_selectedMode == PaymentMode.Fixed
+                    labelText: 'Payment ${_selectedMode == PaymentMode.fixed
                             ? 'Amount in ₹'
-                            : 'Rate in ₹/hr'),
+                            : 'Rate in ₹/hr'}',
                   ),
                   textInputAction: TextInputAction.next,
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 50,
               ),
               Theme(
@@ -295,14 +295,13 @@ class _NewProjectState extends State<NewProject> {
                       return "Enter a client name";
                     }
                   },
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Client Name',
                   ),
                 ),
               ),
-              Spacer(),
+              const Spacer(),
               ElevatedButton(
-                child: Text('CREATE PROJECT'),
                 style: ElevatedButton.styleFrom(
                   primary: Theme.of(context).accentColor,
                   textStyle: TextStyle(
@@ -336,6 +335,7 @@ class _NewProjectState extends State<NewProject> {
                         }
                       }
                     : null,
+                child: const Text('CREATE PROJECT'),
               ),
             ],
           ),

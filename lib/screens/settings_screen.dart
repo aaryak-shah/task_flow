@@ -12,14 +12,14 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   void showColorPicker() {
-    ThemeModel theme = Provider.of<ThemeModel>(context, listen: false);
+    final ThemeModel theme = Provider.of<ThemeModel>(context, listen: false);
     showDialog(
       builder: (context) => AlertDialog(
         content: BlockPicker(
           pickerColor: Theme.of(context).accentColor,
           availableColors: theme.availableAccents(),
           onColorChanged: (selectedColor) async {
-            int index = theme.availableAccents().indexOf(selectedColor);
+            final int index = theme.availableAccents().indexOf(selectedColor);
             final settings = Provider.of<Settings>(context, listen: false);
             await settings.setAccentIndex(index);
             theme.setAccent(index);
@@ -31,6 +31,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget switchTile(
+    // ignore: avoid_positional_boolean_parameters
     bool flag,
     String title,
     String description,
@@ -76,7 +77,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Padding(
-              padding: EdgeInsets.fromLTRB(20, 30, 20, 5),
+              padding: const EdgeInsets.fromLTRB(20, 30, 20, 5),
               // Appearance section of settings
               child: Text(
                 'APPEARANCE',
@@ -95,10 +96,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   await settings.setIsDarkTheme(val);
                   Provider.of<ThemeModel>(context, listen: false)
                       .setBrightnessMode(
-                          (val ? BrightnessMode.Dark : BrightnessMode.Light));
+                          val ? BrightnessMode.dark : BrightnessMode.light);
                 }),
                 ListTile(
-                  title: Text(
+                  title: const Text(
                     'Accent Color',
                   ),
                   subtitle: Text(
@@ -106,18 +107,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     style: Theme.of(context).textTheme.bodyText1,
                   ),
                   trailing: ElevatedButton(
-                    child: Text(
-                      'CHANGE',
-                    ),
                     onPressed: () {
                       showColorPicker();
                     },
+                    child: const Text(
+                      'CHANGE',
+                    ),
                   ),
                 )
               ],
             ),
             Padding(
-              padding: EdgeInsets.fromLTRB(20, 30, 20, 5),
+              padding: const EdgeInsets.fromLTRB(20, 30, 20, 5),
               // General section of settings
               child: Text(
                 'GENERAL',

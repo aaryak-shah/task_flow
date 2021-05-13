@@ -11,22 +11,21 @@ import 'package:task_flow/providers/settings.dart';
 import 'package:task_flow/providers/theme_switcher.dart';
 import 'package:task_flow/screens/home_screen.dart';
 
-import 'screens/login_screen.dart';
-
 import './providers/goals.dart';
 import './providers/tasks.dart';
+import 'screens/login_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  var path = await getApplicationDocumentsDirectory();
+  final path = await getApplicationDocumentsDirectory();
   // create the tasks.csv file if it doesn't exist
-  File f = File('${path.path}/tasks.csv');
+  final File f = File('${path.path}/tasks.csv');
   if (!f.existsSync()) {
     f.writeAsStringSync('');
   }
 
-  File f2 = File('${path.path}/projects.csv');
+  final File f2 = File('${path.path}/projects.csv');
   if (!f2.existsSync()) {
     f2.writeAsStringSync('');
   }
@@ -91,7 +90,7 @@ class _MyAppState extends State<MyApp> {
 
 class AuthenticationWrapper extends StatefulWidget {
   final BuildContext ctx;
-  AuthenticationWrapper(this.ctx);
+  const AuthenticationWrapper(this.ctx);
   @override
   _AuthenticationWrapperState createState() => _AuthenticationWrapperState();
 }
@@ -106,12 +105,12 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
       future: Provider.of<AuthService>(widget.ctx).isGuest,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return Login();
+          return const Login();
         } else {
           if ((snapshot.data!) || (firebaseUser != null && firebaseUser.emailVerified)) {
             return HomeScreen();
           } else {
-            return Login();
+            return const Login();
           }
         }
       },

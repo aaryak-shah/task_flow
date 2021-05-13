@@ -10,7 +10,6 @@ class LabelChips extends StatefulWidget {
   final List<String> availableLabels;
   const LabelChips(this.onSelectionChanged, this.availableLabels);
 
-
   @override
   _LabelChipsState createState() => _LabelChipsState();
 }
@@ -21,14 +20,14 @@ class _LabelChipsState extends State<LabelChips> {
 
   List<Widget> _buildChoiceList() {
     // function to build a list of Label chip widgets
-    List<Widget> choices =[];
-    labels.forEach((item) {
+    final List<Widget> choices = [];
+    for (final String item in labels) {
       choices.add(ChoiceChip(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(6),
         ),
         selectedColor: Theme.of(context).accentColor,
-        padding: EdgeInsets.all(6),
+        padding: const EdgeInsets.all(6),
         label: Text(item),
         selected: selectedLabels.contains(item),
         onSelected: (selected) {
@@ -38,14 +37,13 @@ class _LabelChipsState extends State<LabelChips> {
           });
         },
       ));
-    });
+    }
     return choices;
   }
 
   @override
   Widget build(BuildContext context) {
     return Wrap(
-      alignment: WrapAlignment.start,
       spacing: 10,
       runSpacing: -6,
       children: _buildChoiceList(),

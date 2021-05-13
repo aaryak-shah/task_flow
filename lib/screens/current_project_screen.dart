@@ -26,8 +26,8 @@ void showLabelForm(BuildContext context, int i) {
     builder: (_) {
       return GestureDetector(
         onTap: () {},
-        child: NewLabels('project', i),
         behavior: HitTestBehavior.opaque,
+        child: NewLabels('project', i),
       );
     },
   );
@@ -40,7 +40,7 @@ class CurrentProjectScreen extends StatefulWidget {
   final String projectId;
   final bool isFromClients;
 
-  CurrentProjectScreen({
+  const CurrentProjectScreen({
     required this.projectId,
     required this.index,
     this.isFromClients = false,
@@ -58,8 +58,8 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
   void initState() {
     Future.microtask(() async {
       final directory = await getApplicationDocumentsDirectory();
-      File f = File(
-          '${directory.path}/st_${widget.projectId.replaceAll(new RegExp(r'[:. \-]'), "")}.csv');
+      final File f = File(
+          '${directory.path}/st_${widget.projectId.replaceAll(RegExp(r'[:. \-]'), "")}.csv');
       if (!f.existsSync()) {
         f.writeAsStringSync('');
       }
@@ -92,11 +92,12 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
   Widget build(BuildContext context) {
     void newSubTask(String name) {
       final key = GlobalKey<FormState>();
-      TextEditingController titleController = TextEditingController(text: name);
+      final TextEditingController titleController =
+          TextEditingController(text: name);
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('New Subtask'),
+          title: const Text('New Subtask'),
           content: Form(
             key: key,
             child: Theme(
@@ -110,13 +111,12 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                     return 'Enter a Title';
                   }
                 },
-                decoration: InputDecoration(labelText: 'Title'),
+                decoration: const InputDecoration(labelText: 'Title'),
               ),
             ),
           ),
           actions: [
             TextButton(
-              child: Text('START'),
               onPressed: () async {
                 if (key.currentState!.validate()) {
                   await project.addSubTask(
@@ -128,7 +128,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                   Navigator.of(context).pushReplacementNamed(
                     CurrentTaskScreen.routeName,
                     arguments: {
-                      'index': (project.subTasks.length - 1),
+                      'index': project.subTasks.length - 1,
                       'wasSuspended': false,
                       'superProjectName': project.name,
                       'superProjectId': project.id
@@ -136,6 +136,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                   );
                 }
               },
+              child: const Text('START'),
             )
           ],
         ),
@@ -143,11 +144,11 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
     }
 
     if (loaded && !_isCompleted) {
-      ThemeModel themeModel = Provider.of<ThemeModel>(context);
+      final ThemeModel themeModel = Provider.of<ThemeModel>(context);
       return WillPopScope(
         onWillPop: () async {
           await Provider.of<Projects>(context, listen: false).syncEngine();
-          widget.isFromClients != null
+          widget.isFromClients
               ? Navigator.pop(context)
               : Navigator.pushReplacementNamed(
                   context,
@@ -159,33 +160,33 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
         child: Scaffold(
           backgroundColor: Theme.of(context).primaryColor,
           appBar: PreferredSize(
-            preferredSize: Size.fromHeight(100),
+            preferredSize: const Size.fromHeight(100),
             child: showAppBar(context),
           ),
           floatingActionButton: project.end == null
               ? FloatingActionButton(
-                  child: Icon(
-                    Icons.add,
-                    size: 35,
-                  ),
                   backgroundColor: Theme.of(context).cardColor,
                   foregroundColor: Theme.of(context).accentColor,
                   onPressed: () {
                     newSubTask('');
                   },
+                  child: const Icon(
+                    Icons.add,
+                    size: 35,
+                  ),
                 )
               : null,
           body: Column(
             children: [
               Container(
-                padding: EdgeInsets.all(10),
-                margin: EdgeInsets.all(10),
+                padding: const EdgeInsets.all(10),
+                margin: const EdgeInsets.all(10),
                 width: double.infinity,
                 height: 140,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(5),
                   color: Theme.of(context).cardColor,
-                  image: DecorationImage(
+                  image: const DecorationImage(
                     image: AssetImage('assets/images/card_bg.png'),
                     fit: BoxFit.cover,
                   ),
@@ -208,7 +209,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                         ),
                         if (project.end == null)
                           IconButton(
-                              icon: Icon(Icons.stop),
+                              icon: const Icon(Icons.stop),
                               onPressed: () async {
                                 setState(() {
                                   _isCompleted = true;
@@ -226,21 +227,21 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                       project.cardTags(requireLabels: false),
                       style: Theme.of(context).textTheme.bodyText1,
                     ),
-                    Spacer(),
+                    const Spacer(),
                     Row(
                       children: [
                         Text(
-                          'LABELS: ' + project.labels.join(', '),
+                          'LABELS: ${project.labels.join(', ')}',
                           style: Theme.of(context).textTheme.bodyText1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        Spacer(),
+                        const Spacer(),
                         if (project.end == null)
                           GestureDetector(
-                            child: Icon(Icons.add),
                             onTap: () {
                               showLabelForm(context, widget.index);
                             },
+                            child: const Icon(Icons.add),
                           ),
                       ],
                     ),
@@ -251,8 +252,8 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: EdgeInsets.all(10),
-                    margin: EdgeInsets.fromLTRB(10, 0, 5, 10),
+                    padding: const EdgeInsets.all(10),
+                    margin: const EdgeInsets.fromLTRB(10, 0, 5, 10),
                     width: MediaQuery.of(context).size.width * 0.463,
                     height: 100,
                     decoration: BoxDecoration(
@@ -267,7 +268,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                           'Earnings',
                           style: Theme.of(context).textTheme.bodyText1,
                         ),
-                        Spacer(),
+                        const Spacer(),
                         Text(
                           project.earnings,
                           style: TextStyle(
@@ -281,8 +282,8 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                     ),
                   ),
                   Container(
-                    padding: EdgeInsets.all(10),
-                    margin: EdgeInsets.fromLTRB(5, 0, 10, 10),
+                    padding: const EdgeInsets.all(10),
+                    margin: const EdgeInsets.fromLTRB(5, 0, 10, 10),
                     width: MediaQuery.of(context).size.width * 0.463,
                     height: 100,
                     decoration: BoxDecoration(
@@ -297,7 +298,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                           'Time',
                           style: Theme.of(context).textTheme.bodyText1,
                         ),
-                        Spacer(),
+                        const Spacer(),
                         Text(
                           project.deadlineString,
                           style: TextStyle(
@@ -312,12 +313,12 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                   ),
                 ],
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               Text(
                 'YOUR SUBTASKS - ${project.workingDuration.inHours}h ${project.workingDuration.inMinutes.remainder(60)}min',
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white38,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1,
@@ -326,12 +327,12 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
               Expanded(
                 child: ListView.builder(
                   itemBuilder: (context, index) {
-                    Task current = project.subTasks[index];
+                    final Task current = project.subTasks[index];
                     return ListTile(
                       leading: project.end == null
                           ? (current.end == null
                               ? IconButton(
-                                  icon: Icon(Icons.play_arrow),
+                                  icon: const Icon(Icons.play_arrow),
                                   onPressed: () {
                                     Navigator.of(context).pushNamed(
                                       CurrentTaskScreen.routeName,
@@ -345,7 +346,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                                   },
                                 )
                               : IconButton(
-                                  icon: Icon(Icons.refresh),
+                                  icon: const Icon(Icons.refresh),
                                   onPressed: () {
                                     newSubTask(current.title);
                                   },
@@ -355,15 +356,14 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
                       trailing: Consumer<Settings>(
                         builder: (context, settings, _) => Text(
                           current.end == null
-                              ? current.getTimeString(
-                                  'run', settings.showSeconds)
+                              ? current.getTimeString('run',
+                                  showSeconds: settings.showSeconds)
                               : 'Completed',
                         ),
                       ),
                     );
                   },
-                  itemCount:
-                      project.subTasks == null ? 0 : project.subTasks.length,
+                  itemCount: project.subTasks.length,
                 ),
               ),
             ],
@@ -371,7 +371,7 @@ class _CurrentProjectScreenState extends State<CurrentProjectScreen> {
         ),
       );
     } else {
-      return Center(
+      return const Center(
         child: CircularProgressIndicator(),
       );
     }
