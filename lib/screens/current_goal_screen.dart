@@ -6,7 +6,7 @@ import '../models/task.dart';
 import '../providers/goals.dart';
 import '../widgets/app_bar.dart';
 import '../widgets/new_labels.dart';
-import './tabs_screen.dart';
+import 'tabs_screen.dart';
 
 // Screen which shows the timer for the currently running goal
 

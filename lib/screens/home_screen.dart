@@ -1,15 +1,16 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:task_flow/providers/theme_switcher.dart';
-import 'package:task_flow/screens/clients_screen.dart';
-import 'package:task_flow/screens/current_goal_screen.dart';
-import 'package:task_flow/screens/current_project_screen.dart';
-import 'package:task_flow/screens/current_task_screen.dart';
-import 'package:task_flow/screens/profile_screen.dart';
-import 'package:task_flow/screens/settings_screen.dart';
-import 'package:task_flow/screens/stats_screen.dart';
-import 'package:task_flow/screens/tabs_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
+import '../providers/theme_switcher.dart';
+import 'clients_screen.dart';
+import 'current_goal_screen.dart';
+import 'current_project_screen.dart';
+import 'current_task_screen.dart';
+import 'profile_screen.dart';
+import 'settings_screen.dart';
+import 'stats_screen.dart';
+import 'tabs_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override

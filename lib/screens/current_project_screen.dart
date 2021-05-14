@@ -3,15 +3,16 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:task_flow/models/project.dart';
-import 'package:task_flow/providers/projects.dart';
-import 'package:task_flow/providers/settings.dart';
-import 'package:task_flow/models/task.dart';
-import 'package:task_flow/providers/theme_switcher.dart';
-import 'package:task_flow/screens/current_task_screen.dart';
-import 'package:task_flow/screens/tabs_screen.dart';
-import 'package:task_flow/widgets/new_labels.dart';
+
+import '../models/project.dart';
+import '../models/task.dart';
+import '../providers/projects.dart';
+import '../providers/settings.dart';
+import '../providers/theme_switcher.dart';
 import '../widgets/app_bar.dart';
+import '../widgets/new_labels.dart';
+import 'current_task_screen.dart';
+import 'tabs_screen.dart';
 
 void showLabelForm(BuildContext context, int i) {
   // Arguments => context: The context for the modal sheet to be created in

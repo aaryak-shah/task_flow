@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:task_flow/providers/projects.dart';
-import 'package:task_flow/providers/settings.dart';
-import 'package:task_flow/widgets/client_details.dart';
+
+import '../providers/projects.dart';
+import '../providers/settings.dart';
+import '../widgets/client_details.dart';
 
 void showClientDetails(
     BuildContext context, String clientName, double earning, String time) {

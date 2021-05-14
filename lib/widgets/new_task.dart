@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/tasks.dart';
 import '../screens/current_task_screen.dart';
-import './category_chip.dart';
+import 'category_chip.dart';
 
 class NewTask extends StatefulWidget {
   // Arguments => data: List of data to be set as initial values for the form

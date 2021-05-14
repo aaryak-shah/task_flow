@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:task_flow/providers/projects.dart';
-import 'package:task_flow/providers/theme_switcher.dart';
 
 import '../providers/goals.dart';
+import '../providers/projects.dart';
 import '../providers/tasks.dart';
+import '../providers/theme_switcher.dart';
 import '../widgets/main_drawer.dart';
 import '../widgets/plus_btn_controllers.dart';
-import './goals_screen.dart';
-import './projects_screen.dart';
-import './stats_screen.dart';
-import './tasks_screen.dart';
+import 'goals_screen.dart';
+import 'projects_screen.dart';
+import 'stats_screen.dart';
+import 'tasks_screen.dart';
 
 // Screen that displays all the tabs
 class TabsScreen extends StatefulWidget {

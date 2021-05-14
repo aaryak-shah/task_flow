@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:provider/provider.dart';
-import 'package:task_flow/providers/settings.dart';
-import 'package:task_flow/providers/theme_switcher.dart';
+
+import '../providers/settings.dart';
+import '../providers/theme_switcher.dart';
 
 class SettingsScreen extends StatefulWidget {
   static const routeName = '/settings';

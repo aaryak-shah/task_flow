@@ -5,14 +5,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:task_flow/providers/auth_service.dart';
-import 'package:task_flow/providers/projects.dart';
-import 'package:task_flow/providers/settings.dart';
-import 'package:task_flow/providers/theme_switcher.dart';
-import 'package:task_flow/screens/home_screen.dart';
 
-import './providers/goals.dart';
-import './providers/tasks.dart';
+import 'providers/auth_service.dart';
+import 'providers/goals.dart';
+import 'providers/projects.dart';
+import 'providers/settings.dart';
+import 'providers/tasks.dart';
+import 'providers/theme_switcher.dart';
+import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 
 Future<void> main() async {
@@ -107,7 +107,8 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
         if (!snapshot.hasData) {
           return const Login();
         } else {
-          if ((snapshot.data!) || (firebaseUser != null && firebaseUser.emailVerified)) {
+          if ((snapshot.data!) ||
+              (firebaseUser != null && firebaseUser.emailVerified)) {
             return HomeScreen();
           } else {
             return const Login();

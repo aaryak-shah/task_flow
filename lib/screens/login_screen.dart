@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:task_flow/providers/auth_service.dart';
-import 'package:task_flow/widgets/sign_in_form.dart';
-import 'package:task_flow/widgets/sign_up_form.dart';
+
+import '../providers/auth_service.dart';
+import '../widgets/sign_in_form.dart';
+import '../widgets/sign_up_form.dart';
 
 class LoginScreen extends StatefulWidget {
   @override

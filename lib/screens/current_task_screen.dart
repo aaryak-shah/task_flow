@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:task_flow/providers/projects.dart';
 
 import '../models/task.dart';
+import '../providers/projects.dart';
 import '../providers/tasks.dart';
 import '../screens/tabs_screen.dart';
 import '../widgets/app_bar.dart';

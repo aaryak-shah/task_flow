@@ -2,10 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:task_flow/providers/goals.dart';
 
+import '../providers/goals.dart';
 import '../screens/current_goal_screen.dart';
-import './category_chip.dart';
+import 'category_chip.dart';
 
 class NewGoal extends StatefulWidget {
   // Arguments => data: List of data to be set as initial values for the form

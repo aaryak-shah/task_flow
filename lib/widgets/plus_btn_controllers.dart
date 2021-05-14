@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:task_flow/widgets/new_project.dart';
 
-import './new_task.dart';
 import 'new_goal.dart';
+import 'new_project.dart';
+import 'new_task.dart';
 
 // Controls the action of the '+' floating action button on different pages
 

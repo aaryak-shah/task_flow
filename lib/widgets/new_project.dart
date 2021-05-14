@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:task_flow/models/project.dart';
-import 'package:task_flow/providers/projects.dart';
-import 'package:task_flow/screens/current_project_screen.dart';
+
+import '../models/project.dart';
+import '../providers/projects.dart';
+import '../screens/current_project_screen.dart';
 import 'category_chip.dart';
 
 class NewProject extends StatefulWidget {

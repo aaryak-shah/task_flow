@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:task_flow/providers/settings.dart';
 
 import '../providers/goals.dart';
+import '../providers/settings.dart';
 import '../widgets/plus_btn_controllers.dart';
 
 // Screen to display all the goals in the past week

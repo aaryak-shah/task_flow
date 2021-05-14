@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:task_flow/providers/settings.dart';
-import 'package:task_flow/providers/theme_switcher.dart';
-import 'package:task_flow/widgets/plus_btn_controllers.dart';
 
+import '../providers/settings.dart';
 import '../providers/tasks.dart';
+import '../providers/theme_switcher.dart';
 import '../widgets/chart.dart';
+import '../widgets/plus_btn_controllers.dart';
 import 'current_task_screen.dart';
 
 class TasksScreen extends StatefulWidget {
