@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:csv/csv.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -13,10 +15,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/project.dart';
 import '../models/task.dart';
+import '../utils/is_connected.dart';
 
 class Projects with ChangeNotifier {
   BuildContext context;
-  Projects(this.context);
+  SendPort transactionSendPort;
+  Projects({required this.context, required this.transactionSendPort});
 
   List<Project> _projects = [];
 
@@ -57,11 +61,11 @@ class Projects with ChangeNotifier {
             ])
         .toList());
     final File f = await _localFile;
-    debugPrint("projects.csv before");
-    debugPrint(await f.readAsString());
+    // debugPrint("projects.csv before");
+    // debugPrint(await f.readAsString());
     await f.writeAsString(rows, mode: FileMode.writeOnly);
-    debugPrint("projects.csv after");
-    debugPrint(await f.readAsString());
+    // debugPrint("projects.csv after");
+    // debugPrint(await f.readAsString());
     notifyListeners();
   }
 
@@ -111,7 +115,8 @@ class Projects with ChangeNotifier {
       }
       // _projects = [];
       final Project project = Project(
-        context,
+        context: context,
+        transactionSendPort: transactionSendPort,
         id: row[0] as String,
         name: row[1] as String,
         start: parser.parse(row[2] as String),
@@ -145,11 +150,11 @@ class Projects with ChangeNotifier {
   }) async {
     http.Response? response;
     final firebaseUser = context.read<User?>();
-    if (await _isConnected && firebaseUser != null) {
+    if (await isConnected() && firebaseUser != null) {
       final userId = firebaseUser.uid;
       final String? token = (await firebaseUser.getIdTokenResult()).token;
       final Uri url = Uri.parse(
-          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects.json?auth=$token");
+          "${env['FIREBASE_URL']}/Users/$userId/projects.json?auth=$token");
       response = await http.post(
         url,
         body: json.encode(
@@ -167,21 +172,20 @@ class Projects with ChangeNotifier {
     }
 
     final Project newProject = Project(
-      context,
+      context: context,
+      transactionSendPort: transactionSendPort,
       name: name,
       start: start,
       deadline: deadline,
       category: category,
       labels: [],
-      id: response != null
-          ? json.decode(response.body)['name'] as String
-          : id,
+      id: response != null ? json.decode(response.body)['name'] as String : id,
       paymentMode: paymentMode,
       rate: rate,
       client: client,
       subTasks: [],
       syncStatus: (firebaseUser != null)
-          ? (await _isConnected ? SyncStatus.fullySynced : SyncStatus.newTask)
+          ? (await isConnected() ? SyncStatus.fullySynced : SyncStatus.newTask)
           : SyncStatus.fullySynced,
     );
     _projects.add(newProject);
@@ -189,19 +193,6 @@ class Projects with ChangeNotifier {
     await writeCsv(_projects);
     notifyListeners();
     return newProject.id;
-  }
-
-  Future<bool> get _isConnected async {
-    try {
-      final result =
-          await InternetAddress.lookup('taskflow1-4a77f.firebaseio.com');
-      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        return true;
-      }
-    } on SocketException catch (_) {
-      return false;
-    }
-    return false;
   }
 
   Future<void> addLabels(
@@ -222,11 +213,11 @@ class Projects with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('AvailableLabels', labels);
     final firebaseUser = context.read<User?>();
-    if (await _isConnected && firebaseUser != null) {
+    if (await isConnected() && firebaseUser != null) {
       final userId = firebaseUser.uid;
       final String? token = (await firebaseUser.getIdTokenResult()).token;
       final Uri url = Uri.parse(
-          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/${_projects[index].id}.json?auth=$token");
+          "${env['FIREBASE_URL']}/Users/$userId/projects/${_projects[index].id}.json?auth=$token");
       await http.patch(
         url,
         body: json.encode(
@@ -238,7 +229,7 @@ class Projects with ChangeNotifier {
     }
 
     _projects[index].syncStatus = (firebaseUser != null)
-        ? (await _isConnected
+        ? (await isConnected()
             ? (_projects[index].syncStatus == SyncStatus.updatedTask
                 ? SyncStatus.fullySynced
                 : _projects[index].syncStatus)
@@ -253,11 +244,11 @@ class Projects with ChangeNotifier {
   Future<void> complete(int index) async {
     _projects[index].end = DateTime.now();
     final firebaseUser = context.read<User?>();
-    if (await _isConnected && firebaseUser != null) {
+    if (await isConnected() && firebaseUser != null) {
       final userId = firebaseUser.uid;
       final String? token = (await firebaseUser.getIdTokenResult()).token;
       final Uri url = Uri.parse(
-          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/${_projects[index].id}.json?auth=$token");
+          "${env['FIREBASE_URL']}/Users/$userId/projects/${_projects[index].id}.json?auth=$token");
       await http.patch(
         url,
         body: json.encode(
@@ -270,7 +261,7 @@ class Projects with ChangeNotifier {
     }
 
     _projects[index].syncStatus = (firebaseUser != null)
-        ? (await _isConnected
+        ? (await isConnected()
             ? (_projects[index].syncStatus == SyncStatus.updatedTask
                 ? SyncStatus.fullySynced
                 : _projects[index].syncStatus)
@@ -324,7 +315,7 @@ class Projects with ChangeNotifier {
   }
 
   Future<void> pullFromFireBase() async {
-    if (await _isConnected) {
+    if (await isConnected()) {
       late Map<String, dynamic>? syncedProjects;
 
       final firebaseUser = context.read<User?>();
@@ -333,7 +324,7 @@ class Projects with ChangeNotifier {
         final userId = firebaseUser.uid;
         final String? token = (await firebaseUser.getIdTokenResult()).token;
         final Uri url = Uri.parse(
-            "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects.json?auth=$token");
+            "${env['FIREBASE_URL']}/Users/$userId/projects.json?auth=$token");
         final res = await http.get(url);
         syncedProjects = json.decode(res.body) as Map<String, dynamic>?;
       }
@@ -343,7 +334,8 @@ class Projects with ChangeNotifier {
       if (syncedProjects != null) {
         for (final MapEntry<String, dynamic> m in syncedProjects.entries) {
           final Project p = Project(
-            context,
+            context: context,
+            transactionSendPort: transactionSendPort,
             id: m.key,
             name: m.value['name'] as String,
             start: parser.parse(m.value['start'] as String),
@@ -381,10 +373,10 @@ class Projects with ChangeNotifier {
       final String? token = (await firebaseUser.getIdTokenResult()).token;
       for (int i = 0; i < _projects.length; i++) {
         final Project project = _projects[i];
-        if (await _isConnected) {
+        if (await isConnected()) {
           if (project.syncStatus == SyncStatus.updatedTask) {
             final Uri url = Uri.parse(
-                "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/${project.id}.json?auth=$token");
+                "${env['FIREBASE_URL']}/Users/$userId/projects/${project.id}.json?auth=$token");
             await http.patch(
               url,
               body: json.encode(
@@ -398,7 +390,7 @@ class Projects with ChangeNotifier {
             );
           } else if (project.syncStatus == SyncStatus.newTask) {
             final Uri url = Uri.parse(
-                "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects.json?auth=$token");
+                "${env['FIREBASE_URL']}/Users/$userId/projects.json?auth=$token");
             final res = await http.post(
               url,
               body: json.encode(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:task_flow/utils/is_connected.dart';
 
+import '../models/project.dart';
 import '../providers/goals.dart';
 import '../providers/projects.dart';
 import '../providers/tasks.dart';
@@ -116,16 +118,22 @@ class _TabsScreenState extends State<TabsScreen> {
       Provider.of<Tasks>(context).loadData();
       Provider.of<Goals>(context).loadData();
       Provider.of<Projects>(context).loadData();
-      Provider.of<Tasks>(context).purgeOldTasks();
-      Provider.of<Goals>(context).purgeOldGoals();
-      Provider.of<Tasks>(context).syncEngine();
-      // Projects projects = Provider.of<Projects>(context);
-      // projects.syncEngine();
-      // for (Project project in projects.projects) {
-      //   project.syncEngine();
-      // }
+    isConnected().then((isConnected) {
+      if (isConnected) {
+        Provider.of<Tasks>(context, listen: false).purgeOldTasks();
+        Provider.of<Goals>(context, listen: false).purgeOldGoals();
+        Provider.of<Tasks>(context, listen: false).syncEngine();
+        final Projects projects = Provider.of<Projects>(context, listen: false);
+        projects.syncEngine();
+        for (final Project project in projects.projects) {
+          project.syncEngine();
+        }
+      }
+    });
       _isInit = false;
     }
+
+    
     super.didChangeDependencies();
   }
 

@@ -1,20 +1,24 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:csv/csv.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
+import '../utils/is_connected.dart';
 import 'task.dart';
 
 enum PaymentMode { fixed, rate, none }
 
 class Project {
   BuildContext context;
+  SendPort transactionSendPort;
 
   SyncStatus syncStatus;
   String id;
@@ -29,8 +33,9 @@ class Project {
   double rate;
   String client;
 
-  Project(
-    this.context, {
+  Project({
+    required this.context,
+    required this.transactionSendPort,
     this.syncStatus = SyncStatus.newTask,
     required this.id,
     required this.name,
@@ -44,19 +49,6 @@ class Project {
     this.rate = 0,
     this.client = '',
   });
-
-  Future<bool> get _isConnected async {
-    try {
-      final result =
-          await InternetAddress.lookup('taskflow1-4a77f.firebaseio.com');
-      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        return true;
-      }
-    } on SocketException catch (_) {
-      return false;
-    }
-    return false;
-  }
 
   Future<String> get _localPath async {
     // gets the AppData directory
@@ -157,11 +149,11 @@ class Project {
     http.Response? response;
     final firebaseUser = context.read<User?>();
 
-    if (await _isConnected && firebaseUser != null) {
+    if (await isConnected() && firebaseUser != null) {
       final userId = firebaseUser.uid;
       final String? token = (await firebaseUser.getIdTokenResult()).token;
       final Uri url = Uri.parse(
-          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/${this.id}/subtasks.json?auth=$token");
+          "${env['FIREBASE_URL']}/Users/$userId/projects/${this.id}/subtasks.json?auth=$token");
       response = await http.post(
         url,
         body: json.encode(
@@ -177,7 +169,7 @@ class Project {
 
     final Task newTask = Task(
       syncStatus: (firebaseUser != null)
-          ? (await _isConnected ? SyncStatus.fullySynced : SyncStatus.newTask)
+          ? (await isConnected() ? SyncStatus.fullySynced : SyncStatus.newTask)
           : SyncStatus.fullySynced,
       start: start,
       title: title,
@@ -250,11 +242,11 @@ class Project {
         DateTime.now().difference(subTasks[index].latestPause!);
 
     final firebaseUser = context.read<User?>();
-    if (await _isConnected && firebaseUser != null) {
+    if (await isConnected() && firebaseUser != null) {
       final userId = firebaseUser.uid;
       final String? token = (await firebaseUser.getIdTokenResult()).token;
       final Uri url = Uri.parse(
-          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks/${subTasks[index].id}.json?auth=$token");
+          "${env['FIREBASE_URL']}/Users/$userId/projects/$id/subtasks/${subTasks[index].id}.json?auth=$token");
       await http.patch(
         url,
         body: json.encode(
@@ -268,7 +260,7 @@ class Project {
     }
 
     subTasks[index].syncStatus = (firebaseUser != null)
-        ? (await _isConnected
+        ? (await isConnected()
             ? (subTasks[index].syncStatus == SyncStatus.updatedTask
                 ? SyncStatus.fullySynced
                 : subTasks[index].syncStatus)
@@ -287,11 +279,11 @@ class Project {
     subTasks[index].pauses++;
     subTasks[index].latestPause = DateTime.now();
     final firebaseUser = context.read<User?>();
-    if (await _isConnected && firebaseUser != null) {
+    if (await isConnected() && firebaseUser != null) {
       final userId = firebaseUser.uid;
       final String? token = (await firebaseUser.getIdTokenResult()).token;
       final Uri url = Uri.parse(
-          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks/${subTasks[index].id}.json?auth=$token");
+          "${env['FIREBASE_URL']}/Users/$userId/projects/$id/subtasks/${subTasks[index].id}.json?auth=$token");
       await http.patch(
         url,
         body: json.encode(
@@ -306,7 +298,7 @@ class Project {
       );
     }
     subTasks[index].syncStatus = (firebaseUser != null)
-        ? (await _isConnected
+        ? (await isConnected()
             ? (subTasks[index].syncStatus == SyncStatus.updatedTask
                 ? SyncStatus.fullySynced
                 : subTasks[index].syncStatus)
@@ -324,11 +316,11 @@ class Project {
     subTasks[index].latestPause = subTasks[index].end;
 
     final firebaseUser = context.read<User?>();
-    if (await _isConnected && firebaseUser != null) {
+    if (await isConnected() && firebaseUser != null) {
       final userId = firebaseUser.uid;
       final String? token = (await firebaseUser.getIdTokenResult()).token;
       final Uri url = Uri.parse(
-          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks/${subTasks[index].id}.json?auth=$token");
+          "${env['FIREBASE_URL']}/Users/$userId/projects/$id/subtasks/${subTasks[index].id}.json?auth=$token");
       await http.patch(
         url,
         body: json.encode(
@@ -345,7 +337,7 @@ class Project {
     }
 
     subTasks[index].syncStatus = (firebaseUser != null)
-        ? (await _isConnected
+        ? (await isConnected()
             ? (subTasks[index].syncStatus == SyncStatus.updatedTask
                 ? SyncStatus.fullySynced
                 : subTasks[index].syncStatus)
@@ -358,14 +350,14 @@ class Project {
   }
 
   Future<void> pullFromFireBase() async {
-    if (await _isConnected) {
+    if (await isConnected()) {
       late Map<String, dynamic>? syncedTasks;
       final firebaseUser = context.read<User?>();
       if (firebaseUser != null) {
         final userId = firebaseUser.uid;
         final String? token = (await firebaseUser.getIdTokenResult()).token;
         final Uri url = Uri.parse(
-            "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks.json?auth=$token");
+            "${env['FIREBASE_URL']}/Users/$userId/projects/$id/subtasks.json?auth=$token");
         final res = await http.get(url);
         syncedTasks = json.decode(res.body) as Map<String, dynamic>?;
       }
@@ -406,18 +398,18 @@ class Project {
   }
 
   Future<void> syncEngine() async {
-    if (await _isConnected) {
+    if (await isConnected()) {
       final firebaseUser = context.read<User?>();
       await loadData();
       if (firebaseUser != null) {
         final userId = firebaseUser.uid;
         final String? token = (await firebaseUser.getIdTokenResult()).token;
-        debugPrint("Token $token");
+        // debugPrint("Token $token");
         for (int i = 0; i < subTasks.length; i++) {
           final Task task = subTasks[i];
           if (task.syncStatus == SyncStatus.updatedTask) {
             final Uri url = Uri.parse(
-                "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks/${task.id}.json?auth=$token");
+                "${env['FIREBASE_URL']}/Users/$userId/projects/$id/subtasks/${task.id}.json?auth=$token");
             await http.patch(
               url,
               body: json.encode(
@@ -436,7 +428,7 @@ class Project {
             );
           } else if (task.syncStatus == SyncStatus.newTask) {
             final Uri url = Uri.parse(
-                "https://taskflow1-4a77f.firebaseio.com/Users/$userId/projects/$id/subtasks.json?auth=$token");
+                "${env['FIREBASE_URL']}/Users/$userId/projects/$id/subtasks.json?auth=$token");
             final res = await http.post(
               url,
               body: json.encode(
@@ -457,7 +449,7 @@ class Project {
                 },
               ),
             );
-            debugPrint('${json.decode(res.body)}');
+            // debugPrint('${json.decode(res.body)}');
             subTasks[i].id = json.decode(res.body)['name'] as String;
           }
           subTasks[i].syncStatus = SyncStatus.fullySynced;

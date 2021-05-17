@@ -1,22 +1,25 @@
-import 'dart:convert';
+
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:csv/csv.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/task.dart';
+import '../models/transaction.dart';
+import '../utils/is_connected.dart';
 
 class Goals with ChangeNotifier {
   BuildContext context;
+  SendPort transactionSendPort;
   List<Task> _goals = [];
-  Goals(this.context);
+  Goals({required this.context, required this.transactionSendPort});
 
   // goals getter, gives a copy of _goals
   List<Task> get goals => [..._goals];
@@ -31,19 +34,6 @@ class Goals with ChangeNotifier {
     // gets the tasks.csv file from the AppData directory
     final path = await _localPath;
     return File('$path/tasks.csv');
-  }
-
-  Future<bool> get _isConnected async {
-    try {
-      final result = await InternetAddress.lookup(
-          'https://taskflow1-4a77f.firebaseio.com');
-      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        return true;
-      }
-    } on SocketException catch (_) {
-      return false;
-    }
-    return false;
   }
 
   Future<void> loadData() async {
@@ -191,15 +181,35 @@ class Goals with ChangeNotifier {
     _goals[index].end = DateTime.now();
 
     final firebaseUser = context.read<User?>();
-    if (await _isConnected && firebaseUser != null) {
+    if (await isConnected() && firebaseUser != null) {
       final userId = firebaseUser.uid;
       final String? token = (await firebaseUser.getIdTokenResult()).token;
-      final Uri url = Uri.parse(
-          "https://taskflow1-4a77f.firebaseio.com/Users/$userId/tasks.json?auth=$token");
-      await http.post(
-        url,
-        body: json.encode(
-          {
+      // await http.post(
+      //   url,
+      //   body: json.encode(
+          // {
+          //   'id': _goals[index].id,
+          //   'title': _goals[index].title,
+          //   'start':
+          //       DateFormat("dd-MM-yyyy HH:mm:ss").format(_goals[index].start),
+          //   'end': DateFormat("dd-MM-yyyy HH:mm:ss").format(_goals[index].end!),
+          //   'labels':
+          //       _goals[index].labels != null && _goals[index].labels!.isNotEmpty
+          //           ? _goals[index].labels!.join("|")
+          //           : null,
+          //   'goalTime': _goals[index].goalTime.inSeconds,
+          //   'category': _goals[index].category,
+          // },
+      //   ),
+      // );
+      transactionSendPort.send(
+        Transaction(
+          timeStamp: DateTime.now(),
+          transactionType: TransactionType.create,
+          dataType: DataType.task,
+          uid: userId,
+          token: token,
+          data: {
             'id': _goals[index].id,
             'title': _goals[index].title,
             'start':
@@ -214,7 +224,7 @@ class Goals with ChangeNotifier {
           },
         ),
       );
-    } else if (!await _isConnected) {
+    } else if (!await isConnected()) {
       _goals[index].syncStatus = SyncStatus.newTask;
     }
     await writeCsv(_goals);

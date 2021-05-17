@@ -1,10 +1,13 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart' as dot_env;
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:task_flow/utils/transcation_isolate.dart';
 
 import 'providers/auth_service.dart';
 import 'providers/goals.dart';
@@ -29,24 +32,30 @@ Future<void> main() async {
   if (!f2.existsSync()) {
     f2.writeAsStringSync('');
   }
-  runApp(MyApp());
+
+  await dot_env.load();
+  final ReceivePort mainIsolateReceivePort = ReceivePort();
+  SendPort transactionSendPort;
+  await Isolate.spawn(initiateHandler, mainIsolateReceivePort.sendPort);
+  mainIsolateReceivePort.listen((dynamic data) {
+    if (data is SendPort) {
+      transactionSendPort = data;
+      runApp(App(transactionSendPort));
+    }
+  });
 }
 
-class MyApp extends StatefulWidget {
+class App extends StatefulWidget {
   // This widget is the root of your application.
+  final SendPort transactionSendPort;
+  const App(this.transactionSendPort);
   @override
-  _MyAppState createState() => _MyAppState();
+  _AppState createState() => _AppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _AppState extends State<App> {
   bool isAuth = false;
-  // bool isGuest = false;
   bool isInit = true;
-  // ThemeData theme = ThemeData(
-  //   brightness: Brightness.dark,
-  //   primaryColor: Color(0xFF121212),
-  //   accentColor: Colors.lightGreenAccent,
-  // );
 
   @override
   Widget build(BuildContext context) {
@@ -55,25 +64,26 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(
           create: (_) => AuthService(FirebaseAuth.instance),
         ),
-        // ChangeNotifierProvider(
-        //   create: (context) => Auth(),
-        // ),
         StreamProvider(
           initialData: null,
           create: (context) => context.read<AuthService>().authStateChanges,
         ),
         ChangeNotifierProvider(
           create: (context) => Tasks(
-            context,
+            context: context,
+            transactionSendPort: widget.transactionSendPort,
           ), //passing context for calling Auth provider in Tasks
         ),
         ChangeNotifierProvider(
           create: (context) => Goals(
-              context), //passing context for calling Auth provider in Goals
+            context: context,
+            transactionSendPort: widget.transactionSendPort,
+          ), //passing context for calling Auth provider in Goals
         ),
         ChangeNotifierProvider(
           create: (context) => Projects(
-            context,
+            context: context,
+            transactionSendPort: widget.transactionSendPort,
           ),
         ),
         ChangeNotifierProvider(
