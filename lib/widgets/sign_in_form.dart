@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../exceptions/firebase_auth_exception_codes.dart';
 import '../models/project.dart';
 import '../providers/auth_service.dart';

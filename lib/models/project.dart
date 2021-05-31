@@ -404,7 +404,6 @@ class Project {
       if (firebaseUser != null) {
         final userId = firebaseUser.uid;
         final String? token = (await firebaseUser.getIdTokenResult()).token;
-        // debugPrint("Token $token");
         for (int i = 0; i < subTasks.length; i++) {
           final Task task = subTasks[i];
           if (task.syncStatus == SyncStatus.updatedTask) {
@@ -449,7 +448,6 @@ class Project {
                 },
               ),
             );
-            // debugPrint('${json.decode(res.body)}');
             subTasks[i].id = json.decode(res.body)['name'] as String;
           }
           subTasks[i].syncStatus = SyncStatus.fullySynced;

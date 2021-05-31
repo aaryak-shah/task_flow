@@ -33,6 +33,8 @@ class _TasksScreenState extends State<TasksScreen> {
   @override
   Widget build(BuildContext context) {
     final tasks = Provider.of<Tasks>(context);
+    print('task screen length: ${tasks.tasks.length}');
+    print('task screen recent: ${tasks.recentTasks.length}');
     if (tasks.tasks.isEmpty) {
       return Scaffold(
         backgroundColor: Theme.of(context).primaryColor,
@@ -140,11 +142,13 @@ class _TasksScreenState extends State<TasksScreen> {
                               ),
                             )
                           : IconButton(
-                              onPressed: () async {
+                              onPressed: () {
                                 Navigator.of(context).pushReplacementNamed(
                                     CurrentTaskScreen.routeName,
                                     arguments: {
-                                      'index': await t.getIndex,
+                                      'index': Provider.of<Tasks>(context,
+                                              listen: false)
+                                          .getIndex(t.id),
                                       'wasSuspended': false,
                                       'superProjectName': '',
                                       'superProjectId': '',

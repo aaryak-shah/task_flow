@@ -1,25 +1,45 @@
-import 'dart:io';
+import 'package:hive/hive.dart';
 
-import 'package:csv/csv.dart';
-import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
+part 'task.g.dart';
 
-enum SyncStatus { fullySynced, newTask, updatedTask }
+@HiveType(typeId: 1)
+enum SyncStatus {
+  @HiveField(0)
+  fullySynced,
+  @HiveField(1)
+  newTask,
+  @HiveField(2)
+  updatedTask,
+}
 
-class Task {
+@HiveType(typeId: 0)
+class Task extends HiveObject {
   // creating a model for Task objects
+  @HiveField(0)
   SyncStatus syncStatus;
+  @HiveField(1)
   String id;
+  @HiveField(2)
   final String title;
+  @HiveField(3)
   final DateTime start;
+  @HiveField(4)
   DateTime? latestPause;
+  @HiveField(5)
   DateTime? end;
+  @HiveField(6)
   int pauses;
+  @HiveField(7)
   Duration pauseTime;
+  @HiveField(8)
   bool isRunning;
+  @HiveField(9)
   bool isPaused;
+  @HiveField(10)
   final String category;
+  @HiveField(11)
   List<String>? labels;
+  @HiveField(12)
   final Duration goalTime;
 
   Task({
@@ -71,54 +91,5 @@ class Task {
     (mins / 10).floor() == 0 ? m = '0$mins' : m = mins.toString();
     (seconds / 10).floor() == 0 ? s = ':0$seconds' : s = ':$seconds';
     return h + m + (showSeconds ? s : '');
-  }
-
-  Future<String> get _localPath async {
-    // gets the AppData directory
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
-
-  Future<File> get _localFile async {
-    // gets the tasks.csv file from the AppData directory
-    final path = await _localPath;
-    return File('$path/tasks.csv');
-  }
-
-  Future<List<Task>> get tasks async {
-    // getter to read the tasks.csv file and get a list of Task objects
-    final File csvFile = await _localFile;
-    final String csvString = await csvFile.readAsString();
-    final List<List<dynamic>> rowsAsListOfValues =
-        const CsvToListConverter().convert(csvString);
-
-    final DateFormat parser = DateFormat("dd-MM-yyyy HH:mm:ss");
-    final rows = rowsAsListOfValues.map((row) {
-      return Task(
-          id: row[0] as String,
-          title: row[1] as String,
-          start: parser.parse(row[2] as String),
-          latestPause: (row[3] as String).isNotEmpty
-              ? parser.parse(row[3] as String)
-              : null,
-          end: (row[4] as String).isNotEmpty
-              ? parser.parse(row[4] as String)
-              : null,
-          pauses: row[5] as int,
-          pauseTime: Duration(seconds: row[6] as int),
-          isRunning: row[7] == 1,
-          isPaused: row[8] == 1,
-          category: row[9] as String,
-          labels: (row[10] as String).split(" "),
-          goalTime: Duration(seconds: row[11] as int),
-          syncStatus: SyncStatus.values[row[12] as int]);
-    }).toList();
-    return rows;
-  }
-
-  Future<int> get getIndex async {
-    // getter that gets the index of this task in the tasks list
-    final t = await tasks;
-    return t.indexWhere((t) => t.id == id);
   }
 }

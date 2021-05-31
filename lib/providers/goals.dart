@@ -204,13 +204,13 @@ class Goals with ChangeNotifier {
       // );
       transactionSendPort.send(
         Transaction(
+          objectId: _goals[index].id,
           timeStamp: DateTime.now(),
           transactionType: TransactionType.create,
           dataType: DataType.task,
           uid: userId,
           token: token,
           data: {
-            'id': _goals[index].id,
             'title': _goals[index].title,
             'start':
                 DateFormat("dd-MM-yyyy HH:mm:ss").format(_goals[index].start),

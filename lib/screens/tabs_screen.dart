@@ -114,15 +114,13 @@ class _TabsScreenState extends State<TabsScreen> {
           _tabColors.add(Colors.white60);
         }
       }
-
-      Provider.of<Tasks>(context).loadData();
+      Provider.of<Tasks>(context, listen: false).loadData();
       Provider.of<Goals>(context).loadData();
       Provider.of<Projects>(context).loadData();
     isConnected().then((isConnected) {
       if (isConnected) {
-        Provider.of<Tasks>(context, listen: false).purgeOldTasks();
+        // Provider.of<Tasks>(context, listen: false).purgeOldTasks();
         Provider.of<Goals>(context, listen: false).purgeOldGoals();
-        Provider.of<Tasks>(context, listen: false).syncEngine();
         final Projects projects = Provider.of<Projects>(context, listen: false);
         projects.syncEngine();
         for (final Project project in projects.projects) {

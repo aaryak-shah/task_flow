@@ -134,7 +134,6 @@ class _NewTaskState extends State<NewTask> {
                       if (_formKey.currentState!.validate()) {
                         // if the form is valid
                         await tasks.addTask(
-                          DateTime.now().toString(),
                           _titleController.text,
                           DateTime.now(),
                           _selectedCategory,

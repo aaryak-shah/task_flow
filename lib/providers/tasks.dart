@@ -7,6 +7,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hive/hive.dart';
+import 'package:nanoid/nanoid.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -21,72 +23,30 @@ class Tasks with ChangeNotifier {
   // variable that stores list of tasks
   BuildContext context;
   SendPort transactionSendPort;
-  List<Task> _tasks = [];
-  Tasks({required this.context, required this.transactionSendPort});
-  Future<String> get _localPath async {
-    // gets the AppData directory
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
-
-  Future<File> get _localFile async {
-    // gets the tasks.csv file from the AppData directory
-    final path = await _localPath;
-    return File('$path/tasks.csv');
-  }
+  final List<Task> _tasks = [];
+  Box<Task> box;
+  Tasks({
+    required this.context,
+    required this.transactionSendPort,
+    required this.box,
+  });
 
   DateFormat parser = DateFormat("dd-MM-yyyy HH:mm:ss");
 
   Future<void> loadData() async {
-    // function to load the data from the tasks.csv file into Task
-    // models which are then put into the _tasks list
-
-    final String csvPath = await _localPath;
-
-    final String csvString = await File('$csvPath/tasks.csv').readAsString();
-
-    // String csvString = await rootBundle.loadString('assets/data/tasks.csv');
-    final List<List<dynamic>> rowsAsListOfValues =
-        const CsvToListConverter().convert(csvString);
-
-    _tasks = rowsAsListOfValues.map((row) {
-      return Task(
-        id: row[0] as String,
-        title: row[1].toString(),
-        start: parser.parse(row[2] as String),
-        latestPause: (row[3] as String).isNotEmpty
-            ? parser.parse(row[3] as String)
-            : null,
-        end: (row[4] as String).isNotEmpty
-            ? parser.parse(row[4] as String)
-            : null,
-        pauses: row[5] as int,
-        pauseTime: Duration(seconds: row[6] as int),
-        isRunning: row[7] == 1,
-        isPaused: row[8] == 1,
-        category: row[9] as String,
-        labels: (row[10] as String) != "" ? (row[10] as String).split("|") : [],
-        goalTime: Duration(seconds: row[11] as int),
-        syncStatus: SyncStatus.values[row[12] as int],
-      );
-    }).toList();
-    notifyListeners();
+    _tasks.clear();
+    box.toMap().forEach((key, task) {
+      _tasks.add(task);
+    });
+    print('length: ${_tasks.length}');
   }
-
-  // DEBUG FUNCTION
-  // Future<List<List<dynamic>>> readLocalData() async {
-  //   final directory = await getApplicationDocumentsDirectory();
-  //   String csvString = await File('${directory.path}/tasks.csv').readAsString();
-  //   List<List<dynamic>> rowsAsListOfValues =
-  //       const CsvToListConverter().convert(csvString);
-  //   return (rowsAsListOfValues);
-  // }
 
   Future<void> purgeOldTasks() async {
     // function to delete (purge) tasks which have a latest pause date
     // older than 1 week so as to save space and computation time
 
     await loadData();
+    box.clear();
     _tasks.removeWhere((task) {
       return task.latestPause != null &&
           task.latestPause!.isBefore(
@@ -97,15 +57,12 @@ class Tasks with ChangeNotifier {
             ),
           );
     });
-    await writeCsv(_tasks);
+    box.putAll({for (var t in _tasks) t.id: t});
     notifyListeners();
   }
 
-  List<Task> get tasks {
-    // tasks getter, gives a copy of _tasks
-    final t = [..._tasks];
-    return t;
-  }
+  // tasks getter, gives a copy of _tasks
+  List<Task> get tasks => [..._tasks];
 
   List<Task> get recentTasks {
     // gets a list of paused tasks whose latest pause is within the past 7 days
@@ -145,45 +102,17 @@ class Tasks with ChangeNotifier {
         (previousSum, day) => previousSum + (day['time']! as Duration));
   }
 
-  String categoryString(String cid) {
-    // Arguments => cid: String id of the task whose category is needed
-    // Returns => category of the task with id as cid
+  String categoryString(String cid) =>
+      _tasks[_tasks.indexWhere((tsk) => cid == tsk.id)].category;
 
-    return _tasks[_tasks.indexWhere((tsk) => cid == tsk.id)].category;
-  }
+  int getIndex(String id) => _tasks.indexWhere((tsk) => tsk.id == id);
 
-  Future<void> writeCsv(List<Task> tasks) async {
-    // Arguments => tasks: a list of Task objects to be written to the tasks.csv file
-    final rows = const ListToCsvConverter().convert(tasks
-        .map((t) => [
-              t.id,
-              t.title,
-              DateFormat("dd-MM-yyyy HH:mm:ss").format(t.start),
-              if (t.latestPause != null)
-                DateFormat("dd-MM-yyyy HH:mm:ss").format(t.latestPause!)
-              else
-                "",
-              if (t.end != null)
-                DateFormat("dd-MM-yyyy HH:mm:ss").format(t.end!)
-              else
-                "",
-              t.pauses,
-              t.pauseTime.inSeconds,
-              if (t.isRunning) 1 else 0,
-              if (t.isPaused) 1 else 0,
-              t.category,
-              if (t.labels != null) t.labels!.join("|") else "",
-              t.goalTime.inSeconds,
-              t.syncStatus.index
-            ])
-        .toList());
-    final File f = await _localFile;
-    await f.writeAsString(rows, mode: FileMode.writeOnly);
-    notifyListeners();
+  Future<void> clearTasks() async {
+    _tasks.clear();
+    box.clear();
   }
 
   Future<void> addTask(
-    final String id,
     final String title,
     final DateTime start,
     final String category,
@@ -198,7 +127,7 @@ class Tasks with ChangeNotifier {
     // Adds the Task object with the above arguments to the _tasks list
     // and also to the tasks.csv file
 
-    http.Response? response;
+    final id = nanoid();
     final firebaseUser = context.read<User?>();
 
     if (firebaseUser != null) {
@@ -207,6 +136,7 @@ class Tasks with ChangeNotifier {
 
       transactionSendPort.send(
         Transaction(
+          objectId: id,
           timeStamp: DateTime.now(),
           transactionType: TransactionType.create,
           dataType: DataType.task,
@@ -224,7 +154,7 @@ class Tasks with ChangeNotifier {
     }
 
     final task = Task(
-      id: response != null ? json.decode(response.body)['name'] as String : id,
+      id: id,
       title: title,
       start: start,
       category: category,
@@ -233,27 +163,7 @@ class Tasks with ChangeNotifier {
           ? (await isConnected() ? SyncStatus.fullySynced : SyncStatus.newTask)
           : SyncStatus.fullySynced,
     );
-    final row = const ListToCsvConverter().convert(
-      [
-        [
-          id,
-          title,
-          DateFormat("dd-MM-yyyy HH:mm:ss").format(start),
-          "",
-          "",
-          0,
-          0,
-          1,
-          0,
-          category,
-          labels.join("|"),
-          0,
-          task.syncStatus.index
-        ],
-      ],
-    );
-    final File f = await _localFile;
-    await f.writeAsString(row, mode: FileMode.append, flush: true);
+    await box.put(id, task);
     _tasks.add(task);
     notifyListeners();
   }
@@ -273,6 +183,7 @@ class Tasks with ChangeNotifier {
     _tasks[index].labels?.addAll(selected);
     _tasks[index].labels = _tasks[index].labels?.toSet().toList();
 
+    box.put(_tasks[index].id, _tasks[index]);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList('AvailableLabels', labels);
     final firebaseUser = context.read<User?>();
@@ -282,29 +193,19 @@ class Tasks with ChangeNotifier {
       final String? token = (await firebaseUser.getIdTokenResult()).token;
       transactionSendPort.send(
         Transaction(
+          objectId: _tasks[index].id,
           timeStamp: DateTime.now(),
           transactionType: TransactionType.update,
           dataType: DataType.task,
           uid: userId,
           token: token,
           data: {
-            'id': _tasks[index].id,
             'labels': _tasks[index].labels?.join('|'),
           },
         ),
       );
     }
 
-    _tasks[index].syncStatus = (firebaseUser != null)
-        ? (await isConnected()
-            ? (_tasks[index].syncStatus == SyncStatus.updatedTask
-                ? SyncStatus.fullySynced
-                : _tasks[index].syncStatus)
-            : (_tasks[index].syncStatus != SyncStatus.newTask
-                ? SyncStatus.updatedTask
-                : SyncStatus.newTask))
-        : SyncStatus.fullySynced;
-    await writeCsv(_tasks);
     notifyListeners();
   }
 
@@ -324,19 +225,20 @@ class Tasks with ChangeNotifier {
         DateTime.now().difference(_tasks[index].latestPause!);
     final firebaseUser = context.read<User?>();
 
+    box.put(_tasks[index].id, _tasks[index]);
     if (firebaseUser != null) {
       final userId = firebaseUser.uid;
       final String? token = (await firebaseUser.getIdTokenResult()).token;
 
       transactionSendPort.send(
         Transaction(
+          objectId: _tasks[index].id,
           timeStamp: DateTime.now(),
           transactionType: TransactionType.update,
           dataType: DataType.task,
           uid: userId,
           token: token,
           data: {
-            'id': _tasks[index].id,
             'isRunning': true,
             'isPaused': false,
             'pauseTime': _tasks[index].pauseTime.inSeconds,
@@ -344,17 +246,6 @@ class Tasks with ChangeNotifier {
         ),
       );
     }
-
-    _tasks[index].syncStatus = (firebaseUser != null)
-        ? (await isConnected()
-            ? (_tasks[index].syncStatus == SyncStatus.updatedTask
-                ? SyncStatus.fullySynced
-                : _tasks[index].syncStatus)
-            : (_tasks[index].syncStatus != SyncStatus.newTask
-                ? SyncStatus.updatedTask
-                : SyncStatus.newTask))
-        : SyncStatus.fullySynced;
-    await writeCsv(_tasks);
     notifyListeners();
   }
 
@@ -367,19 +258,20 @@ class Tasks with ChangeNotifier {
     _tasks[index].latestPause = DateTime.now();
     final firebaseUser = context.read<User?>();
 
-    if (await isConnected() && firebaseUser != null) {
+    box.put(_tasks[index].id, _tasks[index]);
+    if (firebaseUser != null) {
       final userId = firebaseUser.uid;
       final String? token = (await firebaseUser.getIdTokenResult()).token;
 
       transactionSendPort.send(
         Transaction(
+          objectId: _tasks[index].id,
           timeStamp: DateTime.now(),
           transactionType: TransactionType.update,
           dataType: DataType.task,
           uid: userId,
           token: token,
           data: {
-            'id': _tasks[index].id,
             'isRunning': false,
             'isPaused': true,
             'pauses': _tasks[index].pauses,
@@ -393,16 +285,6 @@ class Tasks with ChangeNotifier {
       );
     }
 
-    _tasks[index].syncStatus = (firebaseUser != null)
-        ? (await isConnected()
-            ? (_tasks[index].syncStatus == SyncStatus.updatedTask
-                ? SyncStatus.fullySynced
-                : _tasks[index].syncStatus)
-            : (_tasks[index].syncStatus != SyncStatus.newTask
-                ? SyncStatus.updatedTask
-                : SyncStatus.newTask))
-        : SyncStatus.fullySynced;
-    await writeCsv(_tasks);
     notifyListeners();
   }
 
@@ -414,7 +296,8 @@ class Tasks with ChangeNotifier {
     _tasks[index].isRunning = false;
     _tasks[index].isPaused = true;
     _tasks[index].latestPause = DateTime.now();
-    await writeCsv(_tasks);
+
+    box.put(_tasks[index].id, _tasks[index]);
     notifyListeners();
   }
 
@@ -424,7 +307,8 @@ class Tasks with ChangeNotifier {
     // (i.e. Resumes the task without updating the pause time)
     _tasks[index].isRunning = true;
     _tasks[index].isPaused = false;
-    await writeCsv(_tasks);
+
+    box.put(_tasks[index].id, _tasks[index]);
     notifyListeners();
   }
 
@@ -438,19 +322,21 @@ class Tasks with ChangeNotifier {
     _tasks[index].latestPause = _tasks[index].end;
 
     final firebaseUser = context.read<User?>();
-    if (await isConnected() && firebaseUser != null) {
+
+    box.put(_tasks[index].id, _tasks[index]);
+    if (firebaseUser != null) {
       final userId = firebaseUser.uid;
       final String? token = (await firebaseUser.getIdTokenResult()).token;
 
       transactionSendPort.send(
         Transaction(
+          objectId: _tasks[index].id,
           timeStamp: DateTime.now(),
           transactionType: TransactionType.update,
           dataType: DataType.task,
           uid: userId,
           token: token,
           data: {
-            'id': _tasks[index].id,
             'isRunning': _tasks[index].isRunning,
             'isPaused': _tasks[index].isPaused,
             'labels': _tasks[index].labels == null
@@ -463,22 +349,13 @@ class Tasks with ChangeNotifier {
         ),
       );
     }
-
-    _tasks[index].syncStatus = (firebaseUser != null)
-        ? (await isConnected()
-            ? (_tasks[index].syncStatus == SyncStatus.updatedTask
-                ? SyncStatus.fullySynced
-                : _tasks[index].syncStatus)
-            : (_tasks[index].syncStatus != SyncStatus.newTask
-                ? SyncStatus.updatedTask
-                : SyncStatus.newTask))
-        : SyncStatus.fullySynced;
-    await writeCsv(_tasks);
     notifyListeners();
   }
 
   Future<void> pullFromFireBase() async {
+    print("firebase func ke andar aaya!!");
     if (await isConnected()) {
+      print("firebase func ke andar aaya aur net se bhi connected hai!!");
       Map<String, dynamic>? syncedTasks;
       final firebaseUser = context.read<User?>();
 
@@ -492,106 +369,43 @@ class Tasks with ChangeNotifier {
       }
 
       _tasks.clear();
-
+      box.clear();
       if (syncedTasks != null) {
         syncedTasks.forEach((id, data) {
-          _tasks.add(
-            Task(
-              id: id,
-              title: data['title'] as String,
-              start: parser.parse(data['start'] as String),
-              category: data['category'] as String,
-              isRunning: data['isRunning'] as bool,
-              isPaused: data['isPaused'] as bool,
-              latestPause:
-                  (data as Map<String, dynamic>).containsKey('latestPause')
-                      ? parser.parse(data['latestPause'] as String)
-                      : null,
-              labels: data.containsKey('labels')
-                  ? (data['labels'] as String).split('|')
-                  : [],
-              goalTime: data.containsKey('goalTime')
-                  ? Duration(seconds: data['goalTime'] as int)
-                  : Duration.zero,
-              pauses: data.containsKey('pauses') ? data['pauses'] as int : 0,
-              pauseTime: data.containsKey('pauseTime')
-                  ? Duration(seconds: data['pauseTime'] as int)
-                  : Duration.zero,
-              end: data.containsKey('end')
-                  ? parser.parse(data['end'] as String)
-                  : null,
-              syncStatus: SyncStatus.fullySynced,
-            ),
+          print('$id');
+          final task = Task(
+            id: id,
+            title: data['title'] as String,
+            start: parser.parse(data['start'] as String),
+            category: data['category'] as String,
+            isRunning: data['isRunning'] as bool,
+            isPaused: data['isPaused'] as bool,
+            latestPause:
+                (data as Map<String, dynamic>).containsKey('latestPause')
+                    ? parser.parse(data['latestPause'] as String)
+                    : null,
+            labels: data.containsKey('labels')
+                ? (data['labels'] as String).split('|')
+                : [],
+            goalTime: data.containsKey('goalTime')
+                ? Duration(seconds: data['goalTime'] as int)
+                : Duration.zero,
+            pauses: data.containsKey('pauses') ? data['pauses'] as int : 0,
+            pauseTime: data.containsKey('pauseTime')
+                ? Duration(seconds: data['pauseTime'] as int)
+                : Duration.zero,
+            end: data.containsKey('end')
+                ? parser.parse(data['end'] as String)
+                : null,
+            syncStatus: SyncStatus.fullySynced,
           );
+          _tasks.add(task);
+          print('${_tasks.first.id}');
+          box.put(task.id, task);
+          print("sab sampann hua!!");
         });
-        await writeCsv(_tasks);
       }
     }
-  }
-
-  Future<void> syncEngine() async {
-    final firebaseUser = context.read<User?>();
-
-    await loadData();
-    if (firebaseUser != null) {
-      final userId = firebaseUser.uid;
-      final String? token = (await firebaseUser.getIdTokenResult()).token;
-      for (int i = 0; i < _tasks.length; i++) {
-        final Task task = _tasks[i];
-        if (await isConnected()) {
-          if (task.syncStatus == SyncStatus.updatedTask) {
-            final Uri url = Uri.parse(
-                "${env['FIREBASE_URL']}/Users/$userId/tasks/${task.id}.json?auth=$token");
-            await http.patch(
-              url,
-              body: json.encode(
-                {
-                  'isRunning': task.isRunning,
-                  'isPaused': task.isPaused,
-                  'labels': task.labels != null ? task.labels!.join("|") : null,
-                  'latestPause': task.latestPause != null
-                      ? DateFormat("dd-MM-yyyy HH:mm:ss")
-                          .format(task.latestPause!)
-                      : null,
-                  'end': task.end != null
-                      ? DateFormat("dd-MM-yyyy HH:mm:ss").format(task.end!)
-                      : null,
-                },
-              ),
-            );
-          } else if (task.syncStatus == SyncStatus.newTask) {
-            final Uri url = Uri.parse(
-                "${env['FIREBASE_URL']}/Users/$userId/tasks.json?auth=$token");
-            final res = await http.post(
-              url,
-              body: json.encode(
-                {
-                  'title': task.title,
-                  'start': DateFormat("dd-MM-yyyy HH:mm:ss").format(task.start),
-                  'latestPause': task.latestPause != null
-                      ? DateFormat("dd-MM-yyyy HH:mm:ss")
-                          .format(task.latestPause!)
-                      : null,
-                  'end': task.end != null
-                      ? DateFormat("dd-MM-yyyy HH:mm:ss").format(task.end!)
-                      : null,
-                  'labels': task.labels != null ? task.labels!.join("|") : null,
-                  'goalTime': task.goalTime.inSeconds,
-                  'pauses': task.pauses,
-                  'pauseTime': task.pauseTime.inSeconds,
-                  'isRunning': task.isRunning,
-                  'isPaused': task.isPaused,
-                  'category': task.category,
-                },
-              ),
-            );
-            _tasks[i].id = json.decode(res.body)['name'] as String;
-          }
-          _tasks[i].syncStatus = SyncStatus.fullySynced;
-        }
-      }
-
-      await writeCsv(_tasks);
-    }
+    notifyListeners();
   }
 }

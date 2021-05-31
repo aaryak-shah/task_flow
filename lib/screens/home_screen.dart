@@ -1,7 +1,9 @@
+import 'dart:isolate';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import 'package:task_flow/providers/tasks.dart';
 import '../providers/theme_switcher.dart';
 import 'clients_screen.dart';
 import 'current_goal_screen.dart';
@@ -13,17 +15,44 @@ import 'stats_screen.dart';
 import 'tabs_screen.dart';
 
 class HomeScreen extends StatefulWidget {
+  final ReceivePort appReceivePort;
+  const HomeScreen(this.appReceivePort);
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool _isInit = true;
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  final GlobalKey<CurrentTaskScreenState> taskKey =
+      GlobalKey<CurrentTaskScreenState>();
+  @override
+  void didChangeDependencies() {
+    if (_isInit) {
+      widget.appReceivePort.listen((message) async {
+        if (message == "pullFromFireBase") {
+          await Provider.of<Tasks>(context, listen: false).pullFromFireBase();
+          taskKey.currentState?.popper();
+        }
+      });
+      _isInit = false;
+    }
+    super.didChangeDependencies();
+  }
+
+  @override
+  void dispose() {
+    widget.appReceivePort.close();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer2<User?, ThemeModel>(
       builder: (context, user, themeModel, _) => MaterialApp(
         title: 'Task Flow',
         theme: themeModel.currentTheme,
+        navigatorKey: navigatorKey,
         // setting home screen as tasks screen
         home: const TabsScreen(0),
         routes: {
@@ -48,6 +77,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 wasSuspended: wasSuspended,
                 superProjectName: superProjectName,
                 superProjectId: superProjectId,
+                navigatorKey: navigatorKey,
+                key: taskKey,
               );
             });
           } else if (settings.name == CurrentGoalScreen.routeName) {

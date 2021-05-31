@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:isolate';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -65,18 +66,21 @@ class CurrentTaskScreen extends StatefulWidget {
   final bool wasSuspended;
   final String superProjectName;
   final String superProjectId;
+  final GlobalKey<NavigatorState> navigatorKey;
   const CurrentTaskScreen({
+    required Key key,
     required this.index,
     required this.wasSuspended,
     required this.superProjectName,
     required this.superProjectId,
-  });
+    required this.navigatorKey,
+  }) : super(key: key);
 
   @override
-  _CurrentTaskScreenState createState() => _CurrentTaskScreenState();
+  CurrentTaskScreenState createState() => CurrentTaskScreenState();
 }
 
-class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
+class CurrentTaskScreenState extends State<CurrentTaskScreen> {
   dynamic _provider;
   late Timer _timer;
   late String _time;
@@ -86,6 +90,10 @@ class _CurrentTaskScreenState extends State<CurrentTaskScreen> {
   late Duration _resumeTime;
 
   bool _isInit = true;
+
+  void popper() {
+    Navigator.of(context).pop();
+  }
 
   @override
   void didChangeDependencies() {

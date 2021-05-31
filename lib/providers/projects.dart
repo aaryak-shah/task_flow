@@ -61,11 +61,7 @@ class Projects with ChangeNotifier {
             ])
         .toList());
     final File f = await _localFile;
-    // debugPrint("projects.csv before");
-    // debugPrint(await f.readAsString());
     await f.writeAsString(rows, mode: FileMode.writeOnly);
-    // debugPrint("projects.csv after");
-    // debugPrint(await f.readAsString());
     notifyListeners();
   }
 
@@ -189,7 +185,6 @@ class Projects with ChangeNotifier {
           : SyncStatus.fullySynced,
     );
     _projects.add(newProject);
-    debugPrint("new project");
     await writeCsv(_projects);
     notifyListeners();
     return newProject.id;
@@ -288,7 +283,6 @@ class Projects with ChangeNotifier {
       if (project.client.isNotEmpty) clientMap[project.client] = [0, 0];
     }
     for (final Project project in _projects) {
-      // if (project.client == "Test") print(project.workingDuration.inSeconds);
       if (project.client.isNotEmpty) {
         clientMap.update(
           project.client,
@@ -422,8 +416,8 @@ class Projects with ChangeNotifier {
           _projects[i].syncStatus = SyncStatus.fullySynced;
         }
       }
-      debugPrint("sync engine");
-      debugPrint('${_projects.length}');
+      // debugPrint("sync engine");
+      // debugPrint('${_projects.length}');
       await writeCsv(_projects);
     }
   }

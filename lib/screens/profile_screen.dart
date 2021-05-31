@@ -100,7 +100,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           );
         },
       );
-      await Provider.of<Tasks>(context).syncEngine();
       final Projects projects = Provider.of<Projects>(context);
       await projects.syncEngine();
       for (final Project project in projects.projects) {
@@ -199,9 +198,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             photoUrl = '';
                           });
                           await Provider.of<Tasks>(context, listen: false)
-                              .syncEngine();
-                          await Provider.of<Tasks>(context, listen: false)
-                              .writeCsv([]);
+                              .clearTasks();
                           final Projects projects =
                               Provider.of<Projects>(context, listen: false);
                           await projects.syncEngine();
@@ -290,10 +287,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   await Provider.of<Projects>(context,
                                           listen: false)
                                       .pullFromFireBase();
-                                  for (final Project project in Provider.of<Projects>(
-                                          context,
-                                          listen: false)
-                                      .projects) {
+                                  for (final Project project
+                                      in Provider.of<Projects>(context,
+                                              listen: false)
+                                          .projects) {
                                     project.pullFromFireBase();
                                   }
                                   setState(() {

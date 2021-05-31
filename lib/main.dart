@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:io';
 import 'dart:isolate';
 
@@ -5,9 +6,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart' as dot_env;
+import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:task_flow/models/task.dart';
+import 'package:task_flow/models/transaction.dart';
 import 'package:task_flow/utils/transcation_isolate.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import 'providers/auth_service.dart';
 import 'providers/goals.dart';
@@ -35,12 +40,56 @@ Future<void> main() async {
 
   await dot_env.load();
   final ReceivePort mainIsolateReceivePort = ReceivePort();
+  final ReceivePort appReceivePort = ReceivePort();
   SendPort transactionSendPort;
-  await Isolate.spawn(initiateHandler, mainIsolateReceivePort.sendPort);
-  mainIsolateReceivePort.listen((dynamic data) {
+
+  await Isolate.spawn(initiateHandler, [
+    mainIsolateReceivePort.sendPort,
+    appReceivePort.sendPort,
+  ]);
+  mainIsolateReceivePort.listen((dynamic data) async {
     if (data is SendPort) {
       transactionSendPort = data;
-      runApp(App(transactionSendPort));
+      await Hive.initFlutter();
+      Hive.registerAdapter(TaskAdapter());
+      Hive.registerAdapter(SyncStatusAdapter());
+      Hive.registerAdapter(TransactionTypeAdapter());
+      Hive.registerAdapter(DataTypeAdapter());
+      Hive.registerAdapter(TransactionAdapter());
+      final taskTransactionBox = await Hive.openBox('taskTransactionBox');
+      final projectTransactionBox = await Hive.openBox('projectTransactionBox');
+      final List<Transaction> taskList = [];
+      final List<Transaction> projectList = [];
+      taskTransactionBox.toMap().forEach((key, tx) {
+        taskList.add(tx as Transaction);
+      });
+      taskList.sort((a, b) => a.timeStamp.isBefore(b.timeStamp) ? 0 : 1);
+      // projectTransactionBox.toMap().forEach((key, tx) {
+      //   projectList.add(tx as Transaction);
+      // });
+      // projectList.sort((a, b) => a.timeStamp.isBefore(b.timeStamp) ? 1 : 0);
+
+      transactionSendPort.send(Queue<Transaction>.from(taskList));
+      transactionSendPort.send(Queue<Transaction>.from(projectList));
+      runApp(App(transactionSendPort, appReceivePort));
+    } else if (data is Queue<Transaction>) {
+      final taskTransactionBox = await Hive.openBox('taskTransactionBox');
+      final projectTransactionBox = await Hive.openBox('projectTransactionBox');
+      if (data.isNotEmpty) {
+        if (data.first.dataType == DataType.task) {
+          taskTransactionBox.putAll({
+            for (Transaction t in data)
+              t.timeStamp.millisecondsSinceEpoch ~/ 1000: t
+          });
+        } else {
+          projectTransactionBox.putAll({
+            for (Transaction t in data)
+              t.timeStamp.millisecondsSinceEpoch ~/ 1000: t
+          });
+        }
+      } else {
+        debugPrint('Box is empty');
+      }
     }
   });
 }
@@ -48,7 +97,8 @@ Future<void> main() async {
 class App extends StatefulWidget {
   // This widget is the root of your application.
   final SendPort transactionSendPort;
-  const App(this.transactionSendPort);
+  final ReceivePort appReceivePort;
+  const App(this.transactionSendPort, this.appReceivePort);
   @override
   _AppState createState() => _AppState();
 }
@@ -56,51 +106,74 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   bool isAuth = false;
   bool isInit = true;
+  bool isLoaded = false;
+  Box<Task>? taskBox;
+  @override
+  void initState() {
+    Future.delayed(Duration.zero, () async {
+      taskBox = await Hive.openBox('taskBox');
+      setState(() {
+        isLoaded = true;
+      });
+    });
+    super.initState();
+  }
+
+  // @override
+  // void didChangeDependencies() {
+  //   // TODO: implement didChangeDependencies
+  //   super.didChangeDependencies();
+  // }
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (_) => AuthService(FirebaseAuth.instance),
-        ),
-        StreamProvider(
-          initialData: null,
-          create: (context) => context.read<AuthService>().authStateChanges,
-        ),
-        ChangeNotifierProvider(
-          create: (context) => Tasks(
-            context: context,
-            transactionSendPort: widget.transactionSendPort,
-          ), //passing context for calling Auth provider in Tasks
-        ),
-        ChangeNotifierProvider(
-          create: (context) => Goals(
-            context: context,
-            transactionSendPort: widget.transactionSendPort,
-          ), //passing context for calling Auth provider in Goals
-        ),
-        ChangeNotifierProvider(
-          create: (context) => Projects(
-            context: context,
-            transactionSendPort: widget.transactionSendPort,
-          ),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => ThemeModel(),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => Settings(),
-        ),
-      ],
-      builder: (context, _) => AuthenticationWrapper(context),
-    );
+    return !isLoaded
+        ? const Center(child: CircularProgressIndicator())
+        : MultiProvider(
+            providers: [
+              ChangeNotifierProvider(
+                create: (_) => AuthService(FirebaseAuth.instance),
+              ),
+              StreamProvider(
+                initialData: null,
+                create: (context) =>
+                    context.read<AuthService>().authStateChanges,
+              ),
+              ChangeNotifierProvider(
+                create: (context) => Tasks(
+                  box: taskBox!,
+                  context: context,
+                  transactionSendPort: widget.transactionSendPort,
+                ), //passing context for calling Auth provider in Tasks
+              ),
+              ChangeNotifierProvider(
+                create: (context) => Goals(
+                  context: context,
+                  transactionSendPort: widget.transactionSendPort,
+                ), //passing context for calling Auth provider in Goals
+              ),
+              ChangeNotifierProvider(
+                create: (context) => Projects(
+                  context: context,
+                  transactionSendPort: widget.transactionSendPort,
+                ),
+              ),
+              ChangeNotifierProvider(
+                create: (context) => ThemeModel(),
+              ),
+              ChangeNotifierProvider(
+                create: (context) => Settings(),
+              ),
+            ],
+            builder: (context, _) => AuthenticationWrapper(context, widget.appReceivePort),
+          );
   }
 }
 
 class AuthenticationWrapper extends StatefulWidget {
   final BuildContext ctx;
-  const AuthenticationWrapper(this.ctx);
+  final ReceivePort appReceivePort;
+  const AuthenticationWrapper(this.ctx, this.appReceivePort);
   @override
   _AuthenticationWrapperState createState() => _AuthenticationWrapperState();
 }
@@ -119,7 +192,7 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
         } else {
           if ((snapshot.data!) ||
               (firebaseUser != null && firebaseUser.emailVerified)) {
-            return HomeScreen();
+            return HomeScreen(widget.appReceivePort);
           } else {
             return const Login();
           }
